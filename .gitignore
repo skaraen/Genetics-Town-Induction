@@ -1,0 +1,72 @@
+Library/ArtifactDB
+Library/PackageCache/com.unity.burst@59eb6f11d242/.Runtime/libburst-llvm-18.dylib
+Library/PackageCache/com.unity.burst@59eb6f11d242/.Runtime/libburst-llvm-19.dylib
+packages
+[Ll]ibrary/
+[Tt]emp/
+[Bb]uild/
+[Bb]uilds/
+[Oo]bj/
+[Ll]ogs/
+
+# Unity cache and user settings
+MemoryCaptures/
+UserSettings/
+
+# Crash and debug logs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+
+# Visual Studio / JetBrains Rider files
+.vscode/
+.idea/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.ilk
+*.log
+*.obj
+*.pch
+*.aps
+*.ncb
+*.res
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.VC.opendb
+
+# Unity generated meta files (if accidentally created outside Assets/)
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Builds
+*.apk
+*.aab
+*.xcodeproj/
+*.xcworkspace/
+
+# Mac/Unix system files
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows system files
+Thumbs.db
+Desktop.ini
+
+# VS Code workspace
+*.code-workspace
+
+# Rider
+*.sln.iml

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>The Land - Genetic Avatar Creator (Light)</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body { 
+            margin: 0; 
+            background: linear-gradient(135deg, #f0f8ff, #e6f3ff);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #007acc;
+            color: #333;
+            width: 300px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .gene-group {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(240, 248, 255, 0.8);
+            border-radius: 8px;
+            border-left: 4px solid #007acc;
+        }
+        
+        .gene-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #007acc;
+        }
+        
+        .dna-sequence {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            background: rgba(0, 122, 204, 0.1);
+            padding: 6px;
+            border-radius: 4px;
+            margin: 5px 0;
+            letter-spacing: 1px;
+            border: 1px solid #ccc;
+            color: #333;
+        }
+        
+        .gene-button {
+            background: linear-gradient(45deg, #007acc, #0099ff);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            margin: 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .gene-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0, 122, 204, 0.3);
+        }
+        
+        .gene-button.active {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+        }
+        
+        .slider {
+            width: 100%;
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #007acc;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        #avatar-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #007acc;
+            color: #333;
+            width: 200px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .trait-display {
+            margin: 6px 0;
+            padding: 6px;
+            background: rgba(240, 248, 255, 0.6);
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        #center-info {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #333;
+            font-size: 16px;
+            z-index: 10;
+            pointer-events: none;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <h2 style="color: #007acc; margin-top: 0;">🧬 Genetic Avatar Creator</h2>
+        
+        <div class="gene-group">
+            <div class="gene-title">Species Gene</div>
+            <div class="dna-sequence" id="species-seq">ATCGATCG</div>
+            <button class="gene-button" onclick="setSpecies('ATCGATCG', 'firefly')">🔥 Firefly</button>
+            <button class="gene-button" onclick="setSpecies('GGCCTTAA', 'eel')">⚡ Electric Eel</button>
+            <button class="gene-button" onclick="setSpecies('TTAACCGG', 'jellyfish')">🌊 Jellyfish</button>
+            <button class="gene-button" onclick="setSpecies('CCGGAATT', 'whale')">🐋 Whale</button>
+            <button class="gene-button" onclick="setSpecies('AATTCCGG', 'bat')">🦇 Bat</button>
+        </div>
+        
+        <div class="gene-group">
+            <div class="gene-title">Size Gene</div>
+            <div class="dna-sequence" id="size-seq">GGAATTCC</div>
+            <div class="slider-container">
+                <input type="range" min="0.5" max="3" value="1" step="0.1" class="slider" id="size-slider" onchange="updateSize(this.value)">
+                <div>Expression Level: <span id="size-value">1.0</span></div>
+            </div>
+        </div>
+        
+        <div class="gene-group">
+            <div class="gene-title">Color Genes</div>
+            <div class="dna-sequence" id="color-seq">CCTTAAGG</div>
+            <button class="gene-button" onclick="setColor('CCTTAAGG', 0xff1493)">💖 Pink</button>
+            <button class="gene-button" onclick="setColor('TTGGCCAA', 0x32cd32)">💚 Green</button>
+            <button class="gene-button" onclick="setColor('AAGGCCTT', 0x9370db)">💜 Purple</button>
+            <button class="gene-button" onclick="setColor('GGCCAATT', 0xff8c00)">🧡 Orange</button>
+            <button class="gene-button" onclick="setColor('AATTGGCC', 0x1e90ff)">💙 Blue</button>
+        </div>
+        
+        <div class="gene-group">
+            <div class="gene-title">Movement Pattern</div>
+            <div class="dna-sequence" id="move-seq">CGATCGAT</div>
+            <button class="gene-button" onclick="setMovement('float')">🎈 Float</button>
+            <button class="gene-button" onclick="setMovement('swim')">🏊 Swim</button>
+            <button class="gene-button" onclick="setMovement('bounce')">⚽ Bounce</button>
+            <button class="gene-button" onclick="setMovement('spiral')">🌀 Spiral</button>
+        </div>
+        
+        <button style="width: 100%; padding: 12px; font-size: 14px; margin-top: 15px;" class="gene-button" onclick="randomDNA()">
+            🎲 RANDOM DNA
+        </button>
+    </div>
+    
+    <div id="avatar-info">
+        <h3 style="color: #007acc; margin-top: 0;">Your Avatar</h3>
+        <div class="trait-display">Species: <span id="species-name">Firefly</span></div>
+        <div class="trait-display">Size: <span id="size-display">Normal</span></div>
+        <div class="trait-display">Color: <span id="color-name">Pink</span></div>
+        <div class="trait-display">Movement: <span id="movement-name">Float</span></div>
+        <div class="trait-display">DNA Similarity: <span id="similarity">99.9%</span></div>
+    </div>
+    
+    <div id="center-info">
+        <h1>🧬 The Land</h1>
+        <p>Modify genetic code to customize your avatar</p>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, avatar, dnaParticles = [];
+        let currentSpecies = 'firefly';
+        let currentSize = 1.0;
+        let currentColor = 0xff1493;
+        let movementPattern = 'float';
+        
+        const speciesData = {
+            firefly: { name: 'Firefly', baseColor: 0xffd700 },
+            eel: { name: 'Electric Eel', baseColor: 0x4169e1 },
+            jellyfish: { name: 'Jellyfish', baseColor: 0xda70d6 },
+            whale: { name: 'Whale', baseColor: 0x4682b4 },
+            bat: { name: 'Bat', baseColor: 0x696969 }
+        };
+        
+        init();
+        animate();
+        
+        function init() {
+            // Setup Three.js
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf8f8ff);
+            
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(1, 1, 1);
+            scene.add(directionalLight);
+            
+            // Create avatar
+            createAvatar();
+            
+            // Create DNA background
+            createDNABackground();
+            
+            // Setup renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+            
+            // Mouse controls
+            document.addEventListener('mousemove', onMouseMove);
+        }
+        
+        function createAvatar() {
+            // Remove existing avatar
+            if (avatar) {
+                scene.remove(avatar);
+            }
+            
+            // Create new avatar based on species
+            let geometry;
+            switch(currentSpecies) {
+                case 'firefly':
+                    geometry = new THREE.SphereGeometry(0.5, 16, 16);
+                    break;
+                case 'eel':
+                    geometry = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
+                    break;
+                case 'jellyfish':
+                    geometry = new THREE.ConeGeometry(0.8, 1, 8);
+                    break;
+                case 'whale':
+                    geometry = new THREE.SphereGeometry(0.8, 16, 16);
+                    geometry.scale(1.5, 1, 1);
+                    break;
+                case 'bat':
+                    geometry = new THREE.SphereGeometry(0.3, 16, 16);
+                    break;
+            }
+            
+            const material = new THREE.MeshLambertMaterial({
+                color: currentColor,
+                transparent: false
+            });
+            
+            avatar = new THREE.Mesh(geometry, material);
+            avatar.scale.setScalar(currentSize);
+            scene.add(avatar);
+        }
+        
+        function createDNABackground() {
+            // Simple floating spheres
+            for (let i = 0; i < 25; i++) {
+                const geometry = new THREE.SphereGeometry(0.08, 8, 8);
+                const material = new THREE.MeshLambertMaterial({
+                    color: Math.random() > 0.5 ? 0x87ceeb : 0x98fb98,
+                    transparent: true,
+                    opacity: 0.4
+                });
+                
+                const particle = new THREE.Mesh(geometry, material);
+                particle.position.x = (Math.random() - 0.5) * 30;
+                particle.position.y = (Math.random() - 0.5) * 20;
+                particle.position.z = (Math.random() - 0.5) * 15 - 8;
+                
+                scene.add(particle);
+                dnaParticles.push(particle);
+            }
+        }
+        
+        function setSpecies(sequence, species) {
+            currentSpecies = species;
+            document.getElementById('species-seq').textContent = sequence;
+            document.getElementById('species-name').textContent = speciesData[species].name;
+            
+            // Update buttons
+            document.querySelectorAll('.gene-group:first-child .gene-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            createAvatar();
+            updateSimilarity();
+        }
+        
+        function setColor(sequence, color) {
+            currentColor = color;
+            document.getElementById('color-seq').textContent = sequence;
+            
+            const colorNames = {
+                0xff1493: 'Pink',
+                0x32cd32: 'Green', 
+                0x9370db: 'Purple',
+                0xff8c00: 'Orange',
+                0x1e90ff: 'Blue'
+            };
+            
+            document.getElementById('color-name').textContent = colorNames[color];
+            
+            // Update buttons
+            document.querySelectorAll('.gene-group:nth-child(3) .gene-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            createAvatar();
+            updateSimilarity();
+        }
+        
+        function updateSize(value) {
+            currentSize = parseFloat(value);
+            document.getElementById('size-value').textContent = value;
+            
+            const sizeNames = {
+                0.5: 'Tiny', 1.0: 'Normal', 1.5: 'Large', 2.0: 'Huge', 3.0: 'Giant'
+            };
+            
+            let closestSize = Object.keys(sizeNames).reduce((prev, curr) => {
+                return (Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev);
+            });
+            
+            document.getElementById('size-display').textContent = sizeNames[closestSize];
+            
+            if (avatar) {
+                avatar.scale.setScalar(currentSize);
+            }
+            updateSimilarity();
+        }
+        
+        function setMovement(pattern) {
+            movementPattern = pattern;
+            document.getElementById('movement-name').textContent = 
+                pattern.charAt(0).toUpperCase() + pattern.slice(1);
+            
+            // Update buttons
+            document.querySelectorAll('.gene-group:nth-child(4) .gene-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            updateSimilarity();
+        }
+        
+        function randomDNA() {
+            // Random species
+            const species = ['firefly', 'eel', 'jellyfish', 'whale', 'bat'];
+            const randomSpecies = species[Math.floor(Math.random() * species.length)];
+            setSpecies('RANDOM' + Math.floor(Math.random() * 1000), randomSpecies);
+            
+            // Random color
+            const colors = [0xff1493, 0x32cd32, 0x9370db, 0xff8c00, 0x1e90ff];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            setColor('RAND' + Math.floor(Math.random() * 1000), randomColor);
+            
+            // Random size
+            const randomSize = (Math.random() * 2.5 + 0.5).toFixed(1);
+            document.getElementById('size-slider').value = randomSize;
+            updateSize(randomSize);
+            
+            // Random movement
+            const movements = ['float', 'swim', 'bounce', 'spiral'];
+            const randomMovement = movements[Math.floor(Math.random() * movements.length)];
+            setMovement(randomMovement);
+        }
+        
+        function updateSimilarity() {
+            // Simulate DNA similarity calculation
+            const baseSimilarity = 99.9;
+            const variation = (Math.random() * 0.2 - 0.1);
+            const similarity = (baseSimilarity + variation).toFixed(1);
+            document.getElementById('similarity').textContent = similarity + '%';
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const timer = Date.now() * 0.001;
+            
+            if (avatar) {
+                // Apply movement pattern
+                switch(movementPattern) {
+                    case 'float':
+                        avatar.position.y = Math.sin(timer) * 0.5;
+                        avatar.rotation.y += 0.01;
+                        break;
+                    case 'swim':
+                        avatar.position.x = Math.sin(timer * 0.5) * 2;
+                        avatar.rotation.z = Math.sin(timer * 0.5) * 0.3;
+                        break;
+                    case 'bounce':
+                        avatar.position.y = Math.abs(Math.sin(timer * 2)) * 1.5;
+                        break;
+                    case 'spiral':
+                        avatar.position.x = Math.cos(timer) * 1.5;
+                        avatar.position.y = Math.sin(timer) * 1.5;
+                        avatar.rotation.y += 0.02;
+                        break;
+                }
+            }
+            
+            // Animate DNA particles
+            dnaParticles.forEach((particle, i) => {
+                particle.rotation.y += 0.01;
+                particle.position.y += Math.sin(timer + i * 0.5) * 0.02;
+                particle.position.x += Math.cos(timer * 0.7 + i) * 0.01;
+            });
+            
+            renderer.render(scene, camera);
+        }
+        
+        function onMouseMove(event) {
+            const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            // Set target position instead of accumulating
+            const targetX = mouseX * 2;
+            const targetY = mouseY * 2;
+            
+            // Smooth interpolation to target
+            camera.position.x += (targetX - camera.position.x) * 0.05;
+            camera.position.y += (targetY - camera.position.y) * 0.05;
+            
+            // Keep camera at fixed distance from origin
+            camera.position.z = 5;
+            camera.lookAt(scene.position);
+        }
+        
+        // Initialize with default values
+        updateSimilarity();
+        
+        // Window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

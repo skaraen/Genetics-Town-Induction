@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Land - Genetic Avatar World</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="20" font-size="12" fill="rgba(255,255,255,0.1)">ATCGATCG</text><text y="40" font-size="10" fill="rgba(255,255,255,0.08)">GGCCTTAA</text><text y="60" font-size="14" fill="rgba(255,255,255,0.06)">TTAACCGG</text><text y="80" font-size="11" fill="rgba(255,255,255,0.09)">CCGGAATT</text></svg>');
+            animation: dnaFloat 20s linear infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes dnaFloat {
+            0% { transform: translateY(100vh); }
+            100% { transform: translateY(-100vh); }
+        }
+        
+        .title {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.2); }
+            to { text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 0 0 30px rgba(255,255,255,0.4); }
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+        }
+        
+        .dna-sequence {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+            margin-bottom: 3rem;
+            padding: 15px 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .features {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .feature {
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            max-width: 200px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .feature h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        
+        .feature p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .floating-dna {
+            position: absolute;
+            font-family: 'Courier New', monospace;
+            color: rgba(255,255,255,0.1);
+            font-size: 14px;
+            animation: float 15s linear infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .info-section {
+            padding: 80px 20px;
+            background: rgba(255,255,255,0.95);
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+        
+        .info-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .info-card h3 {
+            color: #667eea;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-card p {
+            line-height: 1.6;
+            color: #666;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            text-align: center;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .features {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1 class="title">🧬 The Land</h1>
+        <p class="subtitle">A virtual world where genetic code creates life. Design your avatar through DNA, explore with others, and discover the building blocks of existence.</p>
+        
+        <div class="dna-sequence">
+            A T C G • A T C G • A T C G
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <span class="feature-icon">🔬</span>
+                <h3>Genetic Design</h3>
+                <p>Create avatars by selecting and modifying real DNA sequences</p>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">🌊</span>
+                <h3>Species Variety</h3>
+                <p>Choose from fireflies, jellyfish, electric eels, whales, and bats</p>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">🧠</span>
+                <h3>Memory Formation</h3>
+                <p>Interact with others to create lasting neural connections</p>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">🦠</span>
+                <h3>Crisis Response</h3>
+                <p>Work together to cure genetic bugs and save your avatars</p>
+            </div>
+        </div>
+        
+        <div class="cta-buttons">
+            <a href="#" class="btn btn-primary" onclick="startExperience()">🚀 Enter The Land</a>
+            <a href="#learn-more" class="btn btn-secondary">📚 Learn More</a>
+        </div>
+    </div>
+    
+    <div class="info-section" id="learn-more">
+        <div class="container">
+            <h2 class="section-title">How The Land Works</h2>
+            <p class="section-subtitle">Experience genetics education through immersive avatar creation and collaborative problem-solving</p>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🧬 Step 1: DNA Selection</h3>
+                    <p>Begin by selecting random DNA sequences that determine your avatar's species. Each sequence codes for unique traits like bioluminescence in fireflies or echolocation in bats. Learn how just 0.1% genetic difference creates incredible diversity.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h3>🎨 Step 2: Trait Customization</h3>
+                    <p>Fine-tune your avatar by adjusting gene expression levels. Turn genes on or off, modify protein production, and see real-time changes in your avatar's appearance and abilities. Discover how genetic regulation works in living organisms.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h3>🌍 Step 3: World Exploration</h3>
+                    <p>Enter a shared virtual environment where your genetic creation comes to life. Visit themed areas like the DNA-to-RNA library, protein factory, and medicine restaurant. Each location teaches different aspects of molecular biology.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h3>🤝 Step 4: Social Interaction</h3>
+                    <p>When avatars meet, they form memories through neural connection games. Connect neurons to strengthen synapses and learn how memories are physically formed in the brain through repeated neural firing patterns.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h3>🚨 Step 5: Collaborative Crisis</h3>
+                    <p>Face a genetic virus that invades all avatars! Work together to identify the common viral sequence and develop ASO treatments. Experience how scientists research disease mechanisms and develop genetic therapies.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h3>🏆 Step 6: Scientific Victory</h3>
+                    <p>Successfully cure the genetic bug through teamwork and scientific thinking. Learn about complementary base pairing, antisense oligonucleotides, and how modern genetic medicine works to treat diseases.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>&copy; 2025 The Land. An immersive genetics education experience.</p>
+        <p>🧬 Where DNA meets digital innovation 🧬</p>
+    </div>
+    
+    <script>
+        function startExperience() {
+            // You can redirect to your avatar creator or Unity game here
+            alert('🧬 Welcome to The Land! \n\nYou would be redirected to the genetic avatar creator or Unity experience.');
+            // Example: window.location.href = 'avatar-creator.html';
+        }
+        
+        // Create floating DNA sequences
+        function createFloatingDNA() {
+            const sequences = ['ATCGATCG', 'GGCCTTAA', 'TTAACCGG', 'CCGGAATT', 'AATTCCGG'];
+            const colors = ['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.08)', 'rgba(255,255,255,0.12)'];
+            
+            setInterval(() => {
+                const dna = document.createElement('div');
+                dna.className = 'floating-dna';
+                dna.textContent = sequences[Math.floor(Math.random() * sequences.length)];
+                dna.style.left = Math.random() * 100 + '%';
+                dna.style.color = colors[Math.floor(Math.random() * colors.length)];
+                dna.style.animationDelay = Math.random() * 2 + 's';
+                dna.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                
+                document.body.appendChild(dna);
+                
+                setTimeout(() => {
+                    if (dna.parentNode) {
+                        dna.parentNode.removeChild(dna);
+                    }
+                }, 25000);
+            }, 3000);
+        }
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Start floating DNA animation
+        createFloatingDNA();
+        
+        // Add parallax effect on scroll
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero');
+            hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+        });
+    </script>
+</body>
+</html>

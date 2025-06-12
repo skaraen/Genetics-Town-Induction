@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Land - Genetic Code Room</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+            cursor: grab;
+        }
+        
+        body.dragging {
+            cursor: grabbing;
+        }
+        
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #00ff00;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #00ff00;
+            z-index: 100;
+            font-size: 14px;
+        }
+        
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ff00;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid #00ff00;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>🧬 The Land - Genetic Lab</h3>
+        <p><strong>Drag:</strong> Look Around</p>
+        <p><strong>Scroll:</strong> Zoom In/Out</p>
+        <p><strong>Status:</strong> DNA Sequencing Active</p>
+    </div>
+    
+    <div id="controls">
+        Mouse/Touch to explore • Genetic code streams active
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, room;
+        let isMouseDown = false;
+        let mouseX = 0, mouseY = 0;
+        let cameraRotationX = 0, cameraRotationY = 0;
+        let textMeshes = [];
+        let dnaStreams = [];
+        
+        const dnaSequences = [
+            'ATCGATCGATCG', 'GGCCTTAAGGCC', 'TTAACCGGTTAA', 'CCGGAATTCCGG',
+            'AATTCCGGAATT', 'GGAATTCCGGAA', 'CCTTAAGGCCTT', 'TTGGCCAATTGG',
+            'ACGTACGTACGT', 'TGCATGCATGCA', 'CATGCATGCATG', 'GTACGTACGTAC'
+        ];
+        
+        init();
+        animate();
+        
+        function init() {
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x001122, 10, 50);
+            
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0, 0);
+            
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x001122);
+            document.body.appendChild(renderer.domElement);
+            
+            // Create room
+            createRoom();
+            
+            // Create genetic code streams
+            createGeneticStreams();
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x004400, 0.4);
+            scene.add(ambientLight);
+            
+            const pointLight1 = new THREE.PointLight(0x00ff00, 1.5, 25);
+            pointLight1.position.set(0, 4, 0);
+            scene.add(pointLight1);
+            
+            const pointLight2 = new THREE.PointLight(0x0088aa, 0.8, 15);
+            pointLight2.position.set(-7, 3, -7);
+            scene.add(pointLight2);
+            
+            const pointLight3 = new THREE.PointLight(0x0088aa, 0.8, 15);
+            pointLight3.position.set(7, 3, 7);
+            scene.add(pointLight3);
+            
+            const pointLight4 = new THREE.PointLight(0x0066aa, 0.6, 12);
+            pointLight4.position.set(0, -4, 0);
+            scene.add(pointLight4);
+            
+            // Controls
+            addControls();
+        }
+        
+        function createRoom() {
+            const roomGroup = new THREE.Group();
+            
+            // Room dimensions
+            const roomSize = 20;
+            const roomHeight = 12;
+            
+            // Floor with grid pattern
+            const floorGeometry = new THREE.PlaneGeometry(roomSize, roomSize, 20, 20);
+            const floorMaterial = new THREE.MeshLambertMaterial({
+                color: 0x003366,
+                wireframe: false,
+                transparent: true,
+                opacity: 1
+            });
+            
+            // Add grid lines to floor
+            const floorGridGeometry = new THREE.PlaneGeometry(roomSize, roomSize, 20, 20);
+            const floorGridMaterial = new THREE.MeshBasicMaterial({
+                color: 0x0066aa,
+                wireframe: true,
+                opacity: 0.3,
+                transparent: true
+            });
+            
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            const floorGrid = new THREE.Mesh(floorGridGeometry, floorGridMaterial);
+            
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -roomHeight / 2;
+            floorGrid.rotation.x = -Math.PI / 2;
+            floorGrid.position.y = -roomHeight / 2 + 0.01;
+            
+            roomGroup.add(floor);
+            roomGroup.add(floorGrid);
+            
+            // Ceiling with structure
+            const ceilingMaterial = new THREE.MeshLambertMaterial({
+                color: 0x001133,
+                transparent: true,
+                opacity: 0.9
+            });
+            const ceiling = new THREE.Mesh(floorGeometry, ceilingMaterial);
+            ceiling.rotation.x = Math.PI / 2;
+            ceiling.position.y = roomHeight / 2;
+            roomGroup.add(ceiling);
+            
+            // Add ceiling beams
+            const beamGeometry = new THREE.BoxGeometry(roomSize, 0.3, 0.3);
+            const beamMaterial = new THREE.MeshLambertMaterial({ color: 0x004466 });
+            
+            for (let i = -2; i <= 2; i++) {
+                const beam = new THREE.Mesh(beamGeometry, beamMaterial);
+                beam.position.set(0, roomHeight / 2 - 0.5, i * 4);
+                roomGroup.add(beam);
+            }
+            
+            // Walls with visible edges and panels
+            const wallGeometry = new THREE.PlaneGeometry(roomSize, roomHeight);
+            const wallMaterial = new THREE.MeshLambertMaterial({
+                color: 0x002244,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            // Wall edge geometry
+            const edgeGeometry = new THREE.BoxGeometry(0.2, roomHeight, 0.2);
+            const edgeMaterial = new THREE.MeshLambertMaterial({ color: 0x004488 });
+            
+            // Front wall with edges
+            const frontWall = new THREE.Mesh(wallGeometry, wallMaterial);
+            frontWall.position.z = -roomSize / 2;
+            roomGroup.add(frontWall);
+            
+            // Front wall edges
+            const frontLeftEdge = new THREE.Mesh(edgeGeometry, edgeMaterial);
+            frontLeftEdge.position.set(-roomSize/2, 0, -roomSize/2);
+            const frontRightEdge = new THREE.Mesh(edgeGeometry, edgeMaterial);
+            frontRightEdge.position.set(roomSize/2, 0, -roomSize/2);
+            roomGroup.add(frontLeftEdge);
+            roomGroup.add(frontRightEdge);
+            
+            // Back wall with edges
+            const backWall = new THREE.Mesh(wallGeometry, wallMaterial);
+            backWall.position.z = roomSize / 2;
+            backWall.rotation.y = Math.PI;
+            roomGroup.add(backWall);
+            
+            const backLeftEdge = new THREE.Mesh(edgeGeometry, edgeMaterial);
+            backLeftEdge.position.set(-roomSize/2, 0, roomSize/2);
+            const backRightEdge = new THREE.Mesh(edgeGeometry, edgeMaterial);
+            backRightEdge.position.set(roomSize/2, 0, roomSize/2);
+            roomGroup.add(backLeftEdge);
+            roomGroup.add(backRightEdge);
+            
+            // Left wall with edges
+            const leftWall = new THREE.Mesh(wallGeometry, wallMaterial);
+            leftWall.position.x = -roomSize / 2;
+            leftWall.rotation.y = Math.PI / 2;
+            roomGroup.add(leftWall);
+            
+            const leftTopEdge = new THREE.Mesh(new THREE.BoxGeometry(roomSize, 0.2, 0.2), edgeMaterial);
+            leftTopEdge.position.set(0, roomHeight/2, -roomSize/2);
+            const leftBottomEdge = new THREE.Mesh(new THREE.BoxGeometry(roomSize, 0.2, 0.2), edgeMaterial);
+            leftBottomEdge.position.set(0, -roomHeight/2, -roomSize/2);
+            roomGroup.add(leftTopEdge);
+            roomGroup.add(leftBottomEdge);
+            
+            // Right wall with edges
+            const rightWall = new THREE.Mesh(wallGeometry, wallMaterial);
+            rightWall.position.x = roomSize / 2;
+            rightWall.rotation.y = -Math.PI / 2;
+            roomGroup.add(rightWall);
+            
+            const rightTopEdge = new THREE.Mesh(new THREE.BoxGeometry(roomSize, 0.2, 0.2), edgeMaterial);
+            rightTopEdge.position.set(0, roomHeight/2, roomSize/2);
+            const rightBottomEdge = new THREE.Mesh(new THREE.BoxGeometry(roomSize, 0.2, 0.2), edgeMaterial);
+            rightBottomEdge.position.set(0, -roomHeight/2, roomSize/2);
+            roomGroup.add(rightTopEdge);
+            roomGroup.add(rightBottomEdge);
+            
+            // Add corner pillars for better room definition
+            const pillarGeometry = new THREE.BoxGeometry(0.4, roomHeight, 0.4);
+            const pillarMaterial = new THREE.MeshLambertMaterial({ color: 0x0066aa });
+            
+            const corners = [
+                [-roomSize/2, 0, -roomSize/2],
+                [roomSize/2, 0, -roomSize/2],
+                [-roomSize/2, 0, roomSize/2],
+                [roomSize/2, 0, roomSize/2]
+            ];
+            
+            corners.forEach(corner => {
+                const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+                pillar.position.set(corner[0], corner[1], corner[2]);
+                roomGroup.add(pillar);
+            });
+            
+            // Add wall panels for more detail
+            const panelGeometry = new THREE.PlaneGeometry(3, 2);
+            const panelMaterial = new THREE.MeshLambertMaterial({
+                color: 0x003355,
+                transparent: true,
+                opacity: 0.6
+            });
+            
+            // Panels on walls
+            for (let wall = 0; wall < 4; wall++) {
+                for (let i = -1; i <= 1; i++) {
+                    const panel = new THREE.Mesh(panelGeometry, panelMaterial);
+                    
+                    switch(wall) {
+                        case 0: // Front
+                            panel.position.set(i * 5, 2, -roomSize/2 + 0.1);
+                            break;
+                        case 1: // Back
+                            panel.position.set(i * 5, 2, roomSize/2 - 0.1);
+                            panel.rotation.y = Math.PI;
+                            break;
+                        case 2: // Left
+                            panel.position.set(-roomSize/2 + 0.1, 2, i * 5);
+                            panel.rotation.y = Math.PI/2;
+                            break;
+                        case 3: // Right
+                            panel.position.set(roomSize/2 - 0.1, 2, i * 5);
+                            panel.rotation.y = -Math.PI/2;
+                            break;
+                    }
+                    roomGroup.add(panel);
+                }
+            }
+            
+            scene.add(roomGroup);
+            room = roomGroup;
+        }
+        
+        function createGeneticStreams() {
+            // Create streams on each wall
+            const positions = [
+                { pos: [0, 0, -9.8], rot: [0, 0, 0] },      // Front wall
+                { pos: [0, 0, 9.8], rot: [0, Math.PI, 0] },  // Back wall
+                { pos: [-9.8, 0, 0], rot: [0, Math.PI/2, 0] }, // Left wall
+                { pos: [9.8, 0, 0], rot: [0, -Math.PI/2, 0] }  // Right wall
+            ];
+            
+            positions.forEach((wallData, wallIndex) => {
+                // Create multiple streams per wall
+                for (let streamIndex = 0; streamIndex < 8; streamIndex++) {
+                    createDNAStream(wallData.pos, wallData.rot, wallIndex, streamIndex);
+                }
+            });
+        }
+        
+        function createDNAStream(wallPos, wallRot, wallIndex, streamIndex) {
+            const streamGroup = new THREE.Group();
+            
+            // Position streams across the wall
+            const offsetX = (streamIndex - 3.5) * 2;
+            streamGroup.position.set(wallPos[0], wallPos[1], wallPos[2]);
+            streamGroup.rotation.set(wallRot[0], wallRot[1], wallRot[2]);
+            
+            // Create individual DNA text elements
+            const textElements = [];
+            const streamHeight = 12;
+            const textSpacing = 0.8;
+            
+            for (let i = 0; i < 20; i++) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 64;
+                const context = canvas.getContext('2d');
+                
+                // Random DNA sequence
+                const sequence = dnaSequences[Math.floor(Math.random() * dnaSequences.length)];
+                
+                // Clear canvas
+                context.fillStyle = 'transparent';
+                context.fillRect(0, 0, 256, 64);
+                
+                // Draw glowing text
+                context.font = 'bold 20px Courier New';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                
+                // Glow effect
+                context.shadowColor = '#00ff00';
+                context.shadowBlur = 20;
+                context.fillStyle = '#00ff00';
+                context.fillText(sequence, 128, 32);
+                
+                // Create sprite
+                const texture = new THREE.CanvasTexture(canvas);
+                const spriteMaterial = new THREE.SpriteMaterial({ 
+                    map: texture,
+                    transparent: true,
+                    opacity: 0.8 + Math.random() * 0.2
+                });
+                
+                const sprite = new THREE.Sprite(spriteMaterial);
+                sprite.scale.set(3, 0.8, 1);
+                sprite.position.x = offsetX + (Math.random() - 0.5) * 0.5;
+                sprite.position.y = streamHeight/2 - (i * textSpacing) + Math.random() * 0.3;
+                sprite.position.z = 0.1;
+                
+                sprite.userData = {
+                    originalY: sprite.position.y,
+                    speed: 0.05 + Math.random() * 0.03,
+                    streamHeight: streamHeight,
+                    opacity: spriteMaterial.opacity
+                };
+                
+                streamGroup.add(sprite);
+                textElements.push(sprite);
+            }
+            
+            scene.add(streamGroup);
+            dnaStreams.push({
+                group: streamGroup,
+                elements: textElements,
+                wallIndex: wallIndex,
+                streamIndex: streamIndex
+            });
+        }
+        
+        function addControls() {
+            // Mouse controls
+            renderer.domElement.addEventListener('mousedown', onMouseDown);
+            renderer.domElement.addEventListener('mousemove', onMouseMove);
+            renderer.domElement.addEventListener('mouseup', onMouseUp);
+            renderer.domElement.addEventListener('wheel', onMouseWheel);
+            
+            // Touch controls
+            renderer.domElement.addEventListener('touchstart', onTouchStart);
+            renderer.domElement.addEventListener('touchmove', onTouchMove);
+            renderer.domElement.addEventListener('touchend', onTouchEnd);
+            
+            // Prevent context menu
+            renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+        }
+        
+        function onMouseDown(event) {
+            isMouseDown = true;
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+            document.body.classList.add('dragging');
+        }
+        
+        function onMouseMove(event) {
+            if (!isMouseDown) return;
+            
+            const deltaX = event.clientX - mouseX;
+            const deltaY = event.clientY - mouseY;
+            
+            cameraRotationY -= deltaX * 0.005;
+            cameraRotationX -= deltaY * 0.005;
+            
+            // Limit vertical rotation
+            cameraRotationX = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraRotationX));
+            
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+        }
+        
+        function onMouseUp() {
+            isMouseDown = false;
+            document.body.classList.remove('dragging');
+        }
+        
+        function onMouseWheel(event) {
+            // Zoom functionality could be added here
+            event.preventDefault();
+        }
+        
+        function onTouchStart(event) {
+            if (event.touches.length === 1) {
+                isMouseDown = true;
+                mouseX = event.touches[0].clientX;
+                mouseY = event.touches[0].clientY;
+            }
+        }
+        
+        function onTouchMove(event) {
+            if (!isMouseDown || event.touches.length !== 1) return;
+            
+            event.preventDefault();
+            const deltaX = event.touches[0].clientX - mouseX;
+            const deltaY = event.touches[0].clientY - mouseY;
+            
+            cameraRotationY -= deltaX * 0.005;
+            cameraRotationX -= deltaY * 0.005;
+            
+            cameraRotationX = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraRotationX));
+            
+            mouseX = event.touches[0].clientX;
+            mouseY = event.touches[0].clientY;
+        }
+        
+        function onTouchEnd() {
+            isMouseDown = false;
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Update camera rotation
+            camera.rotation.x = cameraRotationX;
+            camera.rotation.y = cameraRotationY;
+            
+            // Animate DNA streams
+            const time = Date.now() * 0.001;
+            
+            dnaStreams.forEach(stream => {
+                stream.elements.forEach((element, index) => {
+                    // Move downward
+                    element.position.y -= element.userData.speed;
+                    
+                    // Reset position when off screen
+                    if (element.position.y < -element.userData.streamHeight/2 - 2) {
+                        element.position.y = element.userData.streamHeight/2 + Math.random() * 3;
+                        
+                        // Regenerate sequence occasionally
+                        if (Math.random() < 0.1) {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = 256;
+                            canvas.height = 64;
+                            const context = canvas.getContext('2d');
+                            
+                            const sequence = dnaSequences[Math.floor(Math.random() * dnaSequences.length)];
+                            
+                            context.fillStyle = 'transparent';
+                            context.fillRect(0, 0, 256, 64);
+                            context.font = 'bold 20px Courier New';
+                            context.textAlign = 'center';
+                            context.textBaseline = 'middle';
+                            context.shadowColor = '#00ff00';
+                            context.shadowBlur = 20;
+                            context.fillStyle = '#00ff00';
+                            context.fillText(sequence, 128, 32);
+                            
+                            element.material.map = new THREE.CanvasTexture(canvas);
+                        }
+                    }
+                    
+                    // Flickering effect
+                    element.material.opacity = element.userData.opacity + 
+                        Math.sin(time * 5 + index) * 0.1;
+                    
+                    // Slight horizontal drift
+                    element.position.x += Math.sin(time + index) * 0.002;
+                });
+            });
+            
+            // Gentle room lighting pulse
+            scene.children.forEach(child => {
+                if (child.type === 'PointLight') {
+                    child.intensity = child.userData?.baseIntensity || child.intensity;
+                    child.intensity += Math.sin(time * 0.5) * 0.1;
+                }
+            });
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Store base intensities for lights
+        scene.traverse((child) => {
+            if (child.type === 'PointLight') {
+                child.userData.baseIntensity = child.intensity;
+            }
+        });
+    </script>
+</body>
+</html>
