@@ -2134,6 +2134,7 @@ MonoBehaviour:
   intelligenceRightButton: {fileID: 358032286}
   abilityLeftButton: {fileID: 648536590}
   abilityRightButton: {fileID: 689007243}
+  goButton: {fileID: 277214653}
   intelligenceText: {fileID: 1626657510}
   abilityText: {fileID: 646053667}
   infoText: {fileID: 699493232}
