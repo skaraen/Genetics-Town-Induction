@@ -1,229 +1,165 @@
 using UnityEngine;
-using System.Collections.Generic;
+using Unity.Netcode;
+using Unity.Cinemachine;
 
-public class Player : MonoBehaviour
+public class Player : NetworkBehaviour
 {
-    [SerializeField] private float moveSpeed = 7.0f;
+    [SerializeField] private float moveSpeed   = 7.0f;
     [SerializeField] private float rotateSpeed = 7.0f;
     [SerializeField] private float playerHeight = 0.7f;
     [SerializeField] private float playerRadius = 0.7f;
-    [SerializeField] private GameInput gameInput;
+    [SerializeField] private float heightOffset = 1.2f;
+    [SerializeField] private float ySmoothTime = 0.05f;
+    [SerializeField] private LayerMask groundMask = ~0;
+    [SerializeField] private float groundRayLength = 200f;
+    [SerializeField] private Transform trackingTarget;
+    [SerializeField] private int ownerCamPriority = 100;
+
+    private CinemachineCamera cineCam;
+    private bool cameraBound = false;
+    private bool bindingInProgress = false;
     private bool isMoving;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    [Header("Avatar Prefabs")]
-    public GameObject seaAvatarPrefab;
-    public GameObject mountainAvatarPrefab;
-    public GameObject skyAvatarPrefab;
-    public GameObject forestAvatarPrefab;
 
-    private GameObject currentAvatar;
-    void Start()
+    public override void OnNetworkSpawn()
     {
-        print(Vector3.forward);
-        Debug.Log($"Received Avatar Data: Biome={AvatarDataHolder.biome}, Intelligence={AvatarDataHolder.intelligence}, Ability={AvatarDataHolder.ability}, Color={AvatarDataHolder.color}");
-
-        GenerateAvatarBasedOnData();
+        if (!IsOwner) return;
+        TryBindCamera();               // kick off once on spawn
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
+        if (!IsOwner) return;
         HandleMovement();
-        HandleInteractions();
     }
 
-    void GenerateAvatarBasedOnData()
+    private void TryBindCamera()
     {
-        if (currentAvatar != null)
+        if (cameraBound || bindingInProgress) return;
+
+        cineCam = FindFirstObjectByType<CinemachineCamera>();
+        if (cineCam != null)
         {
-            Destroy(currentAvatar);
-        }
-
-        GameObject prefabToUse = null;
-        Vector3 position = Vector3.zero;
-        Quaternion rotation = Quaternion.Euler(0, -90, 0);
-
-        switch (AvatarDataHolder.biome)
-        {
-            case "Sea":
-                prefabToUse = seaAvatarPrefab;
-                break;
-            case "Mountain":
-                prefabToUse = mountainAvatarPrefab;
-                position.y = 1.5f;
-                rotation = Quaternion.Euler(0, 90, 0);
-                break;
-            case "Sky":
-                prefabToUse = skyAvatarPrefab;
-                break;
-            case "Forest":
-                prefabToUse = forestAvatarPrefab;
-                break;
-            default:
-                prefabToUse = seaAvatarPrefab;
-                break;
-        }
-
-        if (prefabToUse != null)
-        {
-            currentAvatar = Instantiate(prefabToUse, transform.position, prefabToUse.transform.rotation, transform);
-            currentAvatar.transform.localPosition = position;
-            // currentAvatar.transform.localRotation = Quaternion.identity;
-            currentAvatar.transform.localRotation = rotation;
-            currentAvatar.transform.localScale = Vector3.one;
-
-            ApplyAvatarColor(currentAvatar);
-
-            int headIndex = MapIntelligenceToIndex();
-            int torsoIndex = MapAbilityToIndex();
-
-            ToggleParts("head", headIndex, 2);
-            ToggleParts("torso", torsoIndex, 2);
-        }
-    }
-
-    void TogglePart(string partName, bool enable)
-    {
-        Transform part = currentAvatar.transform.Find(partName);
-        if (part != null)
-        {
-            part.gameObject.SetActive(enable);
-        }
-    }
-
-    void ToggleParts(string baseName, int activeIndex, int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            string partName = $"{baseName}{i + 1}";
-            TogglePart(partName, i == activeIndex);
-        }
-    }
-
-    int MapIntelligenceToIndex()
-    {
-        if (AvatarDataHolder.intelligence == "Smart" || AvatarDataHolder.intelligence == "Camouflage" || AvatarDataHolder.intelligence == "Balance")
-        {
-            return 0;
+            BindCameraNow();
         }
         else
         {
-            return 1;
+            StartCoroutine(BindWhenReady()); // one coroutine, not per-frame
         }
     }
 
-    int MapAbilityToIndex()
+    private System.Collections.IEnumerator BindWhenReady()
     {
-        if (AvatarDataHolder.ability == "Flying" || AvatarDataHolder.ability == "Burst Swim" || AvatarDataHolder.ability == "Insulation")
+        bindingInProgress = true;
+
+        // wait one or more frames until a CinemachineCamera appears
+        while (cineCam == null)
         {
-            return 0;
+            cineCam = FindFirstObjectByType<CinemachineCamera>();
+            if (cineCam == null) yield return null;
         }
-        else
+
+        BindCameraNow();
+        bindingInProgress = false;
+    }
+
+    private void BindCameraNow()
+    {
+        if (cineCam == null) return;
+
+        var target = trackingTarget != null ? trackingTarget : transform;
+
+        // CM v3 API
+        cineCam.Target.TrackingTarget = target;
+        cineCam.Target.LookAtTarget   = target;
+        cineCam.Priority              = ownerCamPriority;
+
+        cameraBound = true;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        if (IsOwner && cineCam != null)
         {
-            return 1;
+            cineCam.Target.TrackingTarget = null;
+            cineCam.Target.LookAtTarget   = null;
         }
     }
 
-    HashSet<string> GetColorTargets()
+    private float _yVel; // for SmoothDamp
+
+    private void HandleMovement()
     {
-        HashSet<string> colorTargets = new HashSet<string>();
+        // Camera-relative planar move
+        Vector2 inputVector = GameInput.Instance.GetMovementVectorNormalized();
+        Vector3 forward = cineCam.transform.forward; forward.y = 0f; forward.Normalize();
+        Vector3 right   = cineCam.transform.right;   right.y   = 0f; right.Normalize();
 
-        switch (AvatarDataHolder.biome)
+        Vector3 moveVector   = forward * inputVector.y + right * inputVector.x;
+        float   moveDistance = moveSpeed * Time.deltaTime;
+
+        // Move horizontally without collision checks (no obstruction)
+        Vector3 targetXZ = transform.position + moveVector * moveDistance;
+
+        // Sample ground height under the target XZ
+        float groundY = GetGroundHeight(targetXZ, out bool hasGround);
+
+        // If we found ground, keep a smooth clearance; otherwise preserve current Y
+        float targetY = hasGround ? groundY + heightOffset : transform.position.y;
+        float newY    = Mathf.SmoothDamp(transform.position.y, targetY, ref _yVel, ySmoothTime);
+
+        // Commit position
+        transform.position = new Vector3(targetXZ.x, newY, targetXZ.z);
+
+        // Rotate only when actually moving
+        if (moveVector != Vector3.zero)
         {
-            case "Sea":
-                colorTargets.Add("head1Emission");
-                colorTargets.Add("head2Emission");
-                break;
-
-            case "Mountain":
-                colorTargets.Add("torso1");
-                colorTargets.Add("torso2");
-                break;
-
-            case "Sky":
-                colorTargets.Add("wings/emission");
-                colorTargets.Add("body/emission");
-                break;
-
-            case "Forest":
-                colorTargets.Add("leaves/emission");
-                colorTargets.Add("trunk/emission");
-                break;
-        }
-
-        return colorTargets;
-    }
-
-    void ApplyAvatarColor(GameObject avatar)
-    {
-        HashSet<string> targetNames = GetColorTargets();
-        Renderer[] renderers = avatar.GetComponentsInChildren<Renderer>(true);
-
-        foreach (Renderer renderer in renderers)
-        {
-            if (targetNames.Contains(renderer.gameObject.name))
-            {
-                Material mat = renderer.material;
-
-                if (mat.HasProperty("_BaseColor"))
-                {
-                    mat.SetColor("_BaseColor", AvatarDataHolder.color);
-                }
-
-                if (mat.HasProperty("_EmissionColor"))
-                {
-                    mat.SetColor("_EmissionColor", AvatarDataHolder.color);
-                    mat.EnableKeyword("_EMISSION");
-                }
-            }
-        }
-    }
-
-    void HandleMovement()
-    {
-        Vector2 inputVector = gameInput.GetMovementVectorNormalized();
-
-        Vector3 moveVector = new Vector3(inputVector.x, 0f, inputVector.y);
-        float moveDistance = Time.deltaTime * moveSpeed;
-
-        bool isHitting = Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveVector, moveDistance);
-
-        if (isHitting)
-        {
-            Vector3 moveVecX = new Vector3(moveVector.x, 0, 0).normalized;
-            bool isHittingX = Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveVecX, moveDistance);
-
-            if (isHittingX)
-            {
-                Vector3 moveVecZ = new Vector3(0, 0, moveVector.z).normalized;
-                bool isHittingZ = Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveVecZ, moveDistance);
-
-                moveVector = isHittingZ ? Vector3.zero : moveVecZ;
-            }
-            else
-            {
-                moveVector = moveVecX;
-            }
+            transform.forward = Vector3.Slerp(transform.forward, moveVector, Time.deltaTime * rotateSpeed);
         }
 
         isMoving = moveVector != Vector3.zero;
-        transform.position += moveVector * moveDistance;
-
-        transform.forward = Vector3.Slerp(transform.forward, moveVector, Time.deltaTime * rotateSpeed);
     }
 
-    void HandleInteractions()
+    // Prefer Terrain.SampleHeight if available; fall back to a downward raycast.
+    private float GetGroundHeight(Vector3 atXZ, out bool hasGround)
     {
-        Vector2 inputVector = gameInput.GetMovementVectorNormalized();
-        Vector3 moveVector = new Vector3(inputVector.x, 0f, inputVector.y);
+        // 1) Terrain path (handles multi-terrain if activeTerrain is the one under us)
+        if (Terrain.activeTerrain != null)
+        {
+            Terrain t = Terrain.activeTerrain;
+            Vector3 tPos = t.transform.position;
+            Vector3 local = atXZ - new Vector3(tPos.x, 0f, tPos.z);
+
+            // Inside terrain bounds?
+            Vector3 size = t.terrainData.size;
+            if (local.x >= 0f && local.z >= 0f && local.x <= size.x && local.z <= size.z)
+            {
+                float h = t.SampleHeight(atXZ) + tPos.y;
+                hasGround = true;
+                return h;
+            }
+        }
+
+        // 2) Raycast path (works for meshes/other colliders)
+        Vector3 rayOrigin = atXZ + Vector3.up * groundRayLength * 0.5f;
+        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, groundRayLength, groundMask, QueryTriggerInteraction.Ignore))
+        {
+            hasGround = true;
+            return hit.point.y;
+        }
+
+        hasGround = false;
+        return atXZ.y; // fallback
+    }
+
+    private void HandleInteractions()
+    {
+        if (!IsOwner) return;
 
         if (Input.GetKeyDown(KeyCode.E))
         {
             Collider[] proximalNpcs = Physics.OverlapSphere(transform.position, 2f);
-            foreach (Collider collider in proximalNpcs)
-            {
-                Debug.Log(collider);
-            } 
+            foreach (var c in proximalNpcs)
+                Debug.Log(c.name);
         }
     }
 }

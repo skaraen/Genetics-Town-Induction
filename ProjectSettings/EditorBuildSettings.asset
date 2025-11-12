@@ -6,11 +6,29 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: Assets/Scenes/TitleScene.unity
+    guid: ab1b32e8da8d04a609d6caedcf890a4e
   - enabled: 1
-    path: Assets/MAIN/Scenes/GameScene_Karaen.unity
-    guid: 5e7af4bd95ac53a4cb784a9eedf8f6f9
+    path: Assets/Scenes/IntroScene.unity
+    guid: 906cbdafe1c1d491cb5767c9a24fa1da
+  - enabled: 1
+    path: Assets/Scenes/AvatarSelection.unity
+    guid: 815249944953144b397106e6577035d2
+  - enabled: 1
+    path: Assets/Scenes/GameScene.unity
+    guid: c481b77d9fb2c461c9fc66066bb165e7
+  - enabled: 1
+    path: Assets/Scenes/MemoryGame.unity
+    guid: 834fb6fdfbc884b14a89508cc325810f
+  - enabled: 0
+    path: Assets/Scenes/MemoryGame_Sawiros.unity
+    guid: 6ac4abcf1aa734c2fbeab0e5f09d891b
+  - enabled: 1
+    path: Assets/Scenes/ASOGame.unity
+    guid: b6e40dc1c7f5147f18461befe1de3792
+  - enabled: 0
+    path: Assets/Scenes/ASOGameOld.unity
+    guid: 84cb6dd604fbe48e8b93b8a6f7e46dda
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 9e7be553448fa2546aea5752021cbcf7, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

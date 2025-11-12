@@ -1,0 +1,57 @@
+[
+    {
+        "id": 0,
+        "name": "Gregor",
+        "baseSequence": "AGCGTGACCGTAAGGTCTAGCTTACGGTAC",
+        "subSequences": ["AGCT", "CTGA"],
+        "colorSequence": "CTGA",
+        "colorTargets": ["head1Emission", "tentacle1", "fur2", "deco-2"],
+        "colorRanges": ["000000", "FFFFFF", "000000", "FFFFFF"],
+        "info": "",
+        "prefabPath" : "Jellyfish/jellyfish"
+    },
+    {
+        "id": 1,
+        "name": "Jellyfish",
+        "baseSequence": "AGTAAAGGAGAAGAACTTTTCACTGGAGTTGTC",
+        "subSequences": ["GAATTCCGAATGTCTACTTCGTTTTTAATAGAT", "AATCACGGAAGGCCGCCGGCCTGGGGCTCCGCA"],
+        "colorSequence": "TGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGG",
+        "colorTargets": ["head1Emission", "head2Emission", "tentacle1", "tentacle2"],
+        "colorRanges": ["77FF00", "0080FF", "77FF00", "0080FF"],
+        "info": "CAMOUFLAGE!\n This sequence allows this avatar to absorb blue light and emit green light, creating a glow.\n As a result, this avatar could distract or attract others with bright light flashes.",
+        "prefabPath" : "Jellyfish/jellyfish"
+    },
+    {
+        "id": 2,
+        "name": "Sheep",
+        "baseSequence": "GCATGTTGCGGAGTGATTAGTGGGTTTGAAAAG",
+        "subSequences": ["AGAACATGGGAGGCACTGAACTTACTACATCAG", "ACAGTTACAGTGCAGAAGCAGAAGCAAAAGAAT"],
+        "colorSequence": "AGCAAATCTCTACAGCTGCAAGGTGAAAAAGGA",
+        "colorTargets": ["deco1", "deco2-2","fur1", "fur2"],
+        "colorRanges": ["AD4339", "FF6254","757575", "FFFFFF"],
+        "info": "SIGHT!\n This sequence contributes to this avatar’s eye muscles by increasing its ability to regulate light intake.\n As a result, this avatar has rectangular pupils and excellent peripheral vision.",
+        "prefabPath" : "Sheep/sheep"
+    },
+    {
+        "id": 3,
+        "name": "Hummingbird",
+        "baseSequence": "ACAGATTTCTTATCGGCTTCCACACTGCGGTAG",
+        "subSequences": ["GACATTTAGACTCCAGGCTTCAACCTGTTTACA", "GGAAGATGCGAGAAGGCAGAGGAGGAGGGAGGG"],
+        "colorSequence": "GGTGGTGTCTCGGGATACCTTGTTTATAGTACC",
+        "colorTargets": ["propeller1", "propeller2", "beak1", "beak2"],
+        "colorRanges": ["000000", "FFFFFF", "000000", "FFFFFF"],
+        "info": "SPEED!\n This sequence allows this avatar to break down sugar quicker, increasing its energy output to muscles.\n As a result, this avatar could hover in the air, fly upside down, and maintain a heartbeat of 1200 bpm.",
+        "prefabPath" : "Bird/bird"
+    },
+    {
+        "id": 4,
+        "name": "Axolotl",
+        "baseSequence": "GGGACCTTGAGAGCGGCCAGGCCAGCCTCGGAG",
+        "subSequences": ["ACTCTGGCGCTCCCGAGGCGGCCTCTTGTGCGA", "CTCTTGCGTCAAGACGGCCGTGCTGAGCGAATG"],
+        "colorSequence": "AACAGTTCTGACGTGAGAGGACAAGAAACACAA",
+        "colorTargets": ["petal1", "petal2", "leaf1", "leaf2"],
+        "colorRanges": ["000000", "FFFFFF", "000000", "FFFFFF"],
+        "info": "REGENERATION!\n This sequence supports this avatar's ability to reactivate development pathways even in adulthood.\n As a result, this avatar could regenerate multiple body parts, including its spinal cord, post-injury.",
+        "prefabPath" : "Axolotl/axolotl"
+    }
+]

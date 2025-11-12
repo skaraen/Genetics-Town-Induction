@@ -1,0 +1,122 @@
+[
+    {
+        "id": 0,
+        "avatarType": 1,
+        "name": "Alex",
+        "baseSequence": "AGCTTGACCGTAAGGTCTAGCTTACGGTAC",
+        "subSequences": ["AGCTGACTT", "GTCTAGCTT"],
+        "sequenceEnabled": [true, false],
+        "colors": [
+            {"r": 2.5, "g": 1.0, "b": 0.2, "a": 1.0},
+            {"r": 0.1, "g": 3.0, "b": 1.5, "a": 1.0}
+        ]
+    },
+    {
+        "id": 1,
+        "avatarType": 2,
+        "name": "Bailey",
+        "baseSequence": "TGCAGATTCGGAATCGTTACCGGTAGGCTA",
+        "subSequences": ["GATTCGGAA", "ACCGGTAGG"],
+        "sequenceEnabled": [false, true],
+        "colors": [
+            {"r": 1.8, "g": 2.2, "b": 0.9, "a": 1.0},
+            {"r": 0.4, "g": 1.0, "b": 3.0, "a": 1.0}
+        ]
+    },
+    {
+        "id": 2,
+        "avatarType": 3,
+        "name": "Casey",
+        "baseSequence": "CCTTAGCGTAACTGGCATAGGCTAATCCGT",
+        "subSequences": ["CGTAACTGG", "ATAGGCTAA"],
+        "sequenceEnabled": [true, true],
+        "colors": [
+            {"r": 0.5, "g": 4.0, "b": 1.5, "a": 1.0},
+            {"r": 3.5, "g": 0.8, "b": 2.0, "a": 1.0}
+        ]
+    },
+    {
+        "id": 3,
+        "avatarType": 4,
+        "name": "Devin",
+        "baseSequence": "GATCTAGCGTACGATTGGCCTAGTAAGCCT",
+        "subSequences": ["AGCT", "CTGA"],
+        "sequenceEnabled": [true, false],
+        "colors": [
+            {"r": 1.2, "g": 1.2, "b": 2.8, "a": 1.0},
+            {"r": 2.5, "g": 2.5, "b": 0.7, "a": 1.0}
+        ]
+    },
+    {
+        "id": 4,
+        "avatarType": 1,
+        "name": "Eden",
+        "baseSequence": "AGCTTGACCGTAAGGTCTAGCTTACGGTAC",
+        "subSequences": ["AGCTGACTT", "GTCTAGCTT"],
+        "sequenceEnabled": [false, false],
+        "colors": [
+            {"r": 3.0, "g": 1.5, "b": 1.0, "a": 1.0},
+            {"r": 0.8, "g": 2.3, "b": 2.2, "a": 1.0}
+        ]
+    },
+    {
+        "id": 5,
+        "avatarType": 2,
+        "name": "Finn",
+        "baseSequence": "TGCAGATTCGGAATCGTTACCGGTAGGCTA",
+        "subSequences": ["GATTCGGAA", "ACCGGTAGG"],
+        "sequenceEnabled": [true, true],
+        "colors": [
+            {"r": 2.2, "g": 0.9, "b": 3.1, "a": 1.0},
+            {"r": 1.5, "g": 3.5, "b": 0.4, "a": 1.0}
+        ]
+    },
+    {
+        "id": 6,
+        "avatarType": 3,
+        "name": "Gale",
+        "baseSequence": "CCTTAGCGTAACTGGCATAGGCTAATCCGT",
+        "subSequences": ["CGTAACTGG", "ATAGGCTAA"],
+        "sequenceEnabled": [false, true],
+        "colors": [
+            {"r": 0.3, "g": 3.3, "b": 1.1, "a": 1.0},
+            {"r": 2.9, "g": 1.2, "b": 0.8, "a": 1.0}
+        ]
+    },
+    {
+        "id": 7,
+        "avatarType": 4,
+        "name": "Harper",
+        "baseSequence": "GATCTAGCGTACGATTGGCCTAGTAAGCCT",
+        "subSequences": ["AGCT", "CTGA"],
+        "sequenceEnabled": [true, true],
+        "colors": [
+            {"r": 2.0, "g": 2.0, "b": 1.0, "a": 1.0},
+            {"r": 1.2, "g": 1.8, "b": 3.3, "a": 1.0}
+        ]
+    },
+    {
+        "id": 8,
+        "avatarType": 1,
+        "name": "Ira",
+        "baseSequence": "AGCTTGACCGTAAGGTCTAGCTTACGGTAC",
+        "subSequences": ["AGCTGACTT", "GTCTAGCTT"],
+        "sequenceEnabled": [true, true],
+        "colors": [
+            {"r": 1.0, "g": 4.0, "b": 1.0, "a": 1.0},
+            {"r": 3.0, "g": 0.5, "b": 0.5, "a": 1.0}
+        ]
+    },
+    {
+        "id": 9,
+        "avatarType": 2,
+        "name": "Jules",
+        "baseSequence": "TGCAGATTCGGAATCGTTACCGGTAGGCTA",
+        "subSequences": ["GATTCGGAA", "ACCGGTAGG"],
+        "sequenceEnabled": [false, false],
+        "colors": [
+            {"r": 1.6, "g": 2.1, "b": 0.9, "a": 1.0},
+            {"r": 0.9, "g": 3.0, "b": 1.6, "a": 1.0}
+        ]
+    }
+]

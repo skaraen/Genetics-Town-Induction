@@ -1,0 +1,171 @@
+[
+    {
+        "sequence": "narrator-main-intro",
+        "mode": "cutscene",
+        "dialogues": [
+            {
+                "speaker" : "Gregor",
+                "emotion": "happy",
+                "text"    : "Hi everyone, my name is Gregor. Welcome to Genetics Land!"
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "Like all digital worlds, this environment is created with hundreds and hundreds of lines of code."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "neutral",
+                "text"    : "However, Genetics Land is different. This digital world is all about genetic code."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "Genetic code is also known as DNA, which is the building block of life. It is found in every single living being and is responsible for determining nearly every aspect of who you are – your appearance, your temperament, and even your susceptibility for various conditions, such as something as simple as a sunburn or as complex as a disease."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "happy",
+                "text"    : "Since we're in Genetics Land, we can use genetic code to create our own avatars. Let's go!"
+            }
+        ]
+    },
+    {
+        "sequence": "narrator-memory-intro",
+        "mode": "overlay",
+        "dialogues": [
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "Let’s learn this avatar’s name and genetic code. But, learning can be tricky – it takes time and effort."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "neutral",
+                "text"    : "To learn this information and form a memory of the avatar, you must match a memory device on the top row with its partner on the bottom row, indicated by matching colors."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "neutral",
+                "text"    : "All colors will flash briefly, then disappear. It is up to you to remember the colors and create the correct match."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "neutral",
+                "text"    : "But be careful – only one set of memory devices will yield the correct learning. Matching any other set will result in a failed trial, as it will trigger the wrong response."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "You must match the correct set 3 times to complete the game and fully unlock all information about the other avatar. Good luck!"
+            }
+        ]
+    },
+    {
+        "sequence": "narrator-memory-final",
+        "mode": "overlay",
+        "dialogues": [
+            {
+                "speaker" : "Gregor",
+                "emotion": "happy",
+                "text"    : "Fantastic! This player’s information, including their genetic code, will now be stored as a memory bubble in your inventory for future reference."
+            }
+        ]
+    },
+    {
+        "sequence": "narrator-first-welcome",
+        "mode": "overlay",
+        "dialogues": [
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "Nice work! Now, have fun exploring Genetics Land!"
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "Notice the variety of avatars and features, determined through differences in genetic code. To learn more about another player and unlock their name and genetic sequence, please select “Interact.” Try interacting with as many players as possible, as friendship and knowledge is powerful, especially here."
+            }
+        ]
+    },
+    {
+        "sequence": "narrator-glitch-panic",
+        "mode": "overlay",
+        "dialogues": [
+            {
+                "speaker" : "Gregor",
+                "emotion": "shock",
+                "text"    : "Attention everyone, no need to panic, but it looks like a bug has invaded our code, damaging all avatars. I’ve received word that this bug has a genetic code of its own that’s been inserted into every avatar in the Land."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "shock",
+                "text"    : "We need your help to fix this! You need to find the bug’s genetic code and design a cure to bring your avatar back to health. Let’s go!"
+            }
+        ]
+    },
+    {
+        "sequence": "narrator-bug-intro",
+        "mode": "overlay",
+        "dialogues": [
+            {
+                "speaker" : "Gregor",
+                "emotion": "neutral",
+                "text"    : "To cure your avatar, we must first determine the genetic sequence of the bug. We know it is 6 letters long. We also know that it has inserted itself into every avatar."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "neutral",
+                "text"    : "Therefore, we can look through our memory bubbles to find the six letters that are shared across every avatar. Notice that some avatars will have a lot of genetic code similarity, but others will look completely different."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "neutral",
+                "text"    : "Regardless, the same bug will be found amongst all. Once you find the bug sequence, please type it into the indicated box."
+            }
+        ]
+    },
+    {
+        "sequence": "narrator-aso-intro",
+        "mode": "overlay",
+        "dialogues": [
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "Now that we know the bug sequence, we can create a cure to stop it! Our cure is called an ASO."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "Our ASO will be created by matching every letter of the bug sequence with its assigned DNA partner. A and T are partners, while C and G are partners."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "Please drag the letters from the right to the bug sequence on the left accordingly."
+            }
+        ]
+    },
+    {
+        "sequence": "narrator-aso-explain",
+        "mode": "overlay",
+        "dialogues": [
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "ASO is short for antisense oligonucleotide. It functions as a cure by working as a band-aid. It covers up, or silences, the harmful bug code, stopping it from damaging your avatar. ASOs are being studied to cure diseases in real life!"
+            }
+        ]
+    },
+    {
+        "sequence": "narrator-aso-final",
+        "mode": "overlay",
+        "dialogues": [
+            {
+                "speaker" : "Gregor",
+                "emotion": "happy",
+                "text"    : "Amazing work! Let’s deliver the cure to bring your avatar back to health."
+            }
+        ]
+    }
+]
