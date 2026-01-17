@@ -1,7 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-
+/// <summary>
+/// Static class which loads the avatar profiles, instances of AvatarProfile,
+/// which provide metadata about avatars. The profiles are loaded
+/// from JSON and AvatarProfileManager provides lookup methods,
+/// </summary>
 public class AvatarProfileManager
 {
     private static AvatarProfileManager _instance;
@@ -15,7 +19,9 @@ public class AvatarProfileManager
         }
     }
 
+    // List of all avatar profiles, same as the keys in sequenceLookup
     private List<AvatarProfile> profiles;
+    // base sequence: AvatarProfile lookup
     private Dictionary<string, AvatarProfile> sequenceLookup;
 
     private AvatarProfileManager()
@@ -23,6 +29,10 @@ public class AvatarProfileManager
         LoadProfiles();
     }
 
+    /// <summary>
+    /// Reads the AvatarProfiles.json (instances of AvatarProfile) file from the Resources folder
+    /// and initilizes it to the sequencelook up
+    /// </summary>
     private void LoadProfiles()
     {
         Debug.Log("Load profiles");

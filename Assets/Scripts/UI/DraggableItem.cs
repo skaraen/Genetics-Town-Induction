@@ -2,6 +2,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+/// <summary>
+/// Add to a UI element to make it draggable. To use:
+/// - add dragable item component to the item
+/// - Add a slothandler to the place you want to drop it in
+/// </summary>
 public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [HideInInspector] public Transform parentAfterDrag;
@@ -34,6 +39,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        // If dropped in a valid slot, the SlotHandler will have updated parentAfterDrag to the slot
         transform.SetParent(parentAfterDrag);
         image.raycastTarget = true;
     }
