@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 public class SlotHandler : MonoBehaviour, IDropHandler, IPointerClickHandler
 {
     [Tooltip("If provided, spawns a copy of respawnItemOnDragOut if respawnItemOnDragOut is dragged out of this slot onto a different slot")]
-    [SerializeField] private DraggableItem respawnItemOnDragOut;
+    [SerializeField] private GameObject respawnItemOnDragOut;
     [SerializeField] private bool acceptItems = true;
     [Tooltip("If true, items dropped into this slot will smoothly lerp to center position")]
     [SerializeField] public bool lerpItemsToCenter = true;
@@ -20,7 +20,6 @@ public class SlotHandler : MonoBehaviour, IDropHandler, IPointerClickHandler
         {
             GameObject dropped = eventData.pointerDrag;
             DraggableItem dItem = dropped.GetComponent<DraggableItem>();
-            Debug.Log($"[SlotHandler] Setting parentAfterDrag to {transform.name}");
             dItem.parentAfterDrag = transform;
         }
     }
@@ -28,12 +27,23 @@ public class SlotHandler : MonoBehaviour, IDropHandler, IPointerClickHandler
     /// <summary>
     /// Called when a draggable item that was originally in this slot is dragged out
     /// </summary>
-    public void OnItemEndDrag()
+    public void ItemRemovedFromSlot()
     {
-        // if the child has changed, respawn a new one
+        // if the child has changed, optionally respawn a new one
         if(respawnItemOnDragOut != null && respawnItemOnDragOut.transform.parent != transform)
         {
-            Instantiate(respawnItemOnDragOut, transform);
+            GameObject newItem = Instantiate(respawnItemOnDragOut, transform);
+            CanvasGroup group = newItem.GetComponentInChildren<CanvasGroup>();
+            // make sure raycast blocking is re-enabled on the new item
+            if (group != null)
+            {
+                group.blocksRaycasts = true;
+            }
+            // spawn it in the center, if specified
+            if(lerpItemsToCenter)
+            {
+                newItem.transform.localPosition = Vector3.zero;
+            }
         }
     }
 

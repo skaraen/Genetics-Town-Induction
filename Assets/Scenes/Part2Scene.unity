@@ -1276,6 +1276,7 @@ GameObject:
   - component: {fileID: 607410215}
   - component: {fileID: 607410217}
   - component: {fileID: 607410216}
+  - component: {fileID: 607410219}
   - component: {fileID: 607410218}
   m_Layer: 5
   m_Name: DNALetterImage
@@ -1356,7 +1357,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DraggableItem
   parentAfterDrag: {fileID: 0}
   compType: 0
-  lerpToParent: 1
+  lerpToParent: 0
+--- !u!225 &607410219
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 607410214}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &747056071
 GameObject:
   m_ObjectHideFlags: 0
@@ -3688,7 +3701,7 @@ PrefabInstance:
     - target: {fileID: 619651814715957087, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
       propertyPath: respawnItemOnDragOut
       value: 
-      objectReference: {fileID: 607410218}
+      objectReference: {fileID: 607410214}
     - target: {fileID: 1294339525480320385, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

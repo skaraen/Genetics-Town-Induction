@@ -9,9 +9,11 @@ using DG.Tweening;
 /// - Add a slothandler to the place you want to drop it in
 /// </summary>
 [RequireComponent(typeof(Image))]
+[RequireComponent(typeof(CanvasGroup))]
 public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [HideInInspector] public Transform parentAfterDrag;
+    private Transform cachedParentBeforeDrag;
     [HideInInspector] public char compType;
     [HideInInspector] public bool lerpToParent = false; // flag triggered by slots to lerp back to parent on end drag
     private Canvas canvas;
@@ -23,13 +25,10 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         canvas = transform.GetComponentInParent<Canvas>().rootCanvas;
         canvasGroup = GetComponent<CanvasGroup>();
-        if (canvasGroup == null)
-        {
-            canvasGroup = gameObject.AddComponent<CanvasGroup>();
-        }
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
+        cachedParentBeforeDrag = transform.parent;
         parentAfterDrag = transform.parent;
         transform.SetParent(transform.root);
         transform.SetAsLastSibling();
@@ -54,6 +53,15 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             // Lerp to center of new parent, whether it's a new slot or the original slot
             transform.DOLocalMove(Vector3.zero, 0.3f).SetEase(Ease.OutQuad);
             lerpToParent = false; // slot handler sets lerpParentToTrue if it needs to lerp on the latest drop
+        }
+        if(cachedParentBeforeDrag != parentAfterDrag)
+        {
+            // notify the old slot that an item has left it
+            SlotHandler oldSlot = cachedParentBeforeDrag.GetComponent<SlotHandler>();
+            if(oldSlot != null)
+            {
+                oldSlot.ItemRemovedFromSlot();
+            }
         }
         canvasGroup.blocksRaycasts = true;
     }
