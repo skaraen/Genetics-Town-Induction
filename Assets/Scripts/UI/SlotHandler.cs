@@ -1,3 +1,4 @@
+using UnityEditor.EditorTools;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -9,6 +10,8 @@ public class SlotHandler : MonoBehaviour, IDropHandler
     [Tooltip("If provided, spawns a copy of respawnItemOnDragOut if respawnItemOnDragOut is dragged out of this slot onto a different slot")]
     [SerializeField] private GameObject respawnItemOnDragOut;
     [SerializeField] private bool acceptItems = true;
+    [Tooltip("If true, dropping an item into this slot will destroy an existing item in the slot. Will NOT work with respawnItemOnDragOut")]
+    [SerializeField] private bool replaceItems = false;
     [Tooltip("If true, items dropped into this slot will smoothly lerp to center position")]
     [SerializeField] public bool lerpItemsToCenter = true;
     [Tooltip("If true, items that are dropped outside of any slot will be destroyed")]
@@ -16,7 +19,10 @@ public class SlotHandler : MonoBehaviour, IDropHandler
     public void OnDrop(PointerEventData eventData)
     {
         if(!acceptItems) return;
-        if (transform.childCount == 0)
+        if(replaceItems && transform.childCount > 0){
+            DestroyImmediate(transform.GetChild(0).gameObject);
+        }
+        if (transform.childCount == 0 || replaceItems)
         {
             GameObject dropped = eventData.pointerDrag;
             DraggableItem dItem = dropped.GetComponent<DraggableItem>();

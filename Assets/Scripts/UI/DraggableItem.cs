@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -12,9 +13,18 @@ using DG.Tweening;
 [RequireComponent(typeof(CanvasGroup))]
 public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
+    // Static registry of all DraggableItems in the scene
+    // by turning of all draggable item raycasts when one is dragged,
+    // this allows you to drag over other draggable items that are in their own slots
+    // and have their slots register the drop, for slot replacement,
+    // rather than those draggable items blocking the raycast to the slot below them
+    private static List<DraggableItem> allItems = new List<DraggableItem>();
+    
     [HideInInspector] public SlotHandler slotAfterDrag; // the (possibly new) slot to place this item in after dragging
     private SlotHandler cachedSlotBeforeDrag; // the slot the item was in before the drag began
-    [HideInInspector] public char compType;
+    
+    [Tooltip("Character type identifier for this draggable item (e.g., DNA nucleotide letter A, T, G, or C)")]
+    public char compType;
     private Canvas canvas;
     // make a canvas group for this draggable item so that we can disable raycast blocking while dragging
     // otherwise the draggableItem may block the slothandler onEndDrag from being called    
@@ -24,6 +34,15 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         canvas = transform.GetComponentInParent<Canvas>().rootCanvas;
         canvasGroup = GetComponent<CanvasGroup>();
+        
+        // Register this item in the global list
+        allItems.Add(this);
+    }
+    
+    void OnDestroy()
+    {
+        // Unregister when destroyed
+        allItems.Remove(this);
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
@@ -31,7 +50,15 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         slotAfterDrag = cachedSlotBeforeDrag;
         transform.SetParent(transform.root);
         transform.SetAsLastSibling();
-        canvasGroup.blocksRaycasts = false;
+        
+        // Disable raycast blocking for ALL draggable items when any item starts dragging
+        foreach (var item in allItems)
+        {
+            if (item != null && item.canvasGroup != null)
+            {
+                item.canvasGroup.blocksRaycasts = false;
+            }
+        }
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -66,6 +93,14 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             // notify the old slot that an item has left it
             cachedSlotBeforeDrag.ItemRemovedFromSlot();
         }
-        canvasGroup.blocksRaycasts = true;
+        
+        // Re-enable raycast blocking for ALL draggable items when drag ends
+        foreach (var item in allItems)
+        {
+            if (item != null && item.canvasGroup != null)
+            {
+                item.canvasGroup.blocksRaycasts = true;
+            }
+        }
     }
 }

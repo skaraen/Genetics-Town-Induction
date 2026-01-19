@@ -88,3 +88,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b94aaa6ca93642b8895ad20d42c107b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SlotHandler
+  respawnItemOnDragOut: {fileID: 0}
+  acceptItems: 1
+  replaceItems: 1
+  lerpItemsToCenter: 1
+  destroyItemOnFailedDrop: 0
