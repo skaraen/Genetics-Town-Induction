@@ -48,6 +48,18 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public void OnEndDrag(PointerEventData eventData)
     {
         transform.SetParent(parentAfterDrag);
+        // if the item was returned to its original slot
+        if(cachedParentBeforeDrag == transform.parent){
+            SlotHandler slot = transform.parent.GetComponent<SlotHandler>();
+            if(slot.destroyItemOnFailedDrop)
+            {
+                Destroy(gameObject);
+                return;
+            }else{
+                print("Returned to original slot");
+            }
+        }
+
         if(transform.parent.GetComponent<SlotHandler>().lerpItemsToCenter)
         {
             // Lerp to center of new parent, whether it's a new slot or the original slot

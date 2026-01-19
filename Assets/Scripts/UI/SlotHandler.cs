@@ -11,7 +11,8 @@ public class SlotHandler : MonoBehaviour, IDropHandler, IPointerClickHandler
     [SerializeField] private bool acceptItems = true;
     [Tooltip("If true, items dropped into this slot will smoothly lerp to center position")]
     [SerializeField] public bool lerpItemsToCenter = true;
-    
+    [Tooltip("If true, items that are dropped outside of any slot will be destroyed")]
+    [SerializeField] public bool destroyItemOnFailedDrop = false;
     public void OnDrop(PointerEventData eventData)
     {
         Debug.Log($"[SlotHandler] OnDrop called on {gameObject.name}");
@@ -33,6 +34,7 @@ public class SlotHandler : MonoBehaviour, IDropHandler, IPointerClickHandler
         if(respawnItemOnDragOut != null && respawnItemOnDragOut.transform.parent != transform)
         {
             GameObject newItem = Instantiate(respawnItemOnDragOut, transform);
+            respawnItemOnDragOut = newItem;
             CanvasGroup group = newItem.GetComponentInChildren<CanvasGroup>();
             // make sure raycast blocking is re-enabled on the new item
             if (group != null)
