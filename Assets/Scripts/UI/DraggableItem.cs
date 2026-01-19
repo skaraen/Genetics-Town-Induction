@@ -1,30 +1,39 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using DG.Tweening;
 
 /// <summary>
 /// Add to a UI element to make it draggable. To use:
 /// - add dragable item component to the item
 /// - Add a slothandler to the place you want to drop it in
 /// </summary>
+[RequireComponent(typeof(Image))]
 public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [HideInInspector] public Transform parentAfterDrag;
     [HideInInspector] public char compType;
+    [HideInInspector] public bool lerpToParent = false; // flag triggered by slots to lerp back to parent on end drag
     private Canvas canvas;
-    private Image image;
+    // make a canvas group for this draggable item so that we can disable raycast blocking while dragging
+    // otherwise the draggableItem may block the slothandler onEndDrag from being called    
+    private CanvasGroup canvasGroup;
 
     void Awake()
     {
         canvas = transform.GetComponentInParent<Canvas>().rootCanvas;
-        image = transform.GetComponent<Image>();
+        canvasGroup = GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+        {
+            canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        }
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
         parentAfterDrag = transform.parent;
         transform.SetParent(transform.root);
         transform.SetAsLastSibling();
-        image.raycastTarget = false;
+        canvasGroup.blocksRaycasts = false;
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -39,8 +48,13 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        // If dropped in a valid slot, the SlotHandler will have updated parentAfterDrag to the slot
         transform.SetParent(parentAfterDrag);
-        image.raycastTarget = true;
+        if(transform.parent.GetComponent<SlotHandler>().lerpItemsToCenter)
+        {
+            // Lerp to center of new parent, whether it's a new slot or the original slot
+            transform.DOLocalMove(Vector3.zero, 0.3f).SetEase(Ease.OutQuad);
+            lerpToParent = false; // slot handler sets lerpParentToTrue if it needs to lerp on the latest drop
+        }
+        canvasGroup.blocksRaycasts = true;
     }
 }
