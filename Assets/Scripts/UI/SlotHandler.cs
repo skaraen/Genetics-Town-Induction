@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// Add this to a UI element to make it a drop target for DraggableItems
 /// </summary>
-public class SlotHandler : MonoBehaviour, IDropHandler, IPointerClickHandler
+public class SlotHandler : MonoBehaviour, IDropHandler
 {
     [Tooltip("If provided, spawns a copy of respawnItemOnDragOut if respawnItemOnDragOut is dragged out of this slot onto a different slot")]
     [SerializeField] private GameObject respawnItemOnDragOut;
@@ -15,13 +15,12 @@ public class SlotHandler : MonoBehaviour, IDropHandler, IPointerClickHandler
     [SerializeField] public bool destroyItemOnFailedDrop = false;
     public void OnDrop(PointerEventData eventData)
     {
-        Debug.Log($"[SlotHandler] OnDrop called on {gameObject.name}");
         if(!acceptItems) return;
         if (transform.childCount == 0)
         {
             GameObject dropped = eventData.pointerDrag;
             DraggableItem dItem = dropped.GetComponent<DraggableItem>();
-            dItem.parentAfterDrag = transform;
+            dItem.slotAfterDrag = this;
         }
     }
 
@@ -47,13 +46,5 @@ public class SlotHandler : MonoBehaviour, IDropHandler, IPointerClickHandler
                 newItem.transform.localPosition = Vector3.zero;
             }
         }
-    }
-
-    /// <summary>
-    /// Debug method to check if raycasts are reaching this slot
-    /// </summary>
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        Debug.Log($"item clicked: {gameObject.name}, children: {transform.childCount}");
     }
 }

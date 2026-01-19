@@ -12,10 +12,9 @@ using DG.Tweening;
 [RequireComponent(typeof(CanvasGroup))]
 public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    [HideInInspector] public Transform parentAfterDrag;
-    private Transform cachedParentBeforeDrag;
+    [HideInInspector] public SlotHandler slotAfterDrag; // the (possibly new) slot to place this item in after dragging
+    private SlotHandler cachedSlotBeforeDrag; // the slot the item was in before the drag began
     [HideInInspector] public char compType;
-    [HideInInspector] public bool lerpToParent = false; // flag triggered by slots to lerp back to parent on end drag
     private Canvas canvas;
     // make a canvas group for this draggable item so that we can disable raycast blocking while dragging
     // otherwise the draggableItem may block the slothandler onEndDrag from being called    
@@ -28,8 +27,8 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
-        cachedParentBeforeDrag = transform.parent;
-        parentAfterDrag = transform.parent;
+        cachedSlotBeforeDrag = transform.parent.GetComponent<SlotHandler>();
+        slotAfterDrag = cachedSlotBeforeDrag;
         transform.SetParent(transform.root);
         transform.SetAsLastSibling();
         canvasGroup.blocksRaycasts = false;
@@ -47,33 +46,25 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        transform.SetParent(parentAfterDrag);
-        // if the item was returned to its original slot
-        if(cachedParentBeforeDrag == transform.parent){
-            SlotHandler slot = transform.parent.GetComponent<SlotHandler>();
-            if(slot.destroyItemOnFailedDrop)
+        transform.SetParent(slotAfterDrag.transform);
+        // if the item was returned to its original slot, optionally destroy it
+        if(cachedSlotBeforeDrag.transform == transform.parent){
+            if(slotAfterDrag.destroyItemOnFailedDrop)
             {
                 Destroy(gameObject);
                 return;
-            }else{
-                print("Returned to original slot");
             }
         }
 
-        if(transform.parent.GetComponent<SlotHandler>().lerpItemsToCenter)
+        if(slotAfterDrag.lerpItemsToCenter)
         {
             // Lerp to center of new parent, whether it's a new slot or the original slot
             transform.DOLocalMove(Vector3.zero, 0.3f).SetEase(Ease.OutQuad);
-            lerpToParent = false; // slot handler sets lerpParentToTrue if it needs to lerp on the latest drop
         }
-        if(cachedParentBeforeDrag != parentAfterDrag)
+        if(cachedSlotBeforeDrag != slotAfterDrag)
         {
             // notify the old slot that an item has left it
-            SlotHandler oldSlot = cachedParentBeforeDrag.GetComponent<SlotHandler>();
-            if(oldSlot != null)
-            {
-                oldSlot.ItemRemovedFromSlot();
-            }
+            cachedSlotBeforeDrag.ItemRemovedFromSlot();
         }
         canvasGroup.blocksRaycasts = true;
     }
