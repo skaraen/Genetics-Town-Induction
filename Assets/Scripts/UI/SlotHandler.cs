@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using UnityEditor.EditorTools;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 /// <summary>
@@ -16,11 +18,13 @@ public class SlotHandler : MonoBehaviour, IDropHandler
     [SerializeField] public bool lerpItemsToCenter = true;
     [Tooltip("If true, items that are dropped outside of any slot will be destroyed")]
     [SerializeField] public bool destroyItemOnFailedDrop = false;
+    [Tooltip("Called whenever an item is dropped into or removed from this slot")]
+    [SerializeField] public List<UnityEvent> callOnStateChange;
     public void OnDrop(PointerEventData eventData)
     {
         if(!acceptItems) return;
         if(replaceItems && transform.childCount > 0){
-            DestroyImmediate(transform.GetChild(0).gameObject);
+            Destroy(transform.GetChild(0).gameObject);
         }
         if (transform.childCount == 0 || replaceItems)
         {
@@ -28,6 +32,8 @@ public class SlotHandler : MonoBehaviour, IDropHandler
             DraggableItem dItem = dropped.GetComponent<DraggableItem>();
             dItem.slotAfterDrag = this;
         }
+        callOnStateChange.ForEach(e => e.Invoke());
+        print("Item dropped into slot");
     }
 
     /// <summary>
@@ -35,6 +41,7 @@ public class SlotHandler : MonoBehaviour, IDropHandler
     /// </summary>
     public void ItemRemovedFromSlot()
     {
+        callOnStateChange.ForEach(e => e.Invoke());
         // if the child has changed, optionally respawn a new one
         if(respawnItemOnDragOut != null && respawnItemOnDragOut.transform.parent != transform)
         {

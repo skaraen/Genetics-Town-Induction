@@ -19,6 +19,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     // and have their slots register the drop, for slot replacement,
     // rather than those draggable items blocking the raycast to the slot below them
     private static List<DraggableItem> allItems = new List<DraggableItem>();
+    private List<DraggableItem> ItemsDisabledDuringDrag = new List<DraggableItem>();
     
     [HideInInspector] public SlotHandler slotAfterDrag; // the (possibly new) slot to place this item in after dragging
     private SlotHandler cachedSlotBeforeDrag; // the slot the item was in before the drag began
@@ -41,6 +42,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     
     void OnDestroy()
     {
+        ReenabledDisabledItems();
         // Unregister when destroyed
         allItems.Remove(this);
     }
@@ -56,9 +58,26 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             if (item != null && item.canvasGroup != null)
             {
-                item.canvasGroup.blocksRaycasts = false;
+                if(item.canvasGroup.blocksRaycasts)
+                {
+                    ItemsDisabledDuringDrag.Add(item);
+                    item.canvasGroup.blocksRaycasts = false;
+                }
             }
         }
+    }
+
+    private void ReenabledDisabledItems()
+    {
+        // Re-enable raycast blocking only for the items that were disabled during this drag
+        foreach (var item in ItemsDisabledDuringDrag)
+        {
+            if (item != null && item.canvasGroup != null)
+            {
+                item.canvasGroup.blocksRaycasts = true;
+            }
+        }
+        ItemsDisabledDuringDrag.Clear();
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -95,12 +114,9 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
         
         // Re-enable raycast blocking for ALL draggable items when drag ends
-        foreach (var item in allItems)
-        {
-            if (item != null && item.canvasGroup != null)
-            {
-                item.canvasGroup.blocksRaycasts = true;
-            }
-        }
+        ReenabledDisabledItems();
     }
+
+    
+
 }
