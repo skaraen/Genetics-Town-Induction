@@ -90,31 +90,38 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
     }
 
+    /// <summary>
+    /// On drag here is called after the slot's OnDrop; As a result, do most of both the dragging logic and the slot logic here
+    /// </summary>
+    /// <param name="eventData"></param>
     public void OnEndDrag(PointerEventData eventData)
     {
+        bool destroyed = false;
         transform.SetParent(slotAfterDrag.transform);
         // if the item was returned to its original slot, optionally destroy it
-        if(cachedSlotBeforeDrag.transform == transform.parent){
-            if(slotAfterDrag.destroyItemOnFailedDrop)
-            {
-                Destroy(gameObject);
-                return;
-            }
+        if(cachedSlotBeforeDrag.transform == transform.parent && slotAfterDrag.destroyItemOnFailedDrop){
+            // set parent to root so that external logic can see that its no longer a child
+            // otherwise, destroy takes a frame and it will still appear as a child of the slot for that frame
+            transform.SetParent(transform.root); 
+            Destroy(gameObject);
+            // Important: logic below is called even if gameobject is destroyed
+            destroyed = true;
         }
 
-        if(slotAfterDrag.lerpItemsToCenter)
-        {
-            // Lerp to center of new parent, whether it's a new slot or the original slot
-            transform.DOLocalMove(Vector3.zero, 0.3f).SetEase(Ease.OutQuad);
-        }
+        // Re-enable raycast blocking for ALL draggable items when drag ends
+        ReenabledDisabledItems();
         if(cachedSlotBeforeDrag != slotAfterDrag)
         {
             // notify the old slot that an item has left it
             cachedSlotBeforeDrag.ItemRemovedFromSlot();
         }
         
-        // Re-enable raycast blocking for ALL draggable items when drag ends
-        ReenabledDisabledItems();
+        slotAfterDrag.callOnStateChange.ForEach(e => e.Invoke());
+        if(slotAfterDrag.lerpItemsToCenter && !destroyed)
+        {
+            // Lerp to center of new parent, whether it's a new slot or the original slot
+            transform.DOLocalMove(Vector3.zero, 0.3f).SetEase(Ease.OutQuad);
+        }
     }
 
     

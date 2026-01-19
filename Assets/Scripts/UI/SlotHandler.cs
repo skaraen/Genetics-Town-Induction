@@ -32,8 +32,6 @@ public class SlotHandler : MonoBehaviour, IDropHandler
             DraggableItem dItem = dropped.GetComponent<DraggableItem>();
             dItem.slotAfterDrag = this;
         }
-        callOnStateChange.ForEach(e => e.Invoke());
-        print("Item dropped into slot");
     }
 
     /// <summary>
