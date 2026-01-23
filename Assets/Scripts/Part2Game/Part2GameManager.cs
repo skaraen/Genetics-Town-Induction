@@ -2,11 +2,8 @@ using System;
 using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
-using Unity.Properties;
-using UnityEditor.EditorTools;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Video;
 
 [Serializable]
 public class CharColorTuple{
@@ -35,6 +32,23 @@ public class Part2GameManager : MonoBehaviour
     private string currentCorrectSequence; // the correct sequence for the currently selected trait
     [Tooltip("Submit button to verify the entered sequence")]
     [SerializeField] private GameObject submitButton;
+
+    [Header("Dialogue")]
+    [Tooltip("Gregor narrator instance in the scene")]
+    [SerializeField] private GameObject narrator;
+    [Tooltip("DialogueBox instance containing DialogueController")]
+    [SerializeField] private GameObject dialogueBox;
+
+    [Header("Avatar Display")]
+    [Tooltip("Transform where the avatar will be spawned")]
+    [SerializeField] private Transform avatarSpawnPoint;
+    [Tooltip("CanvasGroup for the game UI, fades in after dialogue ends")]
+    [SerializeField] private CanvasGroup gameUI;
+
+    private DialogueController dialogueController;
+    private Animator narratorAnimator;
+    private GameObject currentAvatar;
+    private int avatarId = 2; // TODO: Get from player data or scene context
 
     /// <summary>
     /// Sets up the game manager for a specific sequence, setting the sequence name, and
@@ -124,8 +138,6 @@ public class Part2GameManager : MonoBehaviour
         }
         
         void InitilizeTraitButtons(){
-            // Extract avatarprofile data - get profile by ID (e.g., jellyfish = 1)
-            int avatarId = 2; // TODO: Get this from player data or scene context
             List<(string traitName, string sequence)> traitSequences = GetTraitSequencesFromProfile(avatarId);
 
             // Loop through each trait and create a toggle for it
@@ -192,6 +204,100 @@ public class Part2GameManager : MonoBehaviour
     void Start()
     {
         SetupGameScreen();
+        HideGameUI();
+        InitializeDialogue();
+        TriggerIntroDialogue();
+    }
+
+    /// <summary>
+    /// Hides the game UI at start so only Gregor's intro dialogue is visible.
+    /// </summary>
+    private void HideGameUI()
+    {
+        if (gameUI == null) return;
+        gameUI.alpha = 0f;
+        gameUI.gameObject.SetActive(false);
+    }
+
+    void OnDisable()
+    {
+        if (dialogueController != null)
+            dialogueController.OnDialogueEnded -= HandleDialogueEnded;
+    }
+
+    /// <summary>
+    /// Sets up dialogue system references and subscribes to dialogue end callback.
+    /// </summary>
+    private void InitializeDialogue()
+    {
+        if (dialogueBox != null)
+        {
+            dialogueController = dialogueBox.GetComponent<DialogueController>();
+            dialogueController.OnDialogueEnded += HandleDialogueEnded;
+        }
+        if (narrator != null)
+        {
+            narratorAnimator = narrator.GetComponent<Animator>();
+        }
+    }
+
+    /// <summary>
+    /// Starts Gregor's intro dialogue explaining how to play the DNA sequence minigame.
+    /// </summary>
+    private void TriggerIntroDialogue()
+    {
+        if (narrator == null || dialogueController == null) return;
+
+        narrator.GetComponent<ReactionChooser>().SetReaction("smile");
+        narratorAnimator.SetTrigger("EntryTrigger");
+        dialogueController.StartSequence("narrator-part2-intro");
+    }
+
+    /// <summary>
+    /// Callback when Gregor finishes speaking; triggers his exit and reveals the game UI.
+    /// </summary>
+    private void HandleDialogueEnded()
+    {
+        if (narratorAnimator != null)
+            narratorAnimator.SetTrigger("ExitTrigger");
+
+        ShowGameUI();
+    }
+
+    /// <summary>
+    /// Spawns the avatar and fades in the game UI after Gregor's intro dialogue.
+    /// </summary>
+    private void ShowGameUI()
+    {
+        if (gameUI == null) return;
+
+        SpawnAvatarDisplay();
+        gameUI.gameObject.SetActive(true);
+        gameUI.DOFade(1f, 1f);
+    }
+
+    /// <summary>
+    /// Loads and instantiates the avatar prefab at the spawn point so that its traits can be animated once 
+    /// the player completes the DNA sequences.
+    /// </summary>
+    private void SpawnAvatarDisplay()
+    {
+        if (avatarSpawnPoint == null) return;
+
+        string path = AvatarProfileManager.Instance.GetPathById(avatarId);
+        GameObject prefab = Resources.Load<GameObject>("Avatars/" + path);
+
+        if (prefab == null)
+        {
+            Debug.LogError($"Avatar prefab not found at: Avatars/{path}");
+            return;
+        }
+
+        if (currentAvatar != null)
+            Destroy(currentAvatar);
+
+        currentAvatar = Instantiate(prefab, avatarSpawnPoint.position, prefab.transform.rotation);
+        currentAvatar.transform.SetParent(avatarSpawnPoint);
     }
 
     /// <summary>
