@@ -57,13 +57,13 @@ public class Part2GameManager : MonoBehaviour
             
             // Set the color cycler to cycle through the sequence colors
             // flash white in between cycles for 2 seconds
-            colorCycler.SetColorSequence(sequenceColors, 1f, 3f, Color.white);
+            colorCycler.SetColorSequence(colors: sequenceColors, periodToDisplayColor: 1f, periodInBetween: 1, inBetweenColor: Color.black, waitBeforeRestartingCycle: 3f, waitingToRestartColor: Color.white);
         }
 
         // Store the correct sequence for verification
         this.currentCorrectSequence = correctSequence;
         SetupColorCycler();
-        sequenceNameText.text = $"{traitName}, {correctSequence}"; // display trait name to player
+        sequenceNameText.text = $"{traitName}"; // display trait name to player
     }
 
     /// <summary>
@@ -125,7 +125,7 @@ public class Part2GameManager : MonoBehaviour
         
         void InitilizeTraitButtons(){
             // Extract avatarprofile data - get profile by ID (e.g., jellyfish = 1)
-            int avatarId = 1; // TODO: Get this from player data or scene context
+            int avatarId = 2; // TODO: Get this from player data or scene context
             List<(string traitName, string sequence)> traitSequences = GetTraitSequencesFromProfile(avatarId);
 
             // Loop through each trait and create a toggle for it
@@ -171,15 +171,19 @@ public class Part2GameManager : MonoBehaviour
     /// <param name="sequence">The DNA sequence associated with the trait</param>
     /// </summary>
     public void SelectTraitButtonPressed(Toggle selectedToggle, string traitName, string sequence){
-        // Turn off the previously selected toggle if there is one
+        // Restore the previously selected toggle if there is one
         if(currentlySelectedTraitToggle != null && currentlySelectedTraitToggle != selectedToggle)
         {
+            currentlySelectedTraitToggle.interactable = true;
             currentlySelectedTraitToggle.isOn = false;
         }
-        
+
+        // Lock the newly selected toggle (can only deselect by selecting another)
+        selectedToggle.interactable = false;
+
         // Store the newly selected toggle
         currentlySelectedTraitToggle = selectedToggle;
-        
+
         // Set up the sequence for this trait
         SetupSequence(traitName, sequence);
     }
