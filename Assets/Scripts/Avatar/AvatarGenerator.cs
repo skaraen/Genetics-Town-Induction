@@ -152,7 +152,10 @@ public class AvatarGenerator : NetworkBehaviour
 
     private void RotateNeedle(int i)
     {
-        float r = (sliders[i].value - sliders[i].minValue) / (sliders[i].maxValue - sliders[i].minValue);
+        float range = sliders[i].maxValue - sliders[i].minValue;
+        if (Mathf.Approximately(range, 0f)) return;
+
+        float r = (sliders[i].value - sliders[i].minValue) / range;
         float deg = r * 180;
 
         needles[i].transform.localRotation = Quaternion.Euler(0, 0, -deg);
