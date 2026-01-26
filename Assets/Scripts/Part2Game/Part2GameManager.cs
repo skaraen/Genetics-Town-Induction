@@ -48,7 +48,7 @@ public class Part2GameManager : MonoBehaviour
     private DialogueController dialogueController;
     private Animator narratorAnimator;
     private GameObject currentAvatar;
-    private int avatarId;
+    private PlayerCustoms targetCustoms;
 
     /// <summary>
     /// Sets up the game manager for a specific sequence, setting the sequence name, and
@@ -138,7 +138,7 @@ public class Part2GameManager : MonoBehaviour
         }
         
         void InitilizeTraitButtons(){
-            List<(string traitName, string sequence)> traitSequences = GetTraitSequencesFromProfile(avatarId);
+            List<(string traitName, string sequence)> traitSequences = GetTraitSequencesFromProfile(targetCustoms.avatarType);
 
             // Loop through each trait and create a toggle for it
             foreach(var trait in traitSequences)
@@ -203,7 +203,7 @@ public class Part2GameManager : MonoBehaviour
 
     void Start()
     {
-        avatarId = Part2DataHolder.TargetAvatarId;
+        targetCustoms = Part2DataHolder.TargetCustoms;
         SetupGameScreen();
         HideGameUI();
         InitializeDialogue();
@@ -278,27 +278,17 @@ public class Part2GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Loads and instantiates the avatar prefab at the spawn point so that its traits can be animated once 
-    /// the player completes the DNA sequences.
+    /// Loads and instantiates the fully customized avatar at the spawn point using the shared
+    /// AvatarLoader utility, so that its traits can be animated once the player completes the DNA sequences.
     /// </summary>
     private void SpawnAvatarDisplay()
     {
         if (avatarSpawnPoint == null) return;
 
-        string path = AvatarProfileManager.Instance.GetPathById(avatarId);
-        GameObject prefab = Resources.Load<GameObject>("Avatars/" + path);
-
-        if (prefab == null)
-        {
-            Debug.LogError($"Avatar prefab not found at: Avatars/{path}");
-            return;
-        }
-
         if (currentAvatar != null)
             Destroy(currentAvatar);
 
-        currentAvatar = Instantiate(prefab, avatarSpawnPoint.position, prefab.transform.rotation);
-        currentAvatar.transform.SetParent(avatarSpawnPoint);
+        currentAvatar = AvatarLoader.Load(targetCustoms, avatarSpawnPoint.position, avatarSpawnPoint.rotation, avatarSpawnPoint);
     }
 
     /// <summary>

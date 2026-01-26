@@ -5,7 +5,9 @@
 public static class Part2DataHolder
 {
     /// <summary>
-    /// The avatar profile ID of the other player whose DNA the local player will edit.
+    /// Full visual customization of the other player whose DNA the local player will edit.
+    /// Contains avatar type, part toggles, and colors so the avatar renders with the same 
+    /// customized effect that the other player has selected in the title screen.
     /// </summary>
-    public static int TargetAvatarId;
+    public static PlayerCustoms TargetCustoms;
 }

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using Unity.Cinemachine;
 using Unity.Netcode;
@@ -57,26 +56,15 @@ public class PlayerVisual : NetworkBehaviour
 
     private void OnAvatarTypeChanged(PlayerCustoms prev, PlayerCustoms next) => LoadAvatar(next);
 
+    /// <summary>
+    /// Loads and customizes the avatar using the shared AvatarLoader utility,
+    /// then performs PlayerVisual-specific setup (renderer caching for infection effect, name tag).
+    /// </summary>
     private void LoadAvatar(PlayerCustoms customs)
     {
-        string path = AvatarProfileManager.Instance.GetPathById(customs.avatarType);
-        GameObject prefab = Resources.Load<GameObject>("Avatars/" + path);
-        Quaternion rotation = prefab.transform.rotation;
-        rotation.y = 180;
-        currentAvatar = Instantiate(prefab, transform.position, rotation, transform);
+        currentAvatar = AvatarLoader.Load(customs, transform.position, parent: transform);
 
-        int activeHeadIndex = customs.subSeq0Enabled ? 1 : 0;
-        int activeTorsoIndex = customs.subSeq1Enabled ? 1 : 0;
-        ToggleParts("head", activeHeadIndex);
-        ToggleParts("torso", activeTorsoIndex);
-
-        string[] targets = AvatarProfileManager.Instance.GetColorTargetsById(customs.avatarType);
         renderers = currentAvatar.GetComponentsInChildren<Renderer>(true);
-        Material headMat = renderers.FirstOrDefault(r => r.gameObject.name == targets[0]).material;
-        Material torsoMat = renderers.FirstOrDefault(r => r.gameObject.name == targets[1]).material;
-
-        SetMaterialColor(customs.avatarType, headMat, customs.color0);
-        SetMaterialColor(customs.avatarType, torsoMat, customs.color1);
 
         if (!IsOwner)
             playerTag.text = customs.name.ToString();
@@ -84,37 +72,6 @@ public class PlayerVisual : NetworkBehaviour
             playerTag.text = "";
 
         InitDefaults();
-    }
-
-    void SetMaterialColor(int avatarType, Material mat, Color color)
-    {
-        string propertyName = (avatarType == 2) ? "_BaseColor" : "_EmissionColor";
-        if (mat.HasProperty(propertyName))
-        {
-            mat.SetColor(propertyName, color);
-        }
-    }
-
-    void TogglePart(string partName, bool enable)
-    {
-        Transform part = currentAvatar.transform.Find(partName);
-        if (part != null)
-        {
-            Renderer[] renderers = part.GetComponentsInChildren<Renderer>();
-            foreach (Renderer renderer in renderers)
-            {
-                renderer.enabled = enable;
-            }
-        }
-    }
-
-    void ToggleParts(string baseName, int activeIndex)
-    {
-        for (int i = 0; i < 2; i++)
-        {
-            string partName = $"{baseName}{i + 1}";
-            TogglePart(partName, i == activeIndex);
-        }
     }
 
     private void OnInfectionToggle(bool prev, bool next) => ToggleEffect(next);

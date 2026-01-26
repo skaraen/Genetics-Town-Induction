@@ -34,7 +34,7 @@ public class PlayerUI : NetworkBehaviour
     FacingTarget facingTarget = FacingTarget.Camera;
 
     bool requestReceived = false;
-    int pendingTargetAvatarId; // possible avatar id of the other play
+    PlayerCustoms pendingTargetCustoms; // customs of the other player
     ClientRegistry registry;
 
     void Start()
@@ -131,7 +131,7 @@ public class PlayerUI : NetworkBehaviour
             else
             {
                 requestReceived = false;
-                Part2DataHolder.TargetAvatarId = pendingTargetAvatarId;
+                Part2DataHolder.TargetCustoms = pendingTargetCustoms;
                 AckOwnerServerRpc();
                 // PROBLEM: the scene is not additively loaded correctly, 
                 // you can see grass from the game in the background
@@ -204,14 +204,14 @@ public class PlayerUI : NetworkBehaviour
     }
 
     /// <summary>
-    /// Marks this UI as having a pending interaction request and stores the requester's avatar ID
-    /// so it can be forwarded to Part2DataHolder when accepted.
+    /// Marks this UI as having a pending interaction request and stores the requester's full
+    /// customization data so it can be forwarded to Part2DataHolder when accepted.
     /// </summary>
-    /// <param name="targetAvatarId">The avatar profile ID of the player who sent the request</param>
-    public void RequestInteraction(int targetAvatarId)
+    /// <param name="targetCustoms">The full visual customization of the player who sent the request</param>
+    public void RequestInteraction(PlayerCustoms targetCustoms)
     {
         requestReceived = true;
-        pendingTargetAvatarId = targetAvatarId;
+        pendingTargetCustoms = targetCustoms;
         descTmp.text = "wants to interact with you";
     }
 
@@ -220,11 +220,10 @@ public class PlayerUI : NetworkBehaviour
     {
         ulong senderId = rpcParams.Receive.SenderClientId;
 
-        int senderAvatarType = 0;
-        if (PlayerMetadataRegistry.Instance.TryGetCustoms(senderId, out PlayerCustoms senderData))
-            senderAvatarType = senderData.avatarType;
+        PlayerCustoms senderCustoms = default;
+        PlayerMetadataRegistry.Instance.TryGetCustoms(senderId, out senderCustoms);
 
-        NotifyOwnerClientRpc(senderId, senderAvatarType, new ClientRpcParams
+        NotifyOwnerClientRpc(senderId, senderCustoms, new ClientRpcParams
         {
             Send = new ClientRpcSendParams
             {
@@ -234,12 +233,12 @@ public class PlayerUI : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void NotifyOwnerClientRpc(ulong senderId, int senderAvatarType, ClientRpcParams clientRpcParams = default)
+    private void NotifyOwnerClientRpc(ulong senderId, PlayerCustoms senderCustoms, ClientRpcParams clientRpcParams = default)
     {
         Debug.Log($"Owner {OwnerClientId} received notification from Client {senderId}");
         GameObject targetPlayer = registry.FindPlayerByClientId(senderId);
 
-        targetPlayer.GetComponent<PlayerUI>().RequestInteraction(senderAvatarType);
+        targetPlayer.GetComponent<PlayerUI>().RequestInteraction(senderCustoms);
     }
     
     [ServerRpc(RequireOwnership = false)]
@@ -247,11 +246,10 @@ public class PlayerUI : NetworkBehaviour
     {
         ulong senderId = rpcParams.Receive.SenderClientId;
 
-        int senderAvatarType = 0;
-        if (PlayerMetadataRegistry.Instance.TryGetCustoms(senderId, out PlayerCustoms senderData))
-            senderAvatarType = senderData.avatarType;
+        PlayerCustoms senderCustoms = default;
+        PlayerMetadataRegistry.Instance.TryGetCustoms(senderId, out senderCustoms);
 
-        AckOwnerClientRpc(senderId, senderAvatarType, new ClientRpcParams
+        AckOwnerClientRpc(senderId, senderCustoms, new ClientRpcParams
         {
             Send = new ClientRpcSendParams
             {
@@ -261,10 +259,10 @@ public class PlayerUI : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void AckOwnerClientRpc(ulong senderId, int senderAvatarType, ClientRpcParams clientRpcParams = default)
+    private void AckOwnerClientRpc(ulong senderId, PlayerCustoms senderCustoms, ClientRpcParams clientRpcParams = default)
     {
         Debug.Log($"Owner {OwnerClientId} received acknowledgement from Client {senderId}");
-        Part2DataHolder.TargetAvatarId = senderAvatarType;
+        Part2DataHolder.TargetCustoms = senderCustoms;
         SceneManager.LoadScene("Part2Scene", LoadSceneMode.Additive);
     }
 }
