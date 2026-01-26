@@ -48,7 +48,7 @@ public class Part2GameManager : MonoBehaviour
     private DialogueController dialogueController;
     private Animator narratorAnimator;
     private GameObject currentAvatar;
-    private int avatarId = 2; // TODO: Get from player data or scene context
+    private int avatarId = 4; // TODO: Get from player data or scene context
 
     /// <summary>
     /// Sets up the game manager for a specific sequence, setting the sequence name, and
@@ -71,7 +71,7 @@ public class Part2GameManager : MonoBehaviour
             
             // Set the color cycler to cycle through the sequence colors
             // flash white in between cycles for 2 seconds
-            colorCycler.SetColorSequence(colors: sequenceColors, periodToDisplayColor: 1f, periodInBetween: 1, inBetweenColor: Color.black, waitBeforeRestartingCycle: 3f, waitingToRestartColor: Color.white);
+            colorCycler.SetColorSequence(colors: sequenceColors, periodToDisplayColor: 1f, periodInBetween: 1, inBetweenColor: new Color(0,0,0,0f), waitBeforeRestartingCycle: 3f, waitingToRestartColor: Color.white);
         }
 
         // Store the correct sequence for verification
