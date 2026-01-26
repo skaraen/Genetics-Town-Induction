@@ -48,7 +48,7 @@ public class Part2GameManager : MonoBehaviour
     private DialogueController dialogueController;
     private Animator narratorAnimator;
     private GameObject currentAvatar;
-    private int avatarId = 4; // TODO: Get from player data or scene context
+    private int avatarId;
 
     /// <summary>
     /// Sets up the game manager for a specific sequence, setting the sequence name, and
@@ -203,6 +203,7 @@ public class Part2GameManager : MonoBehaviour
 
     void Start()
     {
+        avatarId = Part2DataHolder.TargetAvatarId;
         SetupGameScreen();
         HideGameUI();
         InitializeDialogue();

@@ -17,7 +17,7 @@ public class ClientRegistry : MonoBehaviour
 
         foreach (Player p in players)
         {
-            ulong clientId = p.GetComponent<NetworkObject>().OwnerClientId;
+        ulong clientId = p.GetComponent<NetworkObject>().OwnerClientId;
             clientPlayers.Add(clientId, p.gameObject);
         }
 

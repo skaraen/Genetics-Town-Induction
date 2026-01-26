@@ -34,6 +34,7 @@ public class PlayerUI : NetworkBehaviour
     FacingTarget facingTarget = FacingTarget.Camera;
 
     bool requestReceived = false;
+    int pendingTargetAvatarId; // possible avatar id of the other play
     ClientRegistry registry;
 
     void Start()
@@ -119,18 +120,22 @@ public class PlayerUI : NetworkBehaviour
 
         interactBtn.onClick.AddListener(() =>
         {
+            // if you interact on another player
             if (!requestReceived)
             {
                 descTmp.text = "Waiting for response...";
                 interactBtn.enabled = false;
-
-                NotifyOwnerServerRpc();
+                NotifyOwnerServerRpc(); // notify the other player
             }
+            // If another player interacts on you
             else
             {
                 requestReceived = false;
+                Part2DataHolder.TargetAvatarId = pendingTargetAvatarId;
                 AckOwnerServerRpc();
-                SceneManager.LoadScene("MemoryGame");
+                // PROBLEM: the scene is not additively loaded correctly, 
+                // you can see grass from the game in the background
+                SceneManager.LoadScene("Part2Scene", LoadSceneMode.Additive);
             }
         });
 
@@ -198,9 +203,15 @@ public class PlayerUI : NetworkBehaviour
         }
     }
 
-    public void RequestInteraction()
+    /// <summary>
+    /// Marks this UI as having a pending interaction request and stores the requester's avatar ID
+    /// so it can be forwarded to Part2DataHolder when accepted.
+    /// </summary>
+    /// <param name="targetAvatarId">The avatar profile ID of the player who sent the request</param>
+    public void RequestInteraction(int targetAvatarId)
     {
         requestReceived = true;
+        pendingTargetAvatarId = targetAvatarId;
         descTmp.text = "wants to interact with you";
     }
 
@@ -209,7 +220,11 @@ public class PlayerUI : NetworkBehaviour
     {
         ulong senderId = rpcParams.Receive.SenderClientId;
 
-        NotifyOwnerClientRpc(senderId, new ClientRpcParams
+        int senderAvatarType = 0;
+        if (PlayerMetadataRegistry.Instance.TryGetCustoms(senderId, out PlayerCustoms senderData))
+            senderAvatarType = senderData.avatarType;
+
+        NotifyOwnerClientRpc(senderId, senderAvatarType, new ClientRpcParams
         {
             Send = new ClientRpcSendParams
             {
@@ -219,12 +234,12 @@ public class PlayerUI : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void NotifyOwnerClientRpc(ulong senderId, ClientRpcParams clientRpcParams = default)
+    private void NotifyOwnerClientRpc(ulong senderId, int senderAvatarType, ClientRpcParams clientRpcParams = default)
     {
         Debug.Log($"Owner {OwnerClientId} received notification from Client {senderId}");
         GameObject targetPlayer = registry.FindPlayerByClientId(senderId);
 
-        targetPlayer.GetComponent<PlayerUI>().RequestInteraction();
+        targetPlayer.GetComponent<PlayerUI>().RequestInteraction(senderAvatarType);
     }
     
     [ServerRpc(RequireOwnership = false)]
@@ -232,7 +247,11 @@ public class PlayerUI : NetworkBehaviour
     {
         ulong senderId = rpcParams.Receive.SenderClientId;
 
-        AckOwnerClientRpc(senderId, new ClientRpcParams
+        int senderAvatarType = 0;
+        if (PlayerMetadataRegistry.Instance.TryGetCustoms(senderId, out PlayerCustoms senderData))
+            senderAvatarType = senderData.avatarType;
+
+        AckOwnerClientRpc(senderId, senderAvatarType, new ClientRpcParams
         {
             Send = new ClientRpcSendParams
             {
@@ -242,9 +261,10 @@ public class PlayerUI : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void AckOwnerClientRpc(ulong senderId, ClientRpcParams clientRpcParams = default)
+    private void AckOwnerClientRpc(ulong senderId, int senderAvatarType, ClientRpcParams clientRpcParams = default)
     {
         Debug.Log($"Owner {OwnerClientId} received acknowledgement from Client {senderId}");
-        SceneManager.LoadScene("MemoryGame", LoadSceneMode.Additive);
+        Part2DataHolder.TargetAvatarId = senderAvatarType;
+        SceneManager.LoadScene("Part2Scene", LoadSceneMode.Additive);
     }
 }
