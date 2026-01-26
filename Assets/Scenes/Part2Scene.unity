@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 124946720}
   - component: {fileID: 124946722}
   - component: {fileID: 124946721}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: Subtitle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -332,7 +332,7 @@ GameObject:
   - component: {fileID: 271767316}
   - component: {fileID: 271767321}
   - component: {fileID: 271767320}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -526,7 +526,7 @@ Camera:
   m_Depth: 1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 951
+    m_Bits: 1025
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -726,6 +726,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DNASlot (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 2956951598307508764, guid: 99e3c38b2d7ed4a4694526d64ec5b6c5, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -747,7 +751,7 @@ GameObject:
   - component: {fileID: 397026339}
   - component: {fileID: 397026341}
   - component: {fileID: 397026342}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: GameplayPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -882,7 +886,7 @@ GameObject:
   - component: {fileID: 485798658}
   - component: {fileID: 485798657}
   - component: {fileID: 485798659}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: FlashingColorIndicator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -966,14 +970,42 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1175195859}
     m_Modifications:
+    - target: {fileID: 195865476309752292, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 439263836928592675, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 740751749422904695, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 1269092188379960631, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
       propertyPath: m_Name
       value: DialogueBox
+      objectReference: {fileID: 0}
+    - target: {fileID: 1269092188379960631, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3218514819226049667, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3528456467149881751, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4352788822806558984, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
       propertyPath: narrator
       value: 
       objectReference: {fileID: 754705733}
+    - target: {fileID: 4576539721639621587, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 5374736117822404488, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1076,7 +1108,7 @@ GameObject:
   - component: {fileID: 510097579}
   - component: {fileID: 510097580}
   - component: {fileID: 510097581}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: SequenceCircles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1178,7 +1210,7 @@ GameObject:
   - component: {fileID: 562331968}
   - component: {fileID: 562331970}
   - component: {fileID: 562331971}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: DNASpawners
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1253,7 +1285,7 @@ GameObject:
   - component: {fileID: 652067023}
   - component: {fileID: 652067025}
   - component: {fileID: 652067024}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1470,15 +1502,15 @@ PrefabInstance:
       objectReference: {fileID: 9100000, guid: 0afb61ba4d4f7413eac8c8d0ab9b6036, type: 2}
     - target: {fileID: 815722730502321310, guid: 5c31d698090e0413baf4b197adc954f0, type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 5c31d698090e0413baf4b197adc954f0, type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5001656100033668010, guid: 5c31d698090e0413baf4b197adc954f0, type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5575113701297423450, guid: 5c31d698090e0413baf4b197adc954f0, type: 3}
       propertyPath: m_Name
@@ -1486,7 +1518,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5575113701297423450, guid: 5c31d698090e0413baf4b197adc954f0, type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5575113701297423450, guid: 5c31d698090e0413baf4b197adc954f0, type: 3}
       propertyPath: m_IsActive
@@ -1494,11 +1526,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5698691869951175657, guid: 5c31d698090e0413baf4b197adc954f0, type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7172423991114828417, guid: 5c31d698090e0413baf4b197adc954f0, type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7382617305603161518, guid: 5c31d698090e0413baf4b197adc954f0, type: 3}
       propertyPath: m_LocalScale.x
@@ -1577,7 +1609,7 @@ GameObject:
   - component: {fileID: 757230740}
   - component: {fileID: 757230742}
   - component: {fileID: 757230741}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: GameplayArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1700,7 +1732,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 1024
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -1899,6 +1931,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DNASlot (6)
       objectReference: {fileID: 0}
+    - target: {fileID: 2956951598307508764, guid: 99e3c38b2d7ed4a4694526d64ec5b6c5, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2053,6 +2089,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DNASlot (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 2956951598307508764, guid: 99e3c38b2d7ed4a4694526d64ec5b6c5, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2074,7 +2114,7 @@ GameObject:
   - component: {fileID: 916994811}
   - component: {fileID: 916994813}
   - component: {fileID: 916994814}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: SelectTrait
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2315,7 +2355,7 @@ GameObject:
   m_Component:
   - component: {fileID: 976183487}
   - component: {fileID: 976183489}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: SelectTraitAndDisplayCharacterPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2361,7 +2401,7 @@ GameObject:
   - component: {fileID: 983261437}
   - component: {fileID: 983261439}
   - component: {fileID: 983261438}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: Title
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2638,7 +2678,7 @@ GameObject:
   - component: {fileID: 1165106879}
   - component: {fileID: 1165106878}
   - component: {fileID: 1165106877}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: SequenceName
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2796,7 +2836,7 @@ GameObject:
   - component: {fileID: 1175195858}
   - component: {fileID: 1175195857}
   - component: {fileID: 1175195856}
-  m_Layer: 8
+  m_Layer: 10
   m_Name: UICanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2985,6 +3025,18 @@ PrefabInstance:
     - target: {fileID: 2956951598307508764, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
       propertyPath: m_Name
       value: DNASpawnerSlot (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2956951598307508764, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4374755968773309922, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7184097570507256662, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3234,6 +3286,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DNASlot (8)
       objectReference: {fileID: 0}
+    - target: {fileID: 2956951598307508764, guid: 99e3c38b2d7ed4a4694526d64ec5b6c5, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3382,6 +3438,10 @@ PrefabInstance:
     - target: {fileID: 2956951598307508764, guid: 99e3c38b2d7ed4a4694526d64ec5b6c5, type: 3}
       propertyPath: m_Name
       value: DNASlot (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2956951598307508764, guid: 99e3c38b2d7ed4a4694526d64ec5b6c5, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3543,6 +3603,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DNASlot (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 2956951598307508764, guid: 99e3c38b2d7ed4a4694526d64ec5b6c5, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3598,7 +3662,7 @@ GameObject:
   - component: {fileID: 1741272793}
   - component: {fileID: 1741272794}
   - component: {fileID: 1741272795}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: DiscoverSequenceScreen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3684,7 +3748,7 @@ GameObject:
   - component: {fileID: 1848743464}
   - component: {fileID: 1848743466}
   - component: {fileID: 1848743467}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: FlashingIndicatorAndDraggablePanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3752,7 +3816,7 @@ GameObject:
   - component: {fileID: 1865977748}
   - component: {fileID: 1865977747}
   - component: {fileID: 1865977750}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: SubmitSequenceBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3993,6 +4057,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: DNASpawnerSlot (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 2956951598307508764, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4374755968773309922, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7184097570507256662, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4103,6 +4179,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: DNASpawnerSlot (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 2956951598307508764, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4374755968773309922, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7184097570507256662, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4208,6 +4296,18 @@ PrefabInstance:
     - target: {fileID: 2956951598307508764, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
       propertyPath: m_Name
       value: DNASpawnerSlot
+      objectReference: {fileID: 0}
+    - target: {fileID: 2956951598307508764, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4374755968773309922, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7184097570507256662, guid: 9d68913e4294c4d2a9d3a03cb5a04e7b, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4346,6 +4446,10 @@ PrefabInstance:
     - target: {fileID: 2956951598307508764, guid: 99e3c38b2d7ed4a4694526d64ec5b6c5, type: 3}
       propertyPath: m_Name
       value: DNASlot (7)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2956951598307508764, guid: 99e3c38b2d7ed4a4694526d64ec5b6c5, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4496,6 +4600,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DNASlot (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 2956951598307508764, guid: 99e3c38b2d7ed4a4694526d64ec5b6c5, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4517,7 +4625,7 @@ GameObject:
   - component: {fileID: 2057832947}
   - component: {fileID: 2057832950}
   - component: {fileID: 2057832948}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: HorizontalLayoutGroup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4717,6 +4825,10 @@ PrefabInstance:
     - target: {fileID: 2956951598307508764, guid: 99e3c38b2d7ed4a4694526d64ec5b6c5, type: 3}
       propertyPath: m_Name
       value: DNASlot
+      objectReference: {fileID: 0}
+    - target: {fileID: 2956951598307508764, guid: 99e3c38b2d7ed4a4694526d64ec5b6c5, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
