@@ -51,6 +51,18 @@ public class Part2GameManager : MonoBehaviour
     private PlayerCustoms targetCustoms;
 
     /// <summary>
+    /// Clears the current sequence selection, resetting the sequence name to empty
+    /// and stopping the color cycler from cycling.
+    /// </summary>
+    private void ClearSequence(){
+        currentCorrectSequence = "";
+        sequenceNameText.text = "";
+        currentlySelectedTraitToggle = null;
+        // Stop the color cycler by setting an empty color sequence
+        colorCycler.SetColorSequence(colors: new List<Color>(), periodToDisplayColor: 0f, periodInBetween: 0f, inBetweenColor: Color.clear);
+    }
+
+    /// <summary>
     /// Sets up the game manager for a specific sequence, setting the sequence name, and
     /// making the flashing circle colors match the DNA in the sequence.
     /// <param name="traitName">The name of the sequence to set up</param>
@@ -158,12 +170,15 @@ public class Part2GameManager : MonoBehaviour
                     toggleText.text = name;
                 }
                 
-                // Add onValueChanged listener to call SelectTraitButtonPressed when toggled on
+                // Add onValueChanged listener to handle toggle state changes
                 Toggle toggle = toggleObj.GetComponentInChildren<Toggle>();
                 if(toggle != null)
                 {
                     toggle.onValueChanged.AddListener((isOn) => {
-                        if(isOn) SelectTraitButtonPressed(toggle, name, seq);
+                        if(isOn)
+                            SelectTraitButtonPressed(toggle, name, seq);
+                        else if(currentlySelectedTraitToggle == toggle)
+                            ClearSequence();
                     });
                 }
                 else{
@@ -186,12 +201,8 @@ public class Part2GameManager : MonoBehaviour
         // Restore the previously selected toggle if there is one
         if(currentlySelectedTraitToggle != null && currentlySelectedTraitToggle != selectedToggle)
         {
-            currentlySelectedTraitToggle.interactable = true;
             currentlySelectedTraitToggle.isOn = false;
         }
-
-        // Lock the newly selected toggle (can only deselect by selecting another)
-        selectedToggle.interactable = false;
 
         // Store the newly selected toggle
         currentlySelectedTraitToggle = selectedToggle;
@@ -288,7 +299,7 @@ public class Part2GameManager : MonoBehaviour
         if (currentAvatar != null)
             Destroy(currentAvatar);
 
-        currentAvatar = AvatarLoader.Load(targetCustoms, avatarSpawnPoint.position, avatarSpawnPoint.rotation, avatarSpawnPoint);
+        currentAvatar = AvatarLoader.Load(targetCustoms, avatarSpawnPoint.position, Quaternion.identity, avatarSpawnPoint);
     }
 
     /// <summary>
@@ -313,8 +324,14 @@ public class Part2GameManager : MonoBehaviour
     public void SubmitSequence(){
         bool isCorrect = VerifySequence();
         if(isCorrect){
-            currentlySelectedTraitToggle.interactable = false; // disable the toggle for this trait
-            currentlySelectedTraitToggle.isOn = false; // deselect the toggle
+            Toggle completedToggle = currentlySelectedTraitToggle;
+            // Set interactable = false first, so when isOn changes, the visibility update shows the checkmark
+            completedToggle.interactable = false;
+            // Setting isOn = false triggers EnlargeToggleWhenSelected (scale down) and
+            // ShowGameobjOnToggleInteractChange (show checkmark since interactable is false)
+            // It also triggers ClearSequence via the onValueChanged listener
+            completedToggle.isOn = false;
+
             // clear the sequence slots
             foreach(var slot in OrderedSequenceSlots){
                 if(slot.transform.childCount > 0){
