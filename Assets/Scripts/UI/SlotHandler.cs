@@ -43,7 +43,9 @@ public class SlotHandler : MonoBehaviour, IDropHandler
         // if the child has changed, optionally respawn a new one
         if(respawnItemOnDragOut != null && respawnItemOnDragOut.transform.parent != transform)
         {
+            Quaternion originalRotation = respawnItemOnDragOut.transform.localRotation;
             GameObject newItem = Instantiate(respawnItemOnDragOut, transform);
+            newItem.transform.localRotation = originalRotation;
             respawnItemOnDragOut = newItem;
             CanvasGroup group = newItem.GetComponentInChildren<CanvasGroup>();
             // make sure raycast blocking is re-enabled on the new item

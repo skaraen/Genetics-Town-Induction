@@ -18,9 +18,7 @@ public class Part2GameManager : MonoBehaviour
 {
     [SerializeField] private ImageColorCycler colorCycler;
     [Tooltip("Ordered list of slots that the player brings their DNA sequence to")]
-    [SerializeField] private List<SlotHandler> OrderedSequenceSlots; 
-    [Tooltip("The four initial DNA components that are draggable by the player")]
-    [SerializeField] private List<DraggableItem> InitialDraggableDNAComponents;
+    [SerializeField] private List<SlotHandler> OrderedSequenceSlots;
     public List<CharColorTuple> nucleotideColors;
     [SerializeField] private TextMeshProUGUI sequenceNameText;
 
@@ -44,6 +42,15 @@ public class Part2GameManager : MonoBehaviour
     [SerializeField] private Transform avatarSpawnPoint;
     [Tooltip("CanvasGroup for the game UI, fades in after dialogue ends")]
     [SerializeField] private CanvasGroup gameUI;
+
+    /// <summary>
+    /// Manual Y offset adjustments for avatars that overlap with UI due to height differences.
+    /// Key: avatar ID, Value: Y offset to apply.
+    /// </summary>
+    private static readonly Dictionary<int, float> AvatarYOffsets = new Dictionary<int, float>
+    {
+        { 2, -0.6f } // Sheep
+    };
 
     private DialogueController dialogueController;
     private Animator narratorAnimator;
@@ -138,23 +145,9 @@ public class Part2GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Called once; sets up the game screen, initializing draggable DNA components and trait selection buttons
+    /// Called once; sets up the game screen, initializing trait selection buttons
     /// </summary>
     private void SetupGameScreen(){
-        void InitilizeDraggableDNAComponents()
-        {
-            // initilize the colors of the initial draggable DNA components
-            foreach(var item in InitialDraggableDNAComponents)
-            {
-                CharColorTuple tuple = nucleotideColors.Find(t => t.character == item.compType);
-                if(tuple != null)
-                {
-                    Color col = tuple.color;
-                    item.GetComponent<Image>().color = col;
-                }
-            }
-        }
-        
         void InitilizeTraitButtons(){
             List<(string traitName, string sequence)> traitSequences = GetTraitSequencesFromProfile(targetCustoms.avatarType);
 
@@ -193,7 +186,6 @@ public class Part2GameManager : MonoBehaviour
             }
         }
         
-        InitilizeDraggableDNAComponents();
         InitilizeTraitButtons();
     }
 
@@ -313,7 +305,13 @@ public class Part2GameManager : MonoBehaviour
         if (currentAvatar != null)
             Destroy(currentAvatar);
 
-        currentAvatar = AvatarLoader.Load(targetCustoms, avatarSpawnPoint.position, avatarSpawnPoint.rotation, avatarSpawnPoint);
+        Vector3 spawnPos = avatarSpawnPoint.position;
+        if (AvatarYOffsets.TryGetValue(targetCustoms.avatarType, out float yOffset))
+        {
+            spawnPos.y += yOffset;
+        }
+
+        currentAvatar = AvatarLoader.Load(targetCustoms, spawnPos, avatarSpawnPoint.rotation, avatarSpawnPoint);
     }
 
     /// <summary>
