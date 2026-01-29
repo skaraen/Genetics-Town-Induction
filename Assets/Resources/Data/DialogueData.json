@@ -213,5 +213,21 @@
                 "text": "This information will be stored in your inventory for safekeeping, to be used in case any trouble Genetics Town arises. Good luck!"
             }
         ]
+    },
+    {
+        "sequence": "narrator-part2-final",
+        "mode": "overlay",
+        "dialogues": [
+            {
+                "speaker": "Gregor",
+                "emotion": "happy",
+                "text": "Nice work! You've completed the full genetic sequence for your new friend. This information will be stored in your inventory."
+            },
+            {
+                "speaker": "Gregor",
+                "emotion": "smile",
+                "text": "Now, click back into Genetics Town to make more friends and discover more sequences."
+            }
+        ]
     }
 ]

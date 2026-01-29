@@ -51,6 +51,12 @@ public class Part2GameManager : MonoBehaviour
     private PlayerCustoms targetCustoms;
 
     /// <summary>
+    /// Tracks dialogue phase to differentiate intro vs final dialogue in HandleDialogueEnded.
+    /// </summary>
+    private enum DialoguePhase { Intro, Final }
+    private DialoguePhase currentDialoguePhase = DialoguePhase.Intro;
+
+    /// <summary>
     /// Clears the current sequence selection, resetting the sequence name to empty
     /// and stopping the color cycler from cycling.
     /// </summary>
@@ -266,14 +272,22 @@ public class Part2GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Callback when Gregor finishes speaking; triggers his exit and reveals the game UI.
+    /// Callback when Gregor finishes speaking; handles different actions based on dialogue phase.
     /// </summary>
     private void HandleDialogueEnded()
     {
         if (narratorAnimator != null)
             narratorAnimator.SetTrigger("ExitTrigger");
 
-        ShowGameUI();
+        switch (currentDialoguePhase)
+        {
+            case DialoguePhase.Intro:
+                ShowGameUI();
+                break;
+            case DialoguePhase.Final:
+                UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync("Part2Scene");
+                break;
+        }
     }
 
     /// <summary>
@@ -299,7 +313,7 @@ public class Part2GameManager : MonoBehaviour
         if (currentAvatar != null)
             Destroy(currentAvatar);
 
-        currentAvatar = AvatarLoader.Load(targetCustoms, avatarSpawnPoint.position, Quaternion.identity, avatarSpawnPoint);
+        currentAvatar = AvatarLoader.Load(targetCustoms, avatarSpawnPoint.position, null, avatarSpawnPoint);
     }
 
     /// <summary>
@@ -331,6 +345,12 @@ public class Part2GameManager : MonoBehaviour
             // ShowGameobjOnToggleInteractChange (show checkmark since interactable is false)
             // It also triggers ClearSequence via the onValueChanged listener
             completedToggle.isOn = false;
+
+            if (CheckAllSequencesCompleted())
+            {
+                StartCompletionFlow();
+                return;
+            }
 
             // clear the sequence slots
             foreach(var slot in OrderedSequenceSlots){
@@ -370,6 +390,54 @@ public class Part2GameManager : MonoBehaviour
         }
         print($"sequence entered: {sequence}, correct sequence: {currentCorrectSequence}");
         return sequence == currentCorrectSequence;
+    }
+
+    /// <summary>
+    /// Checks if all trait toggles are completed (non-interactable).
+    /// </summary>
+    private bool CheckAllSequencesCompleted()
+    {
+        foreach (Transform child in traitButtonParent)
+        {
+            Toggle toggle = child.GetComponentInChildren<Toggle>();
+            if (toggle != null && toggle.interactable)
+                return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// Starts the game completion sequence with fade-out and final dialogue.
+    /// </summary>
+    private void StartCompletionFlow()
+    {
+        StartCoroutine(CompletionRoutine());
+    }
+
+    private System.Collections.IEnumerator CompletionRoutine()
+    {
+        if (gameUI != null)
+        {
+            yield return gameUI.DOFade(0f, 1f).WaitForCompletion();
+            gameUI.gameObject.SetActive(false);
+        }
+        TriggerFinalDialogue();
+    }
+
+    /// <summary>
+    /// Triggers Gregor's congratulatory dialogue after all sequences are completed.
+    /// </summary>
+    private void TriggerFinalDialogue()
+    {
+        if (narrator == null || dialogueController == null) return;
+
+        if (currentAvatar != null)
+            currentAvatar.SetActive(false);
+
+        currentDialoguePhase = DialoguePhase.Final;
+        narrator.GetComponent<ReactionChooser>().SetReaction("happy");
+        narratorAnimator.SetTrigger("EntryTrigger");
+        dialogueController.StartSequence("narrator-part2-final");
     }
 
 }
