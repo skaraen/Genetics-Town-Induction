@@ -313,7 +313,7 @@ public class Part2GameManager : MonoBehaviour
         if (currentAvatar != null)
             Destroy(currentAvatar);
 
-        currentAvatar = AvatarLoader.Load(targetCustoms, avatarSpawnPoint.position, null, avatarSpawnPoint);
+        currentAvatar = AvatarLoader.Load(targetCustoms, avatarSpawnPoint.position, avatarSpawnPoint.rotation, avatarSpawnPoint);
     }
 
     /// <summary>

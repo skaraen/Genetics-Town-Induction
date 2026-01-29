@@ -275,7 +275,7 @@ public class AvatarGenerator : NetworkBehaviour
             avatarSpawnPoint.position = pos;
             // avatarSpawnPoint.forward = new Vector3(1, 0, 0);
 
-            currentAvatar = Instantiate(prefab, avatarSpawnPoint.position, prefab.transform.rotation);
+            currentAvatar = Instantiate(prefab, avatarSpawnPoint.position, avatarSpawnPoint.rotation);
             currentAvatar.transform.SetParent(avatarSpawnPoint);
         }
 
@@ -346,7 +346,8 @@ public class AvatarGenerator : NetworkBehaviour
 
     private void TogglePart(string partName, bool enable)
     {
-        Transform part = currentAvatar.transform.Find(partName);
+        Transform part = currentAvatar.GetComponentsInChildren<Transform>(true)
+            .FirstOrDefault(t => t.name == partName);
         if (part != null)
         {
             Renderer[] renderers = part.GetComponentsInChildren<Renderer>();

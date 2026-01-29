@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 
 public class AvatarManager : MonoBehaviour
@@ -210,7 +211,7 @@ public class AvatarManager : MonoBehaviour
             pos.y = (currentBiome == "Sea") ? -3 : -1;
             avatarSpawnPoint.position = pos;
 
-            currentAvatar = Instantiate(prefab, avatarSpawnPoint.position, prefab.transform.rotation);
+            currentAvatar = Instantiate(prefab, avatarSpawnPoint.position, avatarSpawnPoint.rotation);
             currentAvatar.transform.SetParent(avatarSpawnPoint);
         }
 
@@ -273,7 +274,8 @@ public class AvatarManager : MonoBehaviour
 
     void TogglePart(string partName, bool enable)
     {
-        Transform part = currentAvatar.transform.Find(partName);
+        Transform part = currentAvatar.GetComponentsInChildren<Transform>(true)
+            .FirstOrDefault(t => t.name == partName);
         if (part != null)
         {
             part.gameObject.SetActive(enable);

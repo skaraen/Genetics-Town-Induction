@@ -87,10 +87,12 @@ public static class AvatarLoader
 
     /// <summary>
     /// Enables or disables all renderers on a named child transform of the avatar.
+    /// Searches recursively through all descendants, not just immediate children.
     /// </summary>
     private static void TogglePart(GameObject avatar, string partName, bool enable)
     {
-        Transform part = avatar.transform.Find(partName);
+        Transform part = avatar.GetComponentsInChildren<Transform>(true)
+            .FirstOrDefault(t => t.name == partName);
         if (part != null)
         {
             Renderer[] renderers = part.GetComponentsInChildren<Renderer>();
