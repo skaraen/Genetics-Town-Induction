@@ -89,6 +89,7 @@ public class PlayerSpawner : NetworkBehaviour
 
         Debug.Log($"[Spawner] Spawned player for {clientId} (avatarType={customs.avatarType}).");
         OnSpawnComplete?.Invoke();
+        NotifySpawnCompleteClientRpc();
     }
 
     private (Vector3, Quaternion) GetSpawnFor(ulong clientId)
@@ -117,6 +118,29 @@ public class PlayerSpawner : NetworkBehaviour
             }
         }
         
+        OnInfected?.Invoke();
+        NotifyInfectedClientRpc();
+    }
+
+    /// <summary>
+    /// Broadcasts spawn complete notification to all clients.
+    /// Called by server after a player is spawned.
+    /// </summary>
+    [ClientRpc]
+    private void NotifySpawnCompleteClientRpc()
+    {
+        if (IsHost) return; // Host already invoked event locally
+        OnSpawnComplete?.Invoke();
+    }
+
+    /// <summary>
+    /// Broadcasts infection notification to all clients.
+    /// Called by server after infection starts.
+    /// </summary>
+    [ClientRpc]
+    private void NotifyInfectedClientRpc()
+    {
+        if (IsHost) return; // Host already invoked event locally
         OnInfected?.Invoke();
     }
 }

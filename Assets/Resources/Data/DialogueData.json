@@ -79,12 +79,22 @@
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "Nice work! Now, have fun exploring Genetics Land!"
+                "text"    : "Fantastic! Look at all the other avatars around you. They all have their own colors and features because of differences in their genetic sequences."
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "Notice the variety of avatars and features, determined through differences in genetic code. To learn more about another player and unlock their name and genetic sequence, please select “Interact.” Try interacting with as many players as possible, as friendship and knowledge is powerful, especially here."
+                "text"    : "Have fun exploring by approaching other avatars and selecting \"interact\" to discover their genetic sequences."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "By uncovering another's genetic sequence, we can better understand how our diversity is created! Discovering the genetic root of our diversity can tell us why one avatar glows or why another can fly."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "Try interacting with as many avatars as possible, as friendship and knowledge are powerful, especially here. And the more sequences uncovered, the better prepared you will be for any future dangers in Genetics Town..."
             }
         ]
     },
@@ -164,7 +174,59 @@
             {
                 "speaker" : "Gregor",
                 "emotion": "happy",
-                "text"    : "Amazing work! Let’s deliver the cure to bring your avatar back to health."
+                "text"    : "Amazing work! Let's deliver the cure to bring your avatar back to health."
+            }
+        ]
+    },
+    {
+        "sequence": "narrator-part2-intro",
+        "mode": "overlay",
+        "dialogues": [
+            {
+                "speaker": "Gregor",
+                "emotion": "smile",
+                "text": "By interacting with [NAME], we will uncover the genetic sequences that make them unique! First, click on the avatar's four highlighted features to collect the needed DNA."
+            },
+            {
+                "speaker": "Gregor",
+                "emotion": "smile",
+                "text": "Great! Now, let's discover the genetic sequence that determines each selected feature. This process is called reading."
+            },
+            {
+                "speaker": "Gregor",
+                "emotion": "neutral",
+                "text": "Once you begin your reading, you will see flashes of color in some order. Every color corresponds to a letter."
+            },
+            {
+                "speaker": "Gregor",
+                "emotion": "neutral",
+                "text": "It is your job to translate all of the colors into their letters in the correct order. There will be four unique genetic sequences to translate, one for each feature."
+            },
+            {
+                "speaker": "Gregor",
+                "emotion": "smile",
+                "text": "Once all translations are finished, you will have unlocked the avatar's full genetic code."
+            },
+            {
+                "speaker": "Gregor",
+                "emotion": "happy",
+                "text": "This information will be stored in your inventory for safekeeping, to be used in case any trouble Genetics Town arises. Good luck!"
+            }
+        ]
+    },
+    {
+        "sequence": "narrator-part2-final",
+        "mode": "overlay",
+        "dialogues": [
+            {
+                "speaker": "Gregor",
+                "emotion": "happy",
+                "text": "Nice work! You've completed the full genetic sequence for your new friend. This information will be stored in your inventory."
+            },
+            {
+                "speaker": "Gregor",
+                "emotion": "smile",
+                "text": "Now, click back into Genetics Town to make more friends and discover more sequences."
             }
         ]
     }

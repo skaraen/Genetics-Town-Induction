@@ -101,7 +101,7 @@ public class AvatarGenerator : NetworkBehaviour
             mainCamera.position = Vector3.SmoothDamp(mainCamera.position, targetPosition, ref velocity, 0.3f);
     }
 
-    float GetSliderValue(ColorHSV hsv)
+    private float GetSliderValue(ColorHSV hsv)
     {
         if (currProfile.id == 2)
             return hsv.v;
@@ -109,7 +109,7 @@ public class AvatarGenerator : NetworkBehaviour
         return hsv.h;
     }
 
-    void SetColorValue(int index, float val)
+    private void SetColorValue(int index, float val)
     {
         if (currProfile.id == 2)
             currColor[index].v = val;
@@ -136,7 +136,7 @@ public class AvatarGenerator : NetworkBehaviour
         }
     }
 
-    void SetupToggles()
+    private void SetupToggles()
     {
         for (int i = 0; i < NUM_SUBSEQUENCES; i++)
         {
@@ -150,15 +150,18 @@ public class AvatarGenerator : NetworkBehaviour
         }
     }
 
-    void RotateNeedle(int i)
+    private void RotateNeedle(int i)
     {
-        float r = (sliders[i].value - sliders[i].minValue) / (sliders[i].maxValue - sliders[i].minValue);
+        float range = sliders[i].maxValue - sliders[i].minValue;
+        if (Mathf.Approximately(range, 0f)) return;
+
+        float r = (sliders[i].value - sliders[i].minValue) / range;
         float deg = r * 180;
 
         needles[i].transform.localRotation = Quaternion.Euler(0, 0, -deg);
     }
 
-    void SetupSliders()
+    private void SetupSliders()
     {
         for (int i = 0; i < NUM_SUBSEQUENCES; i++)
         {
@@ -197,7 +200,7 @@ public class AvatarGenerator : NetworkBehaviour
         }
     }
 
-    void ToggleCanvas(int canvasId)
+    private void ToggleCanvas(int canvasId)
     {
         canvas[canvasId].SetActive(false);
 
@@ -229,7 +232,7 @@ public class AvatarGenerator : NetworkBehaviour
         }
     }
 
-    Color GetMaterialColor(Material mat)
+    private Color GetMaterialColor(Material mat)
     {
         string propertyName = (currProfile.id == 2) ? "_BaseColor" : "_EmissionColor";
         if (mat.HasProperty(propertyName))
@@ -251,7 +254,7 @@ public class AvatarGenerator : NetworkBehaviour
         }
     }
 
-    void LoadAvatar()
+    private void LoadAvatar()
     {
         currProfile = AvatarProfileManager.Instance.GetProfileBySequence(currBaseSequence);
         if (currProfile == null)
@@ -272,14 +275,14 @@ public class AvatarGenerator : NetworkBehaviour
             avatarSpawnPoint.position = pos;
             // avatarSpawnPoint.forward = new Vector3(1, 0, 0);
 
-            currentAvatar = Instantiate(prefab, avatarSpawnPoint.position, prefab.transform.rotation);
+            currentAvatar = Instantiate(prefab, avatarSpawnPoint.position, avatarSpawnPoint.rotation);
             currentAvatar.transform.SetParent(avatarSpawnPoint);
         }
 
         InitDefaults();
     }
 
-    void InitDefaults()
+    private void InitDefaults()
     {
         subSequenceEnabled[0] = true;
         subSequenceEnabled[1] = true;
@@ -289,6 +292,7 @@ public class AvatarGenerator : NetworkBehaviour
         {
             for (int j = 0; j < NUM_CHOICES; j++)
             {
+                // read gameobject names from json, such as 'head1emission', etc, that are defined to be colored
                 targetMaterials[i, j] = renderers.FirstOrDefault(r => r.gameObject.name == currProfile.colorTargets[i * NUM_SUBSEQUENCES + j]).material;
             }
             defaultColor[i] = ColorUtils.GetHSVFromRGB(GetMaterialColor(targetMaterials[i, 0]));
@@ -309,7 +313,7 @@ public class AvatarGenerator : NetworkBehaviour
         SetupSliders();
     }
 
-    void UpdateAvatar()
+    private void UpdateAvatar()
     {
         if (currentAvatar == null) return;
 
@@ -340,9 +344,10 @@ public class AvatarGenerator : NetworkBehaviour
         }
     }
 
-    void TogglePart(string partName, bool enable)
+    private void TogglePart(string partName, bool enable)
     {
-        Transform part = currentAvatar.transform.Find(partName);
+        Transform part = currentAvatar.GetComponentsInChildren<Transform>(true)
+            .FirstOrDefault(t => t.name == partName);
         if (part != null)
         {
             Renderer[] renderers = part.GetComponentsInChildren<Renderer>();
@@ -353,7 +358,7 @@ public class AvatarGenerator : NetworkBehaviour
         }
     }
 
-    void ToggleParts(string baseName, int activeIndex)
+    private void ToggleParts(string baseName, int activeIndex)
     {
         for (int i = 0; i < 2; i++)
         {
@@ -362,7 +367,13 @@ public class AvatarGenerator : NetworkBehaviour
         }
     }
 
-    string GetAvatarName(int avatarType)
+    /// <summary>
+    /// Gets a placeholder name (should be user selected in future) for multiplayer
+    /// based on avatar typ
+    /// </summary>
+    /// <param name="avatarType"></param>
+    /// <returns></returns>
+    private string GetMultiplayerName(int avatarType)
     {
         switch (avatarType)
         {
@@ -378,11 +389,11 @@ public class AvatarGenerator : NetworkBehaviour
         return "Ozai";
     }
 
-    void LoadGameScene()
+    private void LoadGameScene()
     {
         // Build your local metadata from current UI/profile
         PlayerMetadata metadata = new PlayerMetadata(currProfile);
-        metadata.name = GetAvatarName(currProfile.id);
+        metadata.name = GetMultiplayerName(currProfile.id);
 
         for (int i = 0; i < 2; i++)
         {

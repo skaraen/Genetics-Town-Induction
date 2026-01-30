@@ -34,6 +34,7 @@ public class PlayerUI : NetworkBehaviour
     FacingTarget facingTarget = FacingTarget.Camera;
 
     bool requestReceived = false;
+    PlayerCustoms pendingTargetCustoms; // customs of the other player
     ClientRegistry registry;
 
     void Start()
@@ -119,18 +120,22 @@ public class PlayerUI : NetworkBehaviour
 
         interactBtn.onClick.AddListener(() =>
         {
+            // if you interact on another player
             if (!requestReceived)
             {
                 descTmp.text = "Waiting for response...";
                 interactBtn.enabled = false;
-
-                NotifyOwnerServerRpc();
+                NotifyOwnerServerRpc(); // notify the other player
             }
+            // If another player interacts on you
             else
             {
                 requestReceived = false;
+                Part2DataHolder.TargetCustoms = pendingTargetCustoms;
                 AckOwnerServerRpc();
-                SceneManager.LoadScene("MemoryGame");
+                // PROBLEM: the scene is not additively loaded correctly, 
+                // you can see grass from the game in the background
+                SceneManager.LoadScene("Part2Scene", LoadSceneMode.Additive);
             }
         });
 
@@ -198,9 +203,15 @@ public class PlayerUI : NetworkBehaviour
         }
     }
 
-    public void RequestInteraction()
+    /// <summary>
+    /// Marks this UI as having a pending interaction request and stores the requester's full
+    /// customization data so it can be forwarded to Part2DataHolder when accepted.
+    /// </summary>
+    /// <param name="targetCustoms">The full visual customization of the player who sent the request</param>
+    public void RequestInteraction(PlayerCustoms targetCustoms)
     {
         requestReceived = true;
+        pendingTargetCustoms = targetCustoms;
         descTmp.text = "wants to interact with you";
     }
 
@@ -209,7 +220,10 @@ public class PlayerUI : NetworkBehaviour
     {
         ulong senderId = rpcParams.Receive.SenderClientId;
 
-        NotifyOwnerClientRpc(senderId, new ClientRpcParams
+        PlayerCustoms senderCustoms = default;
+        PlayerMetadataRegistry.Instance.TryGetCustoms(senderId, out senderCustoms);
+
+        NotifyOwnerClientRpc(senderId, senderCustoms, new ClientRpcParams
         {
             Send = new ClientRpcSendParams
             {
@@ -219,12 +233,12 @@ public class PlayerUI : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void NotifyOwnerClientRpc(ulong senderId, ClientRpcParams clientRpcParams = default)
+    private void NotifyOwnerClientRpc(ulong senderId, PlayerCustoms senderCustoms, ClientRpcParams clientRpcParams = default)
     {
         Debug.Log($"Owner {OwnerClientId} received notification from Client {senderId}");
         GameObject targetPlayer = registry.FindPlayerByClientId(senderId);
 
-        targetPlayer.GetComponent<PlayerUI>().RequestInteraction();
+        targetPlayer.GetComponent<PlayerUI>().RequestInteraction(senderCustoms);
     }
     
     [ServerRpc(RequireOwnership = false)]
@@ -232,7 +246,10 @@ public class PlayerUI : NetworkBehaviour
     {
         ulong senderId = rpcParams.Receive.SenderClientId;
 
-        AckOwnerClientRpc(senderId, new ClientRpcParams
+        PlayerCustoms senderCustoms = default;
+        PlayerMetadataRegistry.Instance.TryGetCustoms(senderId, out senderCustoms);
+
+        AckOwnerClientRpc(senderId, senderCustoms, new ClientRpcParams
         {
             Send = new ClientRpcSendParams
             {
@@ -242,9 +259,10 @@ public class PlayerUI : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void AckOwnerClientRpc(ulong senderId, ClientRpcParams clientRpcParams = default)
+    private void AckOwnerClientRpc(ulong senderId, PlayerCustoms senderCustoms, ClientRpcParams clientRpcParams = default)
     {
         Debug.Log($"Owner {OwnerClientId} received acknowledgement from Client {senderId}");
-        SceneManager.LoadScene("MemoryGame", LoadSceneMode.Additive);
+        Part2DataHolder.TargetCustoms = senderCustoms;
+        SceneManager.LoadScene("Part2Scene", LoadSceneMode.Additive);
     }
 }

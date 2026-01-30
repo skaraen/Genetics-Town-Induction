@@ -5,6 +5,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+/// <summary>
+/// Initilizes the buttons in the title screen menu (for testing purposes)
+/// which starts the game as a host, server, or client
+/// </summary>
 public class NetworkUI : MonoBehaviour
 {
     [SerializeField] private Button HostButton;

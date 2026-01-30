@@ -2,6 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+/// <summary>
+/// Component handler needs to be renamed
+/// Every object in unity is a component and does some kind of "handling" with it anyway
+/// </summary>
 public class ComponentHandler : MonoBehaviour
 {
     const int NUM_COMPONENTS = 12;
@@ -20,8 +24,6 @@ public class ComponentHandler : MonoBehaviour
         { 'G', 'C' }
     };
     private string ASO;
-    private
-
     void OnEnable()
     {
         prefabMap = new Dictionary<string, GameObject>();
@@ -70,6 +72,10 @@ public class ComponentHandler : MonoBehaviour
 
     public bool IsASOValid()
     {
+        // This function is pretty badly coupled
+        // Despite its name "IsASOValid", it also sets the ASO string
+        // so (this is not obvious externaly at all) you need to call IsASOValid before isASOCorrect
+        // furthermore isASOValid and IsASOCorrect have names that sound the exact same and don't explain their differences
         ASO = "";
         for (int i = 0; i < RContainer.transform.childCount; i++)
         {

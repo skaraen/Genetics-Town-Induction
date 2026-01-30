@@ -49,8 +49,6 @@ public class DialogueDatabase : MonoBehaviour
                     byName[seq.sequence] = seq;
             }
         }
-
-        Debug.Log($"[DialogueDatabase] Loaded {byName.Count} sequences.");
     }
 
     public bool HasSequence(string name) => byName != null && byName.ContainsKey(name);

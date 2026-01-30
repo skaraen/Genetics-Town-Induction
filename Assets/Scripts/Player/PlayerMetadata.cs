@@ -4,9 +4,9 @@ using UnityEngine;
 public class PlayerMetadata
 {
     const int NUM_SUBSEQUENCES = 2;
-    public int id;
+    public int id; // the player's randomly generated unique ID
     public int avatarType;
-    public string name;
+    public string name; // the player's custom online name - different from their avatar name
     public string baseSequence;
     public string[] subSequences;
     public bool[] sequenceEnabled;

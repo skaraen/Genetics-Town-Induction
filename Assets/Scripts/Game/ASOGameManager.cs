@@ -48,6 +48,12 @@ public class ASOGameManager : MonoBehaviour
         infoButton.onClick.AddListener(() => {dialogueController.StartSequence("narrator-aso-explain");});
     }
 
+    /// <summary>
+    /// Reads the user input box in the aso game and verifies if the sequence is correct
+    /// </summary>
+    /// <returns>
+    /// True if the sequence is correct, false otherwise
+    /// </returns>
     bool VerifySequence() {
         string raw = inputField.GetComponent<TextMeshProUGUI>().text;
         string input = Regex.Replace(raw ?? string.Empty, @"\s|\p{Cf}", "").ToUpperInvariant();
