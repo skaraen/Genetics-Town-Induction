@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2280205680854757416}
+  - component: {fileID: 3560954404012288695}
   m_Layer: 0
   m_Name: jellyfish
   m_TagString: Untagged
@@ -36,6 +37,45 @@ Transform:
   - {fileID: 4452252562428842607}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!114 &3560954404012288695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 861333239521248288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47b3b40fa9a35415d9289509d779462c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AvatarProfileData
+  id: 1
+  avatarName: Jellyfish
+  baseSequence: AGTAAAGGAGAAGAACTTTTCACTGGAGTTGTC
+  baseSequenceTraitName: Glow
+  subSequences:
+  - GAATTCCGAATGTCTACTTCGTTTTTAATAGAT
+  - AATCACGGAAGGCCGCCGGCCTGGGGCTCCGCA
+  subSequencesTraitNames:
+  - Head Shape
+  - Tentacles
+  colorSequence: TGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGG
+  colorTargetRenderers:
+  - {fileID: 5388244812409537943}
+  - {fileID: 8911854325691626914}
+  - {fileID: 1736094285728882668}
+  - {fileID: 6668964162118719214}
+  colorRanges:
+  - 77FF00
+  - 0080FF
+  - 77FF00
+  - 0080FF
+  colorPropertyName: _EmissionColor
+  colorSliderUsesValue: 0
+  info: CAMOUFLAGE!\n This sequence allows this avatar to absorb blue light and emit
+    green light, creating a glow.\n As a result, this avatar could distract or attract
+    others with bright light flashes.
+  spawnYOffset: -2
 --- !u!1 &1891638868463072173
 GameObject:
   m_ObjectHideFlags: 0

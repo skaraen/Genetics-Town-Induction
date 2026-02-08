@@ -12,7 +12,6 @@ public class AvatarGenerator : NetworkBehaviour
     const int NUM_SUBSEQUENCES = 2;
     const int NUM_CHOICES = 2;
     const int NUM_CANVAS = 3;
-    const int NUM_AVATARS = 4;
 
     [Header("Avatar Spawn")]
     public Transform avatarSpawnPoint;
@@ -31,13 +30,7 @@ public class AvatarGenerator : NetworkBehaviour
     [SerializeField] private int cameraFocus;
 
     const string set = "ATGC";
-    private string[][] baseSequences = new string[][]
-    {
-        new string[] { "AGT","AAA","GGA","GAA","GAA","CTT","TTC","ACT","GGA","GTT","GTC"},
-        new string[] { "GCA","TGT","TGC","GGA","GTG","ATT","AGT","GGG","TTT","GAA","AAG"},
-        new string[] { "ACA","GAT","TTC","TTA","TCG","GCT","TCC","ACA","CTG","CGG","TAG"},
-        new string[] { "GGG","ACC","TTG","AGA","GCG","GCC","AGG","CCA","GCC","TCG","GAG"}
-    };
+    private string[][] baseSequenceCodons;
     private Dictionary<string, GameObject> prefabMap;
 
     private Vector3 straightFocus = new Vector3(0, 0, -6);
@@ -49,7 +42,7 @@ public class AvatarGenerator : NetworkBehaviour
 
 
     private string currBaseSequence;
-    private AvatarProfile currProfile;
+    private AvatarProfileData currProfileData;
     private GameObject currentAvatar;
     private ColorHSV[] defaultColor;
     private ColorHSV[] currColor;
@@ -66,7 +59,8 @@ public class AvatarGenerator : NetworkBehaviour
         targetMaterials = new Material[NUM_SUBSEQUENCES, NUM_CHOICES];
         cameraFocus = 0;
 
-        ArrayUtils.ShuffleRows(baseSequences);
+        BuildBaseSequenceCodons();
+        ArrayUtils.ShuffleRows(baseSequenceCodons);
 
         canvas[0].SetActive(true);
         for (int i = 1; i < NUM_CANVAS; i++)
@@ -76,7 +70,6 @@ public class AvatarGenerator : NetworkBehaviour
         SetupButtons();
         SetupToggles();
     }
-
     void OnEnable()
     {
         prefabMap = new Dictionary<string, GameObject>();
@@ -90,6 +83,39 @@ public class AvatarGenerator : NetworkBehaviour
             prefabMap[c + "_L"] = Resources.Load<GameObject>("Prefabs/" + c + "_L");
         }
     }
+
+    /// <summary>
+    /// Builds the codon display arrays from AvatarRegistry profiles,
+    /// splitting each baseSequence into 3-character codons.
+    /// </summary>
+    private void BuildBaseSequenceCodons()
+    {
+        AvatarProfileData[] profiles = AvatarRegistry.Instance.GetAllProfiles();
+        baseSequenceCodons = new string[profiles.Length][];
+        for (int i = 0; i < profiles.Length; i++)
+        {
+            if (string.IsNullOrEmpty(profiles[i].baseSequence))
+            {
+                Debug.LogWarning($"Avatar profile '{profiles[i].avatarName}' has null/empty baseSequence, skipping codon split");
+                baseSequenceCodons[i] = new string[0];
+                continue;
+            }
+            baseSequenceCodons[i] = SplitIntoCodons(profiles[i].baseSequence);
+        }
+    }
+
+    /// <summary>
+    /// Splits a DNA sequence string into an array of 3-character codon strings.
+    /// </summary>
+    private string[] SplitIntoCodons(string sequence)
+    {
+        int codonCount = sequence.Length / 3;
+        string[] codons = new string[codonCount];
+        for (int i = 0; i < codonCount; i++)
+            codons[i] = sequence.Substring(i * 3, 3);
+        return codons;
+    }
+
 
     void LateUpdate()
     {
@@ -119,7 +145,7 @@ public class AvatarGenerator : NetworkBehaviour
 
     private float GetSliderValue(ColorHSV hsv)
     {
-        if (currProfile.id == 2)
+        if (currProfileData.colorSliderUsesValue)
             return hsv.v;
 
         return hsv.h;
@@ -127,7 +153,7 @@ public class AvatarGenerator : NetworkBehaviour
 
     private void SetColorValue(int index, float val)
     {
-        if (currProfile.id == 2)
+        if (currProfileData.colorSliderUsesValue)
             currColor[index].v = val;
         else
             currColor[index].h = val;
@@ -141,17 +167,15 @@ public class AvatarGenerator : NetworkBehaviour
             goButtons[i].onClick.AddListener(() => SetCanvas(index));
         }
 
-        for (int i = 0; i < NUM_AVATARS; i++)
+        int buttonCount = Mathf.Min(baseSequenceCodons.Length, sequenceButtons.Length);
+        for (int i = 0; i < buttonCount; i++)
         {
             int index = i;
-            string str = string.Join("", baseSequences[index]);
-            
+            string str = string.Join("", baseSequenceCodons[index]);
             Transform gridObj = sequenceButtons[index].transform.Find("GridObject");
             foreach (char c in str)
             {
-                GameObject component = Instantiate(prefabMap[c + "_L"], gridObj.transform);
-                // if (index == 1)
-                //     component.transform.Rotate(0f, 0f, 90f);
+                Instantiate(prefabMap[c + "_L"], gridObj.transform);
             }
 
             sequenceButtons[index].onClick.AddListener(() =>
@@ -188,11 +212,17 @@ public class AvatarGenerator : NetworkBehaviour
 
     private void SetupSliders()
     {
+        int rangeCount = currProfileData.colorRanges != null ? currProfileData.colorRanges.Length : 0;
         for (int i = 0; i < NUM_SUBSEQUENCES; i++)
         {
-            ColorHSV minColor = ColorUtils.GetHSVFromHex(currProfile.colorRanges[2 * i + 0]);
+            if (2 * i + 1 >= rangeCount)
+            {
+                Debug.LogWarning($"Avatar profile missing colorRanges for subsequence {i} (has {rangeCount}, needs {2 * i + 2})");
+                continue;
+            }
+            ColorHSV minColor = ColorUtils.GetHSVFromHex(currProfileData.colorRanges[2 * i + 0]);
             sliders[i].minValue = GetSliderValue(minColor);
-            ColorHSV maxColor = ColorUtils.GetHSVFromHex(currProfile.colorRanges[2 * i + 1]);
+            ColorHSV maxColor = ColorUtils.GetHSVFromHex(currProfileData.colorRanges[2 * i + 1]);
             sliders[i].maxValue = GetSliderValue(maxColor);
             float colorValue = GetSliderValue(defaultColor[i]);
 
@@ -259,12 +289,9 @@ public class AvatarGenerator : NetworkBehaviour
 
     private Color GetMaterialColor(Material mat)
     {
-        string propertyName = (currProfile.id == 2) ? "_BaseColor" : "_EmissionColor";
-        if (mat.HasProperty(propertyName))
+        if (mat.HasProperty(currProfileData.colorPropertyName))
         {
-            Color matColor = mat.GetColor(propertyName);
-
-            return matColor;
+            return mat.GetColor(currProfileData.colorPropertyName);
         }
 
         return Color.black;
@@ -272,67 +299,81 @@ public class AvatarGenerator : NetworkBehaviour
 
     void SetMaterialColor(Material mat, Color color)
     {
-        string propertyName = (currProfile.id == 2) ? "_BaseColor" : "_EmissionColor";
-        if (mat.HasProperty(propertyName))
+        if (mat.HasProperty(currProfileData.colorPropertyName))
         {
-            mat.SetColor(propertyName, color);
+            mat.SetColor(currProfileData.colorPropertyName, color);
         }
     }
 
+    /// <summary>
+    /// Loads the avatar prefab matching the current base sequence from AvatarRegistry,
+    /// instantiates it, and reads AvatarProfileData from the instance for direct renderer access.
+    /// </summary>
     private void LoadAvatar()
     {
-        currProfile = AvatarProfileManager.Instance.GetProfileBySequence(currBaseSequence);
-        if (currProfile == null)
-            Debug.Log($"Currprofile null: {currBaseSequence}");
-        infoText.text = "The base sequence you chose contributes to " + currProfile.info;
+        GameObject prefab = AvatarRegistry.Instance.GetPrefabBySequence(currBaseSequence);
+        if (prefab == null)
+        {
+            Debug.LogError($"No avatar prefab found for sequence: {currBaseSequence}");
+            return;
+        }
+
+        AvatarProfileData prefabProfile = prefab.GetComponent<AvatarProfileData>();
+        infoText.text = "The base sequence you chose contributes to " + prefabProfile.info;
 
         if (currentAvatar != null)
         {
             Destroy(currentAvatar);
         }
 
-        GameObject prefab = Resources.Load<GameObject>("Avatars/" + currProfile.prefabPath);
+        Vector3 pos = avatarSpawnPoint.position;
+        pos.y = prefabProfile.spawnYOffset;
+        avatarSpawnPoint.position = pos;
 
-        if (prefab != null)
-        {
-            Vector3 pos = avatarSpawnPoint.position;
-            pos.y = (currProfile.id != 2) ? -2 : -1;
-            avatarSpawnPoint.position = pos;
-            // avatarSpawnPoint.forward = new Vector3(1, 0, 0);
+        currentAvatar = Instantiate(prefab, avatarSpawnPoint.position, avatarSpawnPoint.rotation);
+        currentAvatar.transform.SetParent(avatarSpawnPoint);
 
-            currentAvatar = Instantiate(prefab, avatarSpawnPoint.position, avatarSpawnPoint.rotation);
-            currentAvatar.transform.SetParent(avatarSpawnPoint);
-        }
+        currProfileData = currentAvatar.GetComponent<AvatarProfileData>();
 
         InitDefaults();
     }
 
+    /// <summary>
+    /// Initializes default state from the instantiated avatar's AvatarProfileData,
+    /// reading color target renderers directly instead of string-based lookups.
+    /// </summary>
     private void InitDefaults()
     {
         subSequenceEnabled[0] = true;
         subSequenceEnabled[1] = true;
 
-        Renderer[] renderers = currentAvatar.GetComponentsInChildren<Renderer>(true);
+        int rendererCount = currProfileData.colorTargetRenderers != null ? currProfileData.colorTargetRenderers.Length : 0;
+        if (rendererCount < NUM_SUBSEQUENCES * NUM_CHOICES)
+            Debug.LogWarning($"Avatar profile has {rendererCount} colorTargetRenderers, expected {NUM_SUBSEQUENCES * NUM_CHOICES}");
         for (int i = 0; i < NUM_SUBSEQUENCES; i++)
         {
             for (int j = 0; j < NUM_CHOICES; j++)
             {
-                // read gameobject names from json, such as 'head1emission', etc, that are defined to be colored
-                targetMaterials[i, j] = renderers.FirstOrDefault(r => r.gameObject.name == currProfile.colorTargets[i * NUM_SUBSEQUENCES + j]).material;
+                int idx = i * NUM_CHOICES + j;
+                if (idx < rendererCount && currProfileData.colorTargetRenderers[idx] != null)
+                    targetMaterials[i, j] = currProfileData.colorTargetRenderers[idx].material;
             }
-            defaultColor[i] = ColorUtils.GetHSVFromRGB(GetMaterialColor(targetMaterials[i, 0]));
-            currColor[i] = new ColorHSV(defaultColor[i].h, defaultColor[i].s, defaultColor[i].v);
+            if (targetMaterials[i, 0] != null)
+            {
+                defaultColor[i] = ColorUtils.GetHSVFromRGB(GetMaterialColor(targetMaterials[i, 0]));
+                currColor[i] = new ColorHSV(defaultColor[i].h, defaultColor[i].s, defaultColor[i].v);
+            }
         }
 
         TickerItem ti;
         for (int i = 0; i < NUM_SUBSEQUENCES; i++)
         {
             ti = tickerItemPrefabs[i].GetComponent<TickerItem>();
-            ti.UpdateText(currProfile.subSequences[i]);
+            ti.UpdateText(currProfileData.subSequences[i]);
         }
 
         ti = tickerItemPrefabs[2].GetComponent<TickerItem>();
-        ti.UpdateText(currProfile.colorSequence);
+        ti.UpdateText(currProfileData.colorSequence);
 
         UpdateAvatar();
         SetupSliders();
@@ -341,24 +382,6 @@ public class AvatarGenerator : NetworkBehaviour
     private void UpdateAvatar()
     {
         if (currentAvatar == null) return;
-
-        Renderer[] renderers = currentAvatar.GetComponentsInChildren<Renderer>();
-
-        // foreach (Renderer r in renderers)
-        // {
-        //     if (targetNames.Contains(r.gameObject.name))
-        //     {
-        //         Material mat = r.material;
-        //         if (mat.HasProperty("_BaseColor"))
-        //         {
-        //             mat.SetColor("_BaseColor", currColor);
-        //         }
-        //         if (mat.IsKeywordEnabled("_EMISSION") && mat.HasProperty("_EmissionColor"))
-        //         {
-        //             mat.SetColor("_EmissionColor", currColor);
-        //         }
-        //     }
-        // }
 
         string[] parts = { "head", "torso" };
 
@@ -394,10 +417,8 @@ public class AvatarGenerator : NetworkBehaviour
 
     /// <summary>
     /// Gets a placeholder name (should be user selected in future) for multiplayer
-    /// based on avatar typ
+    /// based on avatar type.
     /// </summary>
-    /// <param name="avatarType"></param>
-    /// <returns></returns>
     private string GetMultiplayerName(int avatarType)
     {
         switch (avatarType)
@@ -414,15 +435,18 @@ public class AvatarGenerator : NetworkBehaviour
         return "Ozai";
     }
 
+    /// <summary>
+    /// Builds PlayerMetadata from the current AvatarProfileData and user selections,
+    /// then submits to the server for network sync.
+    /// </summary>
     private void LoadGameScene()
     {
-        // Build your local metadata from current UI/profile
-        PlayerMetadata metadata = new PlayerMetadata(currProfile);
-        metadata.name = GetMultiplayerName(currProfile.id);
+        PlayerMetadata metadata = new PlayerMetadata(currProfileData);
+        metadata.name = GetMultiplayerName(currProfileData.id);
 
         for (int i = 0; i < 2; i++)
         {
-            string subSeq = currProfile.subSequences[i];
+            string subSeq = currProfileData.subSequences[i];
             metadata.sequenceEnabled[i] = subSequenceEnabled[i];
             metadata.subSequences[i] = subSequenceEnabled[i] ? "ATG" + subSeq : subSeq + "TAG";
             metadata.colors[i] = ColorUtils.GetRGBFromHSV(currColor[i]);

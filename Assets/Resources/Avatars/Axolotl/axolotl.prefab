@@ -418,6 +418,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2988556692198836117}
+  - component: {fileID: 2421661766061063423}
   m_Layer: 0
   m_Name: axolotl
   m_TagString: Untagged
@@ -445,6 +446,45 @@ Transform:
   - {fileID: 3809654743871058926}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!114 &2421661766061063423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4164714336937734310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47b3b40fa9a35415d9289509d779462c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AvatarProfileData
+  id: 4
+  avatarName: Axolotl
+  baseSequence: GGGACCTTGAGAGCGGCCAGGCCAGCCTCGGAG
+  baseSequenceTraitName: Muscle Regrowth
+  subSequences:
+  - ACTCTGGCGCTCCCGAGGCGGCCTCTTGTGCGA
+  - CTCTTGCGTCAAGACGGCCGTGCTGAGCGAATG
+  subSequencesTraitNames:
+  - Ear Shape
+  - Tail
+  colorSequence: AACAGTTCTGACGTGAGAGGACAAGAAACACAA
+  colorTargetRenderers:
+  - {fileID: 4454248455874934862}
+  - {fileID: 8117087300933028485}
+  - {fileID: 3321198891512367180}
+  - {fileID: 27630982629355900}
+  colorRanges:
+  - 000000
+  - FFFFFF
+  - 000000
+  - FFFFFF
+  colorPropertyName: _EmissionColor
+  colorSliderUsesValue: 0
+  info: REGENERATION!\n This sequence supports this avatar's ability to reactivate
+    development pathways even in adulthood.\n As a result, this avatar could regenerate
+    multiple body parts, including its spinal cord, post-injury.
+  spawnYOffset: -2
 --- !u!1 &4414012847671046490
 GameObject:
   m_ObjectHideFlags: 0

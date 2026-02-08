@@ -122,7 +122,7 @@ public class Part2GameManager : MonoBehaviour
             traitSequences.Add((name, seq.Substring(0, OrderedSequenceSlots.Count)));
         }
 
-        AvatarProfile profile = AvatarProfileManager.Instance.GetProfileById(avatarId);
+        AvatarProfileData profile = AvatarRegistry.Instance.GetProfileById(avatarId);
         
         if (profile == null) return traitSequences;
         

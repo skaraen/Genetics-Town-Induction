@@ -412,6 +412,7 @@ GameObject:
   - component: {fileID: 2776348661459078971}
   - component: {fileID: 1068973113589421091}
   - component: {fileID: -4456324961690362022}
+  - component: {fileID: 6928276871577677570}
   m_Layer: 0
   m_Name: Gregor
   m_TagString: Untagged
@@ -489,6 +490,39 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6928276871577677570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5575113701297423450}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47b3b40fa9a35415d9289509d779462c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AvatarProfileData
+  id: 0
+  avatarName: Gregor
+  baseSequence: AGCGTGACCGTAAGGTCTAGCTTACGGTAC
+  baseSequenceTraitName: 
+  subSequences:
+  - AGCT
+  - CTGA
+  subSequencesTraitNames:
+  - 
+  - 
+  colorSequence: CTGA
+  colorTargetRenderers: []
+  colorRanges:
+  - 000000
+  - FFFFFF
+  - 000000
+  - FFFFFF
+  colorPropertyName: _EmissionColor
+  colorSliderUsesValue: 0
+  info: 
+  spawnYOffset: -2
 --- !u!1 &5698691869951175657
 GameObject:
   m_ObjectHideFlags: 0

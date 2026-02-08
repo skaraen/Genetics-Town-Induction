@@ -1,7 +1,14 @@
 using Unity.Collections;
 
+/// <summary>
+/// Maps between PlayerMetadata (local, full avatar data) and PlayerCustoms (network-serializable, minimal).
+/// Used to convert avatar data for network transmission and to reconstruct full metadata on the receiving end.
+/// </summary>
 public static class MetaDataCustomsMapper
 {
+    /// <summary>
+    /// Converts local PlayerMetadata into a network-ready PlayerCustoms struct.
+    /// </summary>
     public static PlayerCustoms ToNet(PlayerMetadata m)
     {
         return new PlayerCustoms
@@ -15,9 +22,18 @@ public static class MetaDataCustomsMapper
         };
     }
 
+    /// <summary>
+    /// Reconstructs full PlayerMetadata from a network PlayerCustoms struct
+    /// by looking up the avatar profile from AvatarRegistry.
+    /// </summary>
     public static PlayerMetadata ToLocal(int id, PlayerCustoms n)
     {
-        AvatarProfile profile = AvatarProfileManager.Instance.GetProfileById(n.avatarType);
+        AvatarProfileData profile = AvatarRegistry.Instance.GetProfileById(n.avatarType);
+        if (profile == null)
+        {
+            UnityEngine.Debug.LogError($"No avatar profile found for avatar type {n.avatarType}");
+            return null;
+        }
         var m = new PlayerMetadata(profile);
         m.id = id;
         m.name = n.name.ToString();

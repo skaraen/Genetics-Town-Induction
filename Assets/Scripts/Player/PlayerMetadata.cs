@@ -19,7 +19,7 @@ public class PlayerMetadata
         sequenceEnabled = new bool[NUM_SUBSEQUENCES];
     }
 
-    public PlayerMetadata(AvatarProfile profile)
+    public PlayerMetadata(AvatarProfileData profile)
     {
         subSequences = new string[NUM_SUBSEQUENCES];
         colors = new Color[NUM_SUBSEQUENCES];
