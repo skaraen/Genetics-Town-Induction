@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: AvatarRegistry
   m_EditorClassIdentifier: Assembly-CSharp::AvatarRegistry
   avatarPrefabs:
-  - {fileID: 5575113701297423450, guid: 5c31d698090e0413baf4b197adc954f0, type: 3}
   - {fileID: 861333239521248288, guid: 805d0bb911c11490e997e1f779302d3e, type: 3}
   - {fileID: 8900105224179147596, guid: ca25a6a77548a455aad8be3c2162b790, type: 3}
   - {fileID: 49563659778820491, guid: 87b8e2220824241098b823ac962369f2, type: 3}
