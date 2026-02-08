@@ -69,7 +69,6 @@ public class DialogueController : MonoBehaviour
         isNarrationMode = true;
         if (narrator != null)
         {
-            Debug.Log("Hello");
             narratorAnimator = narrator.GetComponent<Animator>();
             reactChooser = narrator.GetComponent<ReactionChooser>();
         }
@@ -125,10 +124,6 @@ public class DialogueController : MonoBehaviour
     {
         if (isSequenceInProgress && (isNarrationMode || !isNarratorAnimating) && (Input.GetKeyDown(KeyCode.Space) || Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)) 
             ProgressDialogue();
-        // else if (isNarratorAnimating && Input.GetKeyDown(KeyCode.Space))
-        // {
-        //     Debug.Log($"Narrator still animating, isSeqprogress {isSequenceInProgress}");
-        // }
 
         if (isAnimating)
         {
