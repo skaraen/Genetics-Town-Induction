@@ -54,7 +54,7 @@ public class VerticalTickItem : MonoBehaviour
 
     public void FlickerUpdateText(string text)
     {
-        FlickerUpdateText(text, 1f, 10); 
+        FlickerUpdateText(text, 3f, 10); 
     }
 
     public void FlickerUpdateText(string text, float duration, int cps)
