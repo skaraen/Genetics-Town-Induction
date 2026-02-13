@@ -30,6 +30,7 @@ public class AvatarGenerator : NetworkBehaviour
 
     [SerializeField] private int cameraFocus;
 
+    const string set = "ATGC";
     private string[][] baseSequences = new string[][]
     {
         new string[] { "AGT","AAA","GGA","GAA","GAA","CTT","TTC","ACT","GGA","GTT","GTC"},
@@ -37,6 +38,7 @@ public class AvatarGenerator : NetworkBehaviour
         new string[] { "ACA","GAT","TTC","TTA","TCG","GCT","TCC","ACA","CTG","CGG","TAG"},
         new string[] { "GGG","ACC","TTG","AGA","GCG","GCC","AGG","CCA","GCC","TCG","GAG"}
     };
+    private Dictionary<string, GameObject> prefabMap;
 
     private Vector3 straightFocus = new Vector3(0, 0, -6);
     private Vector3 sideFocus = new Vector3(-3, 0, -6);
@@ -73,6 +75,20 @@ public class AvatarGenerator : NetworkBehaviour
         }
         SetupButtons();
         SetupToggles();
+    }
+
+    void OnEnable()
+    {
+        prefabMap = new Dictionary<string, GameObject>();
+        LoadPrefabs();
+    }
+
+    void LoadPrefabs()
+    {
+        foreach (char c in set)
+        {
+            prefabMap[c + "_L"] = Resources.Load<GameObject>("Prefabs/" + c + "_L");
+        }
     }
 
     void LateUpdate()
@@ -128,10 +144,19 @@ public class AvatarGenerator : NetworkBehaviour
         for (int i = 0; i < NUM_AVATARS; i++)
         {
             int index = i;
-            sequenceButtons[index].GetComponentInChildren<TextMeshProUGUI>().text = string.Join("\n", baseSequences[index]);
+            string str = string.Join("", baseSequences[index]);
+            
+            Transform gridObj = sequenceButtons[index].transform.Find("GridObject");
+            foreach (char c in str)
+            {
+                GameObject component = Instantiate(prefabMap[c + "_L"], gridObj.transform);
+                // if (index == 1)
+                //     component.transform.Rotate(0f, 0f, 90f);
+            }
+
             sequenceButtons[index].onClick.AddListener(() =>
             {
-                currBaseSequence = string.Join("", baseSequences[index]);
+                currBaseSequence = str;
             });
         }
     }
