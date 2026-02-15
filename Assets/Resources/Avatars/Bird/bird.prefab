@@ -66,10 +66,10 @@ MonoBehaviour:
   - {fileID: 2649950663973239064}
   - {fileID: 6036887609317402325}
   colorRanges:
-  - 000000
-  - FFFFFF
-  - 000000
-  - FFFFFF
+  - '#de4f45'
+  - '#ded145'
+  - '#5c4033'
+  - '#e3ae96'
   colorPropertyName: _EmissionColor
   colorSliderUsesValue: 0
   info: SPEED!\n This sequence allows this avatar to break down sugar quicker, increasing
@@ -432,7 +432,6 @@ GameObject:
   - component: {fileID: 2495371864674145305}
   - component: {fileID: 1517305053309246396}
   - component: {fileID: 3668880781162835830}
-  - component: {fileID: 4090086748286805347}
   - component: {fileID: 7991322055605390502}
   m_Layer: 0
   m_Name: propeller2
@@ -513,28 +512,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &4090086748286805347
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3020375835897515683}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -8484818585897656739, guid: e872a96437a0045fcb26590185b23578, type: 3}
 --- !u!95 &7991322055605390502
 Animator:
   serializedVersion: 7

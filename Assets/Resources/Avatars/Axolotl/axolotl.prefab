@@ -475,10 +475,10 @@ MonoBehaviour:
   - {fileID: 3321198891512367180}
   - {fileID: 27630982629355900}
   colorRanges:
-  - 000000
-  - FFFFFF
-  - 000000
-  - FFFFFF
+  - '#ff69b4'
+  - '#5c1663'
+  - '#f7b5e2'
+  - '#a61477'
   colorPropertyName: _EmissionColor
   colorSliderUsesValue: 0
   info: REGENERATION!\n This sequence supports this avatar's ability to reactivate
