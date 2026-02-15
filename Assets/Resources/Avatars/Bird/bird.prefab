@@ -66,10 +66,10 @@ MonoBehaviour:
   - {fileID: 2649950663973239064}
   - {fileID: 6036887609317402325}
   colorRanges:
-  - '#de4f45'
-  - '#ded145'
-  - '#5c4033'
-  - '#e3ae96'
+  - {r: 0.87059, g: 0.30980, b: 0.27059, a: 1}
+  - {r: 0.87059, g: 0.81961, b: 0.27059, a: 1}
+  - {r: 0.36078, g: 0.25098, b: 0.20000, a: 1}
+  - {r: 0.89020, g: 0.68235, b: 0.58824, a: 1}
   colorPropertyName: _BaseColor
   colorSliderUsesValue: 0001
   info: SPEED!\n This sequence allows this avatar to break down sugar quicker, increasing

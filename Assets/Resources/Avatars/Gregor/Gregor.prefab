@@ -515,10 +515,10 @@ MonoBehaviour:
   colorSequence: CTGA
   colorTargetRenderers: []
   colorRanges:
-  - 000000
-  - FFFFFF
-  - 000000
-  - FFFFFF
+  - {r: 0, g: 0, b: 0, a: 1}
+  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 0, g: 0, b: 0, a: 1}
+  - {r: 1, g: 1, b: 1, a: 1}
   colorPropertyName: _EmissionColor
   colorSliderUsesValue: 0
   info: 

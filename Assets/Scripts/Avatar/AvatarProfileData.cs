@@ -39,8 +39,8 @@ public class AvatarProfileData : MonoBehaviour
              "Layout: [headVariant1, headVariant2, torsoVariant1, torsoVariant2]")]
     public Renderer[] colorTargetRenderers = new Renderer[2 * NUM_SUBSEQUENCES];
 
-    [Tooltip("Hex color range pairs (min/max) for each color slider")]
-    public string[] colorRanges = new string[2 * NUM_SUBSEQUENCES];
+    [Tooltip("Color range pairs (min/max) for each color slider")]
+    public Color[] colorRanges = new Color[2 * NUM_SUBSEQUENCES];
 
     [Tooltip("Material color property to set (e.g., _EmissionColor or _BaseColor)")]
     public string colorPropertyName = "_EmissionColor";

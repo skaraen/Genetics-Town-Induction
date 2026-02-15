@@ -237,8 +237,8 @@ public class AvatarGenerator : NetworkBehaviour
                 Debug.LogWarning($"Avatar profile missing colorRanges for subsequence {i} (has {rangeCount}, needs {2 * i + 2})");
                 continue;
             }
-            ColorHSV minColor = ColorUtils.GetHSVFromHex(currProfileData.colorRanges[2 * i + 0]);
-            ColorHSV maxColor = ColorUtils.GetHSVFromHex(currProfileData.colorRanges[2 * i + 1]);
+            ColorHSV minColor = ColorUtils.GetHSVFromRGB(currProfileData.colorRanges[2 * i + 0]);
+            ColorHSV maxColor = ColorUtils.GetHSVFromRGB(currProfileData.colorRanges[2 * i + 1]);
             float minVal = GetSliderValue(i, minColor);
             float maxVal = GetSliderValue(i, maxColor);
             // Ensure min <= max so the slider isn't stuck when color ranges are ordered bright-to-dark

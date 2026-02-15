@@ -66,10 +66,10 @@ MonoBehaviour:
   - {fileID: 1736094285728882668}
   - {fileID: 6668964162118719214}
   colorRanges:
-  - 77FF00
-  - 0080FF
-  - 77FF00
-  - 0080FF
+  - {r: 0.46667, g: 1, b: 0, a: 1}
+  - {r: 0, g: 0.50196, b: 1, a: 1}
+  - {r: 0.46667, g: 1, b: 0, a: 1}
+  - {r: 0, g: 0.50196, b: 1, a: 1}
   colorPropertyName: _EmissionColor
   colorSliderUsesValue: 0
   info: CAMOUFLAGE!\n This sequence allows this avatar to absorb blue light and emit

@@ -1378,10 +1378,10 @@ MonoBehaviour:
   - {fileID: 8265501173819876179}
   - {fileID: 402569988295493203}
   colorRanges:
-  - AD4339
-  - FF6254
-  - 757575
-  - FFFFFF
+  - {r: 0.67843, g: 0.26275, b: 0.22353, a: 1}
+  - {r: 1, g: 0.38431, b: 0.32941, a: 1}
+  - {r: 0.45882, g: 0.45882, b: 0.45882, a: 1}
+  - {r: 1, g: 1, b: 1, a: 1}
   colorPropertyName: _EmissionColor
   colorSliderUsesValue: 0
   info: "SIGHT!\\n This sequence contributes to this avatar\u2019s eye muscles by
