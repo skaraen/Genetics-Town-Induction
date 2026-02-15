@@ -44,16 +44,16 @@ public class AvatarGenerator : NetworkBehaviour
     private string currBaseSequence;
     private AvatarProfileData currProfileData;
     private GameObject currentAvatar;
-    private ColorHSV[] defaultColor;
-    private ColorHSV[] currColor;
+    private Vector3[] defaultColor;  // HSV stored as (x=h, y=s, z=v)
+    private Vector3[] currColor;     // HSV stored as (x=h, y=s, z=v)
     private bool[] subSequenceEnabled;
     private SwitchToggle[] switchToggles;
     private Material[,] targetMaterials;
 
     void Start()
     {
-        defaultColor = new ColorHSV[NUM_SUBSEQUENCES];
-        currColor = new ColorHSV[NUM_SUBSEQUENCES];
+        defaultColor = new Vector3[NUM_SUBSEQUENCES];
+        currColor = new Vector3[NUM_SUBSEQUENCES];
         subSequenceEnabled = new bool[NUM_SUBSEQUENCES];
         switchToggles = new SwitchToggle[NUM_SUBSEQUENCES];
         targetMaterials = new Material[NUM_SUBSEQUENCES, NUM_CHOICES];
@@ -157,12 +157,12 @@ public class AvatarGenerator : NetworkBehaviour
     /// <summary>
     /// Extracts the HSV component that the given slider controls (Hue or Value).
     /// </summary>
-    private float GetSliderValue(int sliderIndex, ColorHSV hsv)
+    private float GetSliderValue(int sliderIndex, Vector3 hsv)
     {
         if (SliderUsesValue(sliderIndex))
-            return hsv.v;
+            return hsv.z;
 
-        return hsv.h;
+        return hsv.x;
     }
 
     /// <summary>
@@ -171,9 +171,9 @@ public class AvatarGenerator : NetworkBehaviour
     private void SetColorValue(int index, float val)
     {
         if (SliderUsesValue(index))
-            currColor[index].v = val;
+            currColor[index].z = val;
         else
-            currColor[index].h = val;
+            currColor[index].x = val;
     }
 
     void SetupButtons()
@@ -237,8 +237,10 @@ public class AvatarGenerator : NetworkBehaviour
                 Debug.LogWarning($"Avatar profile missing colorRanges for subsequence {i} (has {rangeCount}, needs {2 * i + 2})");
                 continue;
             }
-            ColorHSV minColor = ColorUtils.GetHSVFromRGB(currProfileData.colorRanges[2 * i + 0]);
-            ColorHSV maxColor = ColorUtils.GetHSVFromRGB(currProfileData.colorRanges[2 * i + 1]);
+            Color.RGBToHSV(currProfileData.colorRanges[2 * i + 0], out float minH, out float minS, out float minV);
+            Vector3 minColor = new Vector3(minH, minS, minV);
+            Color.RGBToHSV(currProfileData.colorRanges[2 * i + 1], out float maxH, out float maxS, out float maxV);
+            Vector3 maxColor = new Vector3(maxH, maxS, maxV);
             float minVal = GetSliderValue(i, minColor);
             float maxVal = GetSliderValue(i, maxColor);
             // Ensure min <= max so the slider isn't stuck when color ranges are ordered bright-to-dark
@@ -258,7 +260,7 @@ public class AvatarGenerator : NetworkBehaviour
 
                 for (int j = 0; j < NUM_CHOICES; j++)
                 {
-                    SetMaterialColor(targetMaterials[index, j], ColorUtils.GetRGBFromHSV(currColor[index]));
+                    SetMaterialColor(targetMaterials[index, j], Color.HSVToRGB(currColor[index].x, currColor[index].y, currColor[index].z, true));
                 }
             });
         }
@@ -380,8 +382,9 @@ public class AvatarGenerator : NetworkBehaviour
             }
             if (targetMaterials[i, 0] != null)
             {
-                defaultColor[i] = ColorUtils.GetHSVFromRGB(GetMaterialColor(targetMaterials[i, 0]));
-                currColor[i] = new ColorHSV(defaultColor[i].h, defaultColor[i].s, defaultColor[i].v);
+                Color.RGBToHSV(GetMaterialColor(targetMaterials[i, 0]), out float h, out float s, out float v);
+                defaultColor[i] = new Vector3(h, s, v);
+                currColor[i] = defaultColor[i];
             }
         }
 
@@ -469,7 +472,7 @@ public class AvatarGenerator : NetworkBehaviour
             string subSeq = currProfileData.subSequences[i];
             metadata.sequenceEnabled[i] = subSequenceEnabled[i];
             metadata.subSequences[i] = subSequenceEnabled[i] ? "ATG" + subSeq : subSeq + "TAG";
-            metadata.colors[i] = ColorUtils.GetRGBFromHSV(currColor[i]);
+            metadata.colors[i] = Color.HSVToRGB(currColor[i].x, currColor[i].y, currColor[i].z, true);
         }
 
         // Optional local cache
