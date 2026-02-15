@@ -625,7 +625,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6603707940891199418, guid: e7d8db82dafbd44229d39a3eb5e0ec43, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -439.95157
+      value: -414
       objectReference: {fileID: 0}
     - target: {fileID: 6603707940891199418, guid: e7d8db82dafbd44229d39a3eb5e0ec43, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1249,7 +1249,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6603707940891199418, guid: e7d8db82dafbd44229d39a3eb5e0ec43, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -496.50848
+      value: -469
       objectReference: {fileID: 0}
     - target: {fileID: 6603707940891199418, guid: e7d8db82dafbd44229d39a3eb5e0ec43, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1418,6 +1418,7 @@ GameObject:
   - component: {fileID: 582122874}
   - component: {fileID: 582122873}
   - component: {fileID: 582122872}
+  - component: {fileID: 582122875}
   m_Layer: 6
   m_Name: Terrain
   m_TagString: Untagged
@@ -1500,6 +1501,43 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &582122875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 582122871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bcfa2092cb154523a329bfbaf9e028c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TerrainEdgeFalloff
+  falloffDistance: 50
+  falloffCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1001 &621351610
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2617,7 +2655,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6603707940891199418, guid: e7d8db82dafbd44229d39a3eb5e0ec43, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 790.04846
+      value: 752
       objectReference: {fileID: 0}
     - target: {fileID: 6603707940891199418, guid: e7d8db82dafbd44229d39a3eb5e0ec43, type: 3}
       propertyPath: m_LocalPosition.y
@@ -4042,7 +4080,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6603707940891199418, guid: e7d8db82dafbd44229d39a3eb5e0ec43, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 554.4915
+      value: 542
       objectReference: {fileID: 0}
     - target: {fileID: 6603707940891199418, guid: e7d8db82dafbd44229d39a3eb5e0ec43, type: 3}
       propertyPath: m_LocalRotation.w
@@ -4111,7 +4149,7 @@ Transform:
   m_GameObject: {fileID: 1927991835}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -50.04843, y: 0.00002, z: 97.50848}
+  m_LocalPosition: {x: -50.04843, y: 1.5, z: 97.50848}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
