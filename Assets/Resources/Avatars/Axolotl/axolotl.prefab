@@ -472,15 +472,15 @@ MonoBehaviour:
   colorTargetRenderers:
   - {fileID: 4454248455874934862}
   - {fileID: 8117087300933028485}
-  - {fileID: 3321198891512367180}
-  - {fileID: 27630982629355900}
+  - {fileID: 3013937223315204810}
+  - {fileID: 3013937223315204810}
   colorRanges:
   - '#ff69b4'
   - '#5c1663'
   - '#f7b5e2'
   - '#a61477'
-  colorPropertyName: _EmissionColor
-  colorSliderUsesValue: 0
+  colorPropertyName: _BaseColor
+  colorSliderUsesValue: 0101
   info: REGENERATION!\n This sequence supports this avatar's ability to reactivate
     development pathways even in adulthood.\n As a result, this avatar could regenerate
     multiple body parts, including its spinal cord, post-injury.

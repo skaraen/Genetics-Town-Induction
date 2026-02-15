@@ -238,9 +238,12 @@ public class AvatarGenerator : NetworkBehaviour
                 continue;
             }
             ColorHSV minColor = ColorUtils.GetHSVFromHex(currProfileData.colorRanges[2 * i + 0]);
-            sliders[i].minValue = GetSliderValue(i, minColor);
             ColorHSV maxColor = ColorUtils.GetHSVFromHex(currProfileData.colorRanges[2 * i + 1]);
-            sliders[i].maxValue = GetSliderValue(i, maxColor);
+            float minVal = GetSliderValue(i, minColor);
+            float maxVal = GetSliderValue(i, maxColor);
+            // Ensure min <= max so the slider isn't stuck when color ranges are ordered bright-to-dark
+            sliders[i].minValue = Mathf.Min(minVal, maxVal);
+            sliders[i].maxValue = Mathf.Max(minVal, maxVal);
             float colorValue = GetSliderValue(i, defaultColor[i]);
 
             Debug.Log($"(Slider {i + 1}) Min value: {sliders[i].minValue}, Max value: {sliders[i].maxValue} ");
