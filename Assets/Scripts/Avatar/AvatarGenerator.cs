@@ -143,17 +143,34 @@ public class AvatarGenerator : NetworkBehaviour
             mainCamera.position = Vector3.SmoothDamp(mainCamera.position, targetPosition, ref velocity, 0.3f);
     }
 
-    private float GetSliderValue(ColorHSV hsv)
+    /// <summary>
+    /// Returns whether the given slider adjusts Value instead of Hue.
+    /// Falls back to false (Hue mode) if the array is unset or too short.
+    /// </summary>
+    private bool SliderUsesValue(int sliderIndex)
     {
-        if (currProfileData.colorSliderUsesValue)
+        if (currProfileData.colorSliderUsesValue == null || sliderIndex >= currProfileData.colorSliderUsesValue.Length)
+            return false;
+        return currProfileData.colorSliderUsesValue[sliderIndex];
+    }
+
+    /// <summary>
+    /// Extracts the HSV component that the given slider controls (Hue or Value).
+    /// </summary>
+    private float GetSliderValue(int sliderIndex, ColorHSV hsv)
+    {
+        if (SliderUsesValue(sliderIndex))
             return hsv.v;
 
         return hsv.h;
     }
 
+    /// <summary>
+    /// Sets the HSV component that the given slider controls on the current color.
+    /// </summary>
     private void SetColorValue(int index, float val)
     {
-        if (currProfileData.colorSliderUsesValue)
+        if (SliderUsesValue(index))
             currColor[index].v = val;
         else
             currColor[index].h = val;
@@ -221,10 +238,10 @@ public class AvatarGenerator : NetworkBehaviour
                 continue;
             }
             ColorHSV minColor = ColorUtils.GetHSVFromHex(currProfileData.colorRanges[2 * i + 0]);
-            sliders[i].minValue = GetSliderValue(minColor);
+            sliders[i].minValue = GetSliderValue(i, minColor);
             ColorHSV maxColor = ColorUtils.GetHSVFromHex(currProfileData.colorRanges[2 * i + 1]);
-            sliders[i].maxValue = GetSliderValue(maxColor);
-            float colorValue = GetSliderValue(defaultColor[i]);
+            sliders[i].maxValue = GetSliderValue(i, maxColor);
+            float colorValue = GetSliderValue(i, defaultColor[i]);
 
             Debug.Log($"(Slider {i + 1}) Min value: {sliders[i].minValue}, Max value: {sliders[i].maxValue} ");
             sliders[i].value = Mathf.Clamp(colorValue, sliders[i].minValue, sliders[i].maxValue);

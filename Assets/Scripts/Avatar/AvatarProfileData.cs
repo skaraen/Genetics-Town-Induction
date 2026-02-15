@@ -45,8 +45,8 @@ public class AvatarProfileData : MonoBehaviour
     [Tooltip("Material color property to set (e.g., _EmissionColor or _BaseColor)")]
     public string colorPropertyName = "_EmissionColor";
 
-    [Tooltip("If true, the color slider adjusts HSV Value; if false, it adjusts Hue")]
-    public bool colorSliderUsesValue;
+    [Tooltip("Per-slider mode: if true, that slider adjusts HSV Value (lightness); if false, it adjusts Hue")]
+    public bool[] colorSliderUsesValue = new bool[NUM_SUBSEQUENCES];
 
     [Header("Display")]
     [Tooltip("Educational description of this avatar's biological trait")]

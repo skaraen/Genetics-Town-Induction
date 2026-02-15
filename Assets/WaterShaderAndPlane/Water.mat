@@ -40,10 +40,10 @@ Material:
     m_Ints: []
     m_Floats:
     - _BreathingSpeed: 0.2
-    - _FoamAmount: 0.4
-    - _FoamDepthVarianceSpeed: 1
+    - _FoamAmount: 0.2
+    - _FoamDepthVarianceSpeed: 0.26
     - _FoamDisortionSpeed: 19.88
-    - _FoamDistortionAmount: 0.3
+    - _FoamDistortionAmount: 0.2
     - _FoamNoiseSpeed: 0.05
     - _FoamSimleNoiseStrength: 6.48
     - _FoamSimplexNoiseScale: 5
@@ -61,7 +61,7 @@ Material:
     - _WaterPatternNoiseSpeed: 0.2
     m_Colors:
     - _FoamColor: {r: 0.5754717, g: 0.5754717, b: 0.5754717, a: 1}
-    - _FoamDepthRange: {r: 2, g: 5, b: 0, a: 0}
+    - _FoamDepthRange: {r: 0.5, g: 2, b: 0, a: 0}
     - _IntersectionColor: {r: 0.5281684, g: 0.54361385, b: 0.7830189, a: 1}
     - _IntersectionDepthRange: {r: 0.01, g: 0.05, b: 0, a: 0}
     - _SecondaryWaterColor: {r: 0.14907439, g: 0.32411492, b: 0.4716981, a: 1}

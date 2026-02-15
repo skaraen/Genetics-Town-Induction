@@ -61,8 +61,8 @@ MonoBehaviour:
   - Propellers
   colorSequence: GGTGGTGTCTCGGGATACCTTGTTTATAGTACC
   colorTargetRenderers:
-  - {fileID: 749732219921766313}
-  - {fileID: 3668880781162835830}
+  - {fileID: 5212441248062021438}
+  - {fileID: 5212441248062021438}
   - {fileID: 2649950663973239064}
   - {fileID: 6036887609317402325}
   colorRanges:
@@ -70,8 +70,8 @@ MonoBehaviour:
   - '#ded145'
   - '#5c4033'
   - '#e3ae96'
-  colorPropertyName: _EmissionColor
-  colorSliderUsesValue: 0
+  colorPropertyName: _BaseColor
+  colorSliderUsesValue: 0001
   info: SPEED!\n This sequence allows this avatar to break down sugar quicker, increasing
     its energy output to muscles.\n As a result, this avatar could hover in the air,
     fly upside down, and maintain a heartbeat of 1200 bpm.
