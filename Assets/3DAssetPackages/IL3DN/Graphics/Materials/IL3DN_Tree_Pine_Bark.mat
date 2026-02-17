@@ -97,7 +97,7 @@ Material:
     - _UVSec: 0
     - _Wind: 1
     - _WindQuality: 0
-    - _WindStrenght: 0.5
+    - _WindStrenght: 1
     - _ZWrite: 1
     - __dirty: 1
     m_Colors:

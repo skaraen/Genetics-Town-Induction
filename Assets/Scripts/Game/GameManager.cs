@@ -18,13 +18,18 @@ public class GameManager : MonoBehaviour
     private PlayerSpawner spawner;
     DialogueController dialogueController;
     Animator narratorAnimator;
+    /// <summary>
+    /// Prevents welcome dialogue from triggering multiple times in multiplayer.
+    /// OnSpawnComplete fires once per player, so without this flag the dialogue
+    /// would restart repeatedly, confusing the animator state machine.
+    /// </summary>
+    private bool hasTriggeredWelcome = false;
 
     void OnEnable()
     {
         if (dialogueBox != null)
         {
             dialogueController = dialogueBox.GetComponent<DialogueController>();
-            dialogueController.OnDialogueEnded += HandleDialogueEnded;
         }
 
         Camera renderCam = null;
@@ -54,17 +59,17 @@ public class GameManager : MonoBehaviour
         spawner.OnSpawnComplete -= TriggerWelcome;
         spawner.OnInfected -= TriggerPanic;
 
-        if (dialogueController != null)
-            dialogueController.OnDialogueEnded -= HandleDialogueEnded;
-    }
-
-    private void HandleDialogueEnded()
-    {
-        narratorAnimator.SetTrigger("ExitTrigger");
     }
 
     void TriggerWelcome()
     {
+        // In multiplayer, PlayerSpawner fires OnSpawnComplete for each player.
+        // Without this guard, the dialogue would restart with each spawn, causing
+        // EntryTrigger to be set multiple times and confusing the animator.
+        if (hasTriggeredWelcome)
+            return;
+        hasTriggeredWelcome = true;
+
         narrator.GetComponent<ReactionChooser>().SetReaction("happy");
         narratorAnimator.SetTrigger("EntryTrigger");
         dialogueController.StartSequence("narrator-first-welcome");
@@ -84,10 +89,7 @@ public class GameManager : MonoBehaviour
 
     void OnGlitchButtonClicked()
     {
-        Debug.Log("Glitch button clicked → starting infection!");
         if (spawner != null)
             spawner.StartInfection();
-        else
-            Debug.LogError("Spawner reference missing!");
     }
 }

@@ -96,7 +96,7 @@ public class Part2GameManager : MonoBehaviour
             
             // Set the color cycler to cycle through the sequence colors
             // flash white in between cycles for 2 seconds
-            colorCycler.SetColorSequence(colors: sequenceColors, periodToDisplayColor: 1f, periodInBetween: 1, inBetweenColor: new Color(0,0,0,0f), waitBeforeRestartingCycle: 3f, waitingToRestartColor: Color.white);
+            colorCycler.SetColorSequence(colors: sequenceColors, periodToDisplayColor: 1f, periodInBetween: 1, inBetweenColor: new Color(0,0,0,0f), waitBeforeRestartingCycle: 3f, waitingToRestartColor: Color.white, showStartEndLabels: true);
         }
 
         // Store the correct sequence for verification
@@ -122,7 +122,7 @@ public class Part2GameManager : MonoBehaviour
             traitSequences.Add((name, seq.Substring(0, OrderedSequenceSlots.Count)));
         }
 
-        AvatarProfile profile = AvatarProfileManager.Instance.GetProfileById(avatarId);
+        AvatarProfileData profile = AvatarRegistry.Instance.GetProfileById(avatarId);
         
         if (profile == null) return traitSequences;
         

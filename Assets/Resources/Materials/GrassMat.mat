@@ -151,7 +151,7 @@ Material:
     - _WindHeight: 0.5
     - _WindIntensity: 0.2
     - _WindNoiseSpeed: 1
-    - _WindSpeed: 0.01
+    - _WindSpeed: 0.005
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:

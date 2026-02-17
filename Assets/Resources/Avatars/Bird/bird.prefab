@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 511394176876222148}
+  - component: {fileID: 4781562348027531625}
   m_Layer: 0
   m_Name: bird
   m_TagString: Untagged
@@ -36,6 +37,45 @@ Transform:
   - {fileID: 5121261595427244621}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!114 &4781562348027531625
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 49563659778820491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47b3b40fa9a35415d9289509d779462c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AvatarProfileData
+  id: 3
+  avatarName: Hummingbird
+  baseSequence: ACAGATTTCTTATCGGCTTCCACACTGCGGTAG
+  baseSequenceTraitName: Flight Power
+  subSequences:
+  - GACATTTAGACTCCAGGCTTCAACCTGTTTACA
+  - GGAAGATGCGAGAAGGCAGAGGAGGAGGGAGGG
+  subSequencesTraitNames:
+  - Beak Shape
+  - Propellers
+  colorSequence: GGTGGTGTCTCGGGATACCTTGTTTATAGTACC
+  colorTargetRenderers:
+  - {fileID: 5212441248062021438}
+  - {fileID: 5212441248062021438}
+  - {fileID: 2649950663973239064}
+  - {fileID: 6036887609317402325}
+  colorRanges:
+  - {r: 0.87059, g: 0.30980, b: 0.27059, a: 1}
+  - {r: 0.87059, g: 0.81961, b: 0.27059, a: 1}
+  - {r: 0.36078, g: 0.25098, b: 0.20000, a: 1}
+  - {r: 0.89020, g: 0.68235, b: 0.58824, a: 1}
+  colorPropertyName: _BaseColor
+  colorSliderUsesValue: 0001
+  info: SPEED!\n This sequence allows this avatar to break down sugar quicker, increasing
+    its energy output to muscles.\n As a result, this avatar could hover in the air,
+    fly upside down, and maintain a heartbeat of 1200 bpm.
+  spawnYOffset: -2
 --- !u!1 &1052390578888718973
 GameObject:
   m_ObjectHideFlags: 0
@@ -392,7 +432,6 @@ GameObject:
   - component: {fileID: 2495371864674145305}
   - component: {fileID: 1517305053309246396}
   - component: {fileID: 3668880781162835830}
-  - component: {fileID: 4090086748286805347}
   - component: {fileID: 7991322055605390502}
   m_Layer: 0
   m_Name: propeller2
@@ -473,28 +512,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &4090086748286805347
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3020375835897515683}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -8484818585897656739, guid: e872a96437a0045fcb26590185b23578, type: 3}
 --- !u!95 &7991322055605390502
 Animator:
   serializedVersion: 7

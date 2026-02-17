@@ -9,8 +9,9 @@ using UnityEngine;
 public static class AvatarLoader
 {
     /// <summary>
-    /// Instantiates a fully customized avatar: loads the correct prefab,
-    /// toggles head/torso part variants, and applies colors to target materials.
+    /// Instantiates a fully customized avatar: loads the correct prefab from AvatarRegistry,
+    /// toggles head/torso part variants, and applies colors via direct renderer references
+    /// from the AvatarProfileData component on the instantiated prefab.
     /// </summary>
     /// <param name="customs">The player's visual customization data</param>
     /// <param name="position">World position to place the avatar</param>
@@ -19,12 +20,11 @@ public static class AvatarLoader
     /// <returns>The instantiated and customized avatar GameObject, or null on failure</returns>
     public static GameObject Load(PlayerCustoms customs, Vector3 position, Quaternion? rotation = null, Transform parent = null)
     {
-        string path = AvatarProfileManager.Instance.GetPathById(customs.avatarType);
-        GameObject prefab = Resources.Load<GameObject>("Avatars/" + path);
+        GameObject prefab = AvatarRegistry.Instance.GetPrefabById(customs.avatarType);
 
         if (prefab == null)
         {
-            Debug.LogError($"Avatar prefab not found at: Avatars/{path}");
+            Debug.LogError($"Avatar prefab not found for avatar type: {customs.avatarType}");
             return null;
         }
 
@@ -42,33 +42,33 @@ public static class AvatarLoader
     }
 
     /// <summary>
-    /// Applies the two custom colors to the avatar's head and torso materials,
-    /// using the color targets defined in the avatar's profile.
+    /// Applies the two custom colors to the avatar's head and torso materials
+    /// using the direct renderer references from AvatarProfileData.
+    /// colorTargetRenderers layout: [headVar1, headVar2, torsoVar1, torsoVar2].
+    /// Head variants receive color0, torso variants receive color1.
     /// </summary>
     private static void ApplyColors(GameObject avatar, PlayerCustoms customs)
     {
-        string[] targets = AvatarProfileManager.Instance.GetColorTargetsById(customs.avatarType);
-        Renderer[] renderers = avatar.GetComponentsInChildren<Renderer>(true);
+        AvatarProfileData profile = avatar.GetComponent<AvatarProfileData>();
+        if (profile == null || profile.colorTargetRenderers == null) return;
 
-        Renderer headRenderer = renderers.FirstOrDefault(r => r.gameObject.name == targets[0]);
-        Renderer torsoRenderer = renderers.FirstOrDefault(r => r.gameObject.name == targets[1]);
-
-        if (headRenderer != null)
-            SetMaterialColor(customs.avatarType, headRenderer.material, customs.color0);
-        if (torsoRenderer != null)
-            SetMaterialColor(customs.avatarType, torsoRenderer.material, customs.color1);
+        for (int i = 0; i < profile.colorTargetRenderers.Length; i++)
+        {
+            Color color = (i < 2) ? customs.color0 : customs.color1;
+            SetMaterialColor(profile, profile.colorTargetRenderers[i], color);
+        }
     }
 
     /// <summary>
-    /// Sets the appropriate color property on a material. Avatar type 2 uses _BaseColor;
-    /// all others use _EmissionColor.
+    /// Sets the color property specified by the profile's colorPropertyName on a renderer's material.
     /// </summary>
-    private static void SetMaterialColor(int avatarType, Material mat, Color color)
+    private static void SetMaterialColor(AvatarProfileData profile, Renderer renderer, Color color)
     {
-        string propertyName = (avatarType == 2) ? "_BaseColor" : "_EmissionColor";
-        if (mat.HasProperty(propertyName))
+        if (renderer == null) return;
+        Material mat = renderer.material;
+        if (mat.HasProperty(profile.colorPropertyName))
         {
-            mat.SetColor(propertyName, color);
+            mat.SetColor(profile.colorPropertyName, color);
         }
     }
 
