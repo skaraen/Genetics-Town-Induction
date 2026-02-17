@@ -1382,8 +1382,8 @@ MonoBehaviour:
   - {r: 1, g: 0.38431, b: 0.32941, a: 1}
   - {r: 0.45882, g: 0.45882, b: 0.45882, a: 1}
   - {r: 1, g: 1, b: 1, a: 1}
-  colorPropertyName: _EmissionColor
-  colorSliderUsesValue: 0
+  colorPropertyName: _BaseColor
+  colorSliderUsesValue: 0101
   info: "SIGHT!\\n This sequence contributes to this avatar\u2019s eye muscles by
     increasing its ability to regulate light intake.\\n As a result, this avatar
     has rectangular pupils and excellent peripheral vision."
