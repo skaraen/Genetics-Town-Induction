@@ -1396,7 +1396,7 @@ MonoBehaviour:
   info: "SIGHT!\\n This sequence contributes to this avatar\u2019s eye muscles by
     increasing its ability to regulate light intake.\\n As a result, this avatar
     has rectangular pupils and excellent peripheral vision."
-  spawnYOffset: -2
+  spawnYOffset: 0
 --- !u!1001 &994149730081685706
 PrefabInstance:
   m_ObjectHideFlags: 0
