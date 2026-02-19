@@ -46,6 +46,9 @@ public class Part2GameManager : MonoBehaviour
     [Header("Grey-Out Effect")]
     [Tooltip("Material applied to avatar body parts that have not yet been unlocked by completing their sequence")]
     [SerializeField] private Material greyedOutMaterial;
+    [SerializeField] private Button infoButton;
+    [SerializeField] private GameObject funFactUI;
+    [SerializeField] private string fact;
 
     /// <summary>
     /// Manual Y offset adjustments for avatars that overlap with UI due to height differences.
@@ -240,6 +243,16 @@ public class Part2GameManager : MonoBehaviour
         if (gameUI == null) return;
         gameUI.alpha = 0f;
         gameUI.gameObject.SetActive(false);
+    }
+
+    void OnEnable()
+    {
+        infoButton.onClick.AddListener(() => {
+            FunFactUI funFactUIComp = funFactUI.GetComponent<FunFactUI>();
+
+            funFactUIComp.Activate("Sequencing", fact);
+            funFactUIComp.FadeIn();
+        });
     }
 
     void OnDisable()
