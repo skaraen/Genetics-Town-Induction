@@ -26,6 +26,7 @@ public class AvatarGenerator : NetworkBehaviour
     public TextMeshProUGUI[] seqTitles;
     public Transform[] toggleTransforms;
     public Slider[] sliders;
+    public Image[] dials;
     public Image[] needles;
 
     [SerializeField] private int cameraFocus;
@@ -219,7 +220,13 @@ public class AvatarGenerator : NetworkBehaviour
             int index = i;
             switchToggles[index] = toggleTransforms[index].GetComponent<SwitchToggle>();
             switchToggles[index].onToggleChanged.AddListener((isOn) =>
-            {
+            {   
+                GeneTickerItem ti = tickerItemPrefabs[index].GetComponent<GeneTickerItem>();
+                if (!isOn)
+                    ti.UpdateDisabledText("");
+                else
+                    ti.UpdateText(currProfileData.subSequences[index]);
+
                 subSequenceEnabled[index] = isOn;
                 UpdateAvatar();
             });
@@ -263,6 +270,11 @@ public class AvatarGenerator : NetworkBehaviour
             RotateNeedle(i);
 
             int index = i;
+
+            string spriteName = currProfileData.id.ToString() + "_" + index.ToString();
+            Sprite sprite = Resources.Load<Sprite>("Images/Dialbackground/" + spriteName);
+            dials[index].sprite = sprite;
+
             sliders[index].onValueChanged.AddListener((value) =>
             {
                 RotateNeedle(index);
@@ -284,6 +296,10 @@ public class AvatarGenerator : NetworkBehaviour
         if (canvasId + 1 < canvas.Length)
         {
             canvas[canvasId + 1].SetActive(true);
+        }
+        else
+        {
+            LoadGameScene();
         }
     }
 
@@ -316,7 +332,6 @@ public class AvatarGenerator : NetworkBehaviour
             case 2:
                 RevealTraits();
                 StartCoroutine(DelayedToggleCanvas(canvasId, 6f));
-                // LoadGameScene();
                 break;
         }
     }
@@ -411,14 +426,14 @@ public class AvatarGenerator : NetworkBehaviour
             }
         }
 
-        TickerItem ti;
+        GeneTickerItem ti;
         for (int i = 0; i < NUM_SUBSEQUENCES; i++)
         {
-            ti = tickerItemPrefabs[i].GetComponent<TickerItem>();
+            ti = tickerItemPrefabs[i].GetComponent<GeneTickerItem>();
             ti.UpdateText(currProfileData.subSequences[i]);
         }
 
-        ti = tickerItemPrefabs[2].GetComponent<TickerItem>();
+        ti = tickerItemPrefabs[2].GetComponent<GeneTickerItem>();
         ti.UpdateText(currProfileData.colorSequence);
 
         UpdateAvatar();

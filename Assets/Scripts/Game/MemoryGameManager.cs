@@ -281,7 +281,7 @@ public class MemoryGameManager : MonoBehaviour
                 RevealAvatar();
                 break;
             case 2:
-                seqTicker.FlickerUpdateTicker("KARAENSENTHILKUMAR");
+                // seqTicker.FlickerUpdateTicker("KARAENSENTHILKUMAR");
                 EndGame();
                 break;
         }
@@ -328,7 +328,7 @@ public class MemoryGameManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.C))
         {
-            seqTicker.FlickerUpdateTicker("KARAENSENTHILKUMAR");
+            // seqTicker.FlickerUpdateTicker("KARAENSENTHILKUMAR");
         }
     }
 

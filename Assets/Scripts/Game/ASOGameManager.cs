@@ -12,9 +12,11 @@ public class ASOGameManager : MonoBehaviour
     [SerializeField] TextMeshProUGUI resultASOText;
     [SerializeField] Button verifySequenceButton;
     [SerializeField] Button verifyASOButton;
-    [SerializeField] Button infoButton;
+    [SerializeField] Button[] infoButton;
     [SerializeField] GameObject componentHandler;
     [SerializeField] GameObject dialogueBox;
+    [SerializeField] GameObject funFactUI;
+    [SerializeField] string[] facts;
 
     DialogueController dialogueController;
 
@@ -45,7 +47,18 @@ public class ASOGameManager : MonoBehaviour
             }
         }
 
-        infoButton.onClick.AddListener(() => {dialogueController.StartSequence("narrator-aso-explain");});
+        for (int i = 0; i < 2; i++)
+        {
+            int index = i;
+            infoButton[index].onClick.AddListener(() => {
+                FunFactUI funFactUIComp = funFactUI.GetComponent<FunFactUI>();
+
+                string animName = (index == 0) ? "Disease" : "ASO";
+
+                funFactUIComp.Activate(animName, facts[index]);
+                funFactUIComp.FadeIn();
+            });
+        }
     }
 
     /// <summary>
