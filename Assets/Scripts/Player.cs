@@ -16,14 +16,12 @@ public class Player : NetworkBehaviour
     [SerializeField] private int ownerCamPriority = 100;
 
     private CinemachineCamera cineCam;
-    private bool cameraBound = false;
-    private bool bindingInProgress = false;
     private bool isMoving;
 
     public override void OnNetworkSpawn()
     {
         if (!IsOwner) return;
-        TryBindCamera();               // kick off once on spawn
+        BindCamera();
     }
 
     private void Update()
@@ -32,48 +30,15 @@ public class Player : NetworkBehaviour
         HandleMovement();
     }
 
-    private void TryBindCamera()
+    /// <summary>Binds the ThirdPersonCam to this player's tracking target via CameraManager.</summary>
+    private void BindCamera()
     {
-        if (cameraBound || bindingInProgress) return;
-
-        cineCam = FindFirstObjectByType<CinemachineCamera>();
-        if (cineCam != null)
-        {
-            BindCameraNow();
-        }
-        else
-        {
-            StartCoroutine(BindWhenReady()); // one coroutine, not per-frame
-        }
-    }
-
-    private System.Collections.IEnumerator BindWhenReady()
-    {
-        bindingInProgress = true;
-
-        // wait one or more frames until a CinemachineCamera appears
-        while (cineCam == null)
-        {
-            cineCam = FindFirstObjectByType<CinemachineCamera>();
-            if (cineCam == null) yield return null;
-        }
-
-        BindCameraNow();
-        bindingInProgress = false;
-    }
-
-    private void BindCameraNow()
-    {
-        if (cineCam == null) return;
-
+        cineCam = CameraManager.Instance.ThirdPersonCam;
         var target = trackingTarget != null ? trackingTarget : transform;
 
-        // CM v3 API
         cineCam.Target.TrackingTarget = target;
         cineCam.Target.LookAtTarget   = target;
         cineCam.Priority              = ownerCamPriority;
-
-        cameraBound = true;
     }
 
     public override void OnNetworkDespawn()

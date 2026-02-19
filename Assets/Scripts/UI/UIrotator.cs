@@ -13,7 +13,7 @@ public class UIrotator : MonoBehaviour
     void Awake()
     {
         if (cineCam == null)
-            cineCam = FindFirstObjectByType<CinemachineCamera>();
+            cineCam = CameraManager.Instance.ThirdPersonCam;
     }
 
     void OnBecameVisible()

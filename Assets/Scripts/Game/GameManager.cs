@@ -1,5 +1,4 @@
 using System;
-using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;  // <-- Add this if missing
@@ -30,16 +29,6 @@ public class GameManager : MonoBehaviour
         if (dialogueBox != null)
         {
             dialogueController = dialogueBox.GetComponent<DialogueController>();
-        }
-
-        Camera renderCam = null;
-        var brain = FindObjectOfType<CinemachineBrain>();
-        if (brain) renderCam = brain.GetComponent<Camera>();
-        if (!renderCam) renderCam = Camera.main;
-        if (!renderCam)
-        {
-            Debug.LogError("No render Camera found (no CinemachineBrain and no Camera.main).");
-            return;
         }
 
         spawner = spawnerObj.GetComponent<PlayerSpawner>();

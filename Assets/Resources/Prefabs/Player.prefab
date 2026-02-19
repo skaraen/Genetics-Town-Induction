@@ -137,6 +137,7 @@ GameObject:
   - component: {fileID: 3809831677086898486}
   - component: {fileID: 7977793399430811681}
   - component: {fileID: 5349061468962465566}
+  - component: {fileID: 8940682863906703278}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -366,7 +367,7 @@ MonoBehaviour:
   interactBtn: {fileID: 6468705168822870301}
   worldCam: {fileID: 0}
   triggerRadius: 5
-  fadeSmoothTime: 0.2
+  fadeSmoothTime: 0.75
 --- !u!54 &7977793399430811681
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -417,6 +418,23 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &8940682863906703278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1636854815523831658}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bada5ff7f674e45b685414c594df9728, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractGroupCamController
+  ShowTopMostFoldoutHeaderGroup: 1
+  interactCamName: InteractGroupCam
+  activePriority: 200
+  inactivePriority: 0
+  clearGroupDelay: 2
 --- !u!1 &3186822504345725598
 GameObject:
   m_ObjectHideFlags: 0
