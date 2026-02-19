@@ -23,7 +23,8 @@ public class OwnerCineCamBinderV3 : NetworkBehaviour
 
     private void BindCamera()
     {
-            cineCam = FindFirstObjectByType<CinemachineCamera>();
+            var allCams = FindObjectsByType<CinemachineCamera>(FindObjectsSortMode.None);
+            cineCam = System.Array.Find(allCams, c => c.name == "ThirdPersonCam");
 
         if (cineCam == null)
         {

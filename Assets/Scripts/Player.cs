@@ -36,7 +36,8 @@ public class Player : NetworkBehaviour
     {
         if (cameraBound || bindingInProgress) return;
 
-        cineCam = FindFirstObjectByType<CinemachineCamera>();
+        var allCams = FindObjectsByType<CinemachineCamera>(FindObjectsSortMode.None);
+        cineCam = System.Array.Find(allCams, c => c.name == "ThirdPersonCam");
         if (cineCam != null)
         {
             BindCameraNow();
@@ -54,7 +55,8 @@ public class Player : NetworkBehaviour
         // wait one or more frames until a CinemachineCamera appears
         while (cineCam == null)
         {
-            cineCam = FindFirstObjectByType<CinemachineCamera>();
+            var allCams = FindObjectsByType<CinemachineCamera>(FindObjectsSortMode.None);
+            cineCam = System.Array.Find(allCams, c => c.name == "ThirdPersonCam");
             if (cineCam == null) yield return null;
         }
 

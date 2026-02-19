@@ -1,17 +1,28 @@
 using System;
-using System.ComponentModel;
-using System.Security.Cryptography;
+using DG.Tweening;
 using TMPro;
 using Unity.Cinemachine;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PlayerUI : NetworkBehaviour
 {
     private enum FacingTarget { Camera, Player, Hybrid }
+
+    /// <summary>
+    /// Fired on the local machine when this player's interact popup becomes visible to the local owner.
+    /// Passes the canvas Transform so the camera controller can frame it alongside the local player.
+    /// Static so InteractGroupCamController on the local player can subscribe without a reference to this instance.
+    /// </summary>
+    public static event System.Action<Transform> OnInteractPopupShown;
+
+    /// <summary>
+    /// Fired on the local machine when this player's interact popup begins hiding.
+    /// Fires at the start of HideUI() (not after fade) so the camera blend back begins immediately.
+    /// </summary>
+    public static event System.Action OnInteractPopupHidden;
 
     [Header("References")]
     [SerializeField] private Canvas canvas;
@@ -25,8 +36,6 @@ public class PlayerUI : NetworkBehaviour
     [Header("UI Fade")]
     [SerializeField] float fadeSmoothTime = 0.2f;
     CanvasGroup canvasGroup;
-    bool pendingHide;
-    float targetAlpha, currentAlpha, alphaVelocity;
 
     SphereCollider trigger;
     Action targetAction;
@@ -44,7 +53,8 @@ public class PlayerUI : NetworkBehaviour
         if (!worldCam)
         {
             var brain = FindFirstObjectByType<CinemachineBrain>();
-            var cineCam = FindFirstObjectByType<CinemachineCamera>();
+            var allCams = FindObjectsByType<CinemachineCamera>(FindObjectsSortMode.None);
+            var cineCam = System.Array.Find(allCams, c => c.name == "ThirdPersonCam");
 
             if (brain) worldCam = brain.GetComponent<Camera>();
             if (cineCam) inputAxisController = cineCam.GetComponent<CinemachineInputAxisController>();
@@ -83,17 +93,35 @@ public class PlayerUI : NetworkBehaviour
         HideUI();
     }
 
+    /// <summary>
+    /// Activates the canvas and fades it in via DOTween. Stops any in-progress fade first.
+    /// </summary>
     void ShowUI()
     {
-        canvas.gameObject.SetActive(true);
         if (inputAxisController) inputAxisController.enabled = false;
-        targetAlpha = 1f;
+        canvasGroup.DOKill();
+        canvasGroup.DOFade(1f, fadeSmoothTime).OnComplete(() =>
+        {
+            canvasGroup.interactable = true;
+            canvasGroup.blocksRaycasts = true;
+        });
+        OnInteractPopupShown?.Invoke(canvas.transform);
     }
 
+    /// <summary>
+    /// Fades the canvas out via DOTween, then deactivates it. Stops any in-progress fade first.
+    /// Fires OnInteractPopupHidden immediately so camera blends back without waiting for the fade.
+    /// </summary>
     void HideUI()
     {
-        targetAlpha = 0f;
-        pendingHide = true;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
+        canvasGroup.DOKill();
+        canvasGroup.DOFade(0f, fadeSmoothTime).OnComplete(() =>
+        {
+            if (inputAxisController) inputAxisController.enabled = true;
+        });
+        OnInteractPopupHidden?.Invoke();
     }
 
     void OnEnable()
@@ -106,16 +134,14 @@ public class PlayerUI : NetworkBehaviour
 
         canvas.renderMode = RenderMode.WorldSpace;
         canvas.worldCamera = worldCam;
-        canvas.gameObject.SetActive(false);
         if (!canvas.TryGetComponent<CanvasGroup>(out canvasGroup))
             canvasGroup = canvas.gameObject.AddComponent<CanvasGroup>();
 
         if (canvasGroup)
         {
-            currentAlpha = targetAlpha = 0f;
-            alphaVelocity = 0f;
             canvasGroup.alpha = 0f;
             canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
         }
 
         interactBtn.onClick.AddListener(() =>
@@ -175,33 +201,9 @@ public class PlayerUI : NetworkBehaviour
 
     void LateUpdate()
     {
-        if (canvas.gameObject.activeSelf) targetAction?.Invoke();
+        targetAction?.Invoke();
     }
 
-    void Update()
-    {
-        if (canvasGroup)
-        {
-            currentAlpha = Mathf.SmoothDamp(currentAlpha, targetAlpha, ref alphaVelocity, fadeSmoothTime);
-            canvasGroup.alpha = currentAlpha;
-
-            bool interact = currentAlpha > 0.5f;
-            canvasGroup.interactable = interact;
-            canvasGroup.blocksRaycasts = interact;
-        }
-
-        if (pendingHide)
-        {
-            bool alphaDone = !canvasGroup || currentAlpha < 0.01f | Mathf.Approximately(currentAlpha, 0f);
-
-            if (alphaDone)
-            {
-                canvas.gameObject.SetActive(false);
-                if (inputAxisController) inputAxisController.enabled = true;
-                pendingHide = false;
-            }
-        }
-    }
 
     /// <summary>
     /// Marks this UI as having a pending interaction request and stores the requester's full
