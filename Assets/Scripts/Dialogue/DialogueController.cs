@@ -32,8 +32,9 @@ public class DialogueController : MonoBehaviour
     private bool isSequenceInProgress = false;
 
     private int currStage = 0;
-    private string currDialogue = "";
+    private DialogueLine currDialogue;
     private int currIdx;
+    private string visibleText, hiddenText;
 
     private float smoothTime = 0.2f;
     private float typeSpeed = 0.02f;
@@ -45,6 +46,9 @@ public class DialogueController : MonoBehaviour
     Animator narratorAnimator;
     ReactionChooser reactChooser;
     private bool isNarrationMode;
+
+    string beginTag = "<color=#00000000>";
+    string endTag = "</color>";
 
     void OnEnable()
     {
@@ -80,6 +84,13 @@ public class DialogueController : MonoBehaviour
 
     public void StartSequence(string sequence)
     {
+        if (DialogueDatabase.Instance == null)
+        {
+            Debug.LogError("DialogueDatabase is missing!");
+        } else
+        {
+            Debug.LogError("Oaky!");
+        }
         dialogues = DialogueDatabase.Instance.GetLines(sequence);
         isSequenceInProgress = true;
         currStage = 0;
@@ -95,8 +106,9 @@ public class DialogueController : MonoBehaviour
 
     void ProgressDialogue()
     {   
-        if (isNarrationMode)
-            reactChooser.SetReaction(dialogues[currStage].emotion);
+        OnDialogueProgress?.Invoke();
+        // if (isNarrationMode)
+        //     reactChooser.SetReaction(currDialogue.emotion);
 
         if (!isActive && !isAnimating)
         {
@@ -104,9 +116,8 @@ public class DialogueController : MonoBehaviour
         }
         else if (isTyping)
         {
-            dialogueText.text = dialogues[currStage].text;
-            currDialogue = dialogues[currStage].text;
-            currIdx = dialogues[currStage].text.Length;
+            dialogueText.text = currDialogue.text;
+            currIdx = currDialogue.text.Length;
             isTyping = false;
         }
         else if (isActive && !isTyping)
@@ -122,7 +133,7 @@ public class DialogueController : MonoBehaviour
 
     void Update()
     {
-        if (isSequenceInProgress && (isNarrationMode || !isNarratorAnimating) && (Input.GetKeyDown(KeyCode.Space) || Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)) 
+        if (isSequenceInProgress && (isNarrationMode || !isNarratorAnimating) && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && !isTyping) 
             ProgressDialogue();
 
         if (isAnimating)
@@ -159,15 +170,16 @@ public class DialogueController : MonoBehaviour
         {
             typeTimer += Time.deltaTime;
 
-            if (typeTimer >= typeSpeed && currIdx < dialogues[currStage].text.Length)
+            if (typeTimer >= typeSpeed && currIdx <= currDialogue.text.Length)
             {
-                currDialogue += dialogues[currStage].text[currIdx];
-                dialogueText.text = currDialogue;
+                visibleText = currDialogue.text.Substring(0, currIdx);
+                hiddenText = currDialogue.text.Substring(currIdx);
+                dialogueText.text = visibleText + beginTag + hiddenText + endTag;
                 currIdx++;
                 typeTimer = 0f;
             }
 
-            if (currIdx >= dialogues[currStage].text.Length)
+            if (currIdx > currDialogue.text.Length)
             {
                 isTyping = false;
             }
@@ -176,7 +188,7 @@ public class DialogueController : MonoBehaviour
 
     private void StartTyping()
     {
-        currDialogue = "";
+        currDialogue = dialogues[currStage];
         currIdx = 0;
         dialogueText.text = "";
         isTyping = true;

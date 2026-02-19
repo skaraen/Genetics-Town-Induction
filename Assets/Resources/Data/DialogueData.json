@@ -6,27 +6,37 @@
             {
                 "speaker" : "Gregor",
                 "emotion": "happy",
-                "text"    : "Hi everyone, my name is Gregor. Welcome to Genetics Land!"
+                "text"    : "Hi everyone, my name is Gregor. Welcome to Genetics Town! I'm excited to show you around this place I call home."
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "Like all digital worlds, this environment is created with hundreds and hundreds of lines of code."
+                "text"    : "This digital world is built using hundreds and hundreds of lines of code."
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "neutral",
-                "text"    : "However, Genetics Land is different. This digital world is all about genetic code."
+                "text"    : "In Genetics Town, we'll explore another kind of code: genetic code."
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "Genetic code is also known as DNA, which is the building block of life. It is found in every single living being and is responsible for determining nearly every aspect of who you are – your appearance, your temperament, and even your susceptibility for various conditions, such as something as simple as a sunburn or as complex as a disease."
+                "text"    : "Genetic code is also called DNA. It is found in all living things, which is why it's often known as the building block of life."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "It is responsible for determining nearly every aspect of who you are – your appearance, your personality, and even how likely you are to get something as simple as a sunburn or as complex as an illness."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "Every living thing has its own unique genetic code. It's what makes each of us different!"
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "happy",
-                "text"    : "Since we're in Genetics Land, we can use genetic code to create our own avatars. Let's go!"
+                "text"    : "While you're in Genetics Town, you can use genetic code to create your own avatar. Let's go!"
             }
         ]
     },
