@@ -10,9 +10,6 @@ using UnityEngine;
 /// </summary>
 public class InteractGroupCamController : NetworkBehaviour
 {
-    [Tooltip("Must match the GameObject name of the interact group camera in the scene.")]
-    [SerializeField] private string interactCamName = "InteractGroupCam";
-
     [Tooltip("Priority raised to when the popup is visible. Must exceed ThirdPersonCam's owner priority (100).")]
     [SerializeField] private int activePriority = 200;
 
@@ -30,7 +27,10 @@ public class InteractGroupCamController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         if (!IsOwner) return;
-        FindSceneReferences();
+
+        interactCam = CameraManager.Instance.InteractGroupCam;
+        targetGroup = interactCam.Target.TrackingTarget.GetComponent<CinemachineTargetGroup>();
+
         PlayerUI.OnInteractPopupShown  += OnPopupShown;
         PlayerUI.OnInteractPopupHidden += OnPopupHidden;
     }
@@ -42,30 +42,8 @@ public class InteractGroupCamController : NetworkBehaviour
         PlayerUI.OnInteractPopupShown  -= OnPopupShown;
         PlayerUI.OnInteractPopupHidden -= OnPopupHidden;
 
-        // Safety cleanup in case we despawn while popup is active.
-        DeactivateCam();
+        SetCamState(false);
         ClearTargetGroup();
-    }
-
-    /// <summary>
-    /// Finds InteractGroupCam by name and retrieves its CinemachineTargetGroup from the tracking target.
-    /// Called at spawn and lazily on popup-shown if references are missing.
-    /// </summary>
-    private void FindSceneReferences()
-    {
-        var allCams = FindObjectsByType<CinemachineCamera>(FindObjectsSortMode.None);
-        interactCam = System.Array.Find(allCams, c => c.name == interactCamName);
-
-        if (interactCam == null)
-        {
-            Debug.LogWarning($"[InteractGroupCamController] No CinemachineCamera named '{interactCamName}' found in scene.");
-            return;
-        }
-
-        targetGroup = interactCam.Target.TrackingTarget?.GetComponent<CinemachineTargetGroup>();
-
-        if (targetGroup == null)
-            Debug.LogWarning("[InteractGroupCamController] InteractGroupCam's tracking target has no CinemachineTargetGroup component.");
     }
 
     /// <summary>
@@ -75,12 +53,6 @@ public class InteractGroupCamController : NetworkBehaviour
     /// </summary>
     private void OnPopupShown(Transform popupCanvasTransform)
     {
-        if (interactCam == null || targetGroup == null)
-        {
-            FindSceneReferences();
-            if (interactCam == null || targetGroup == null) return;
-        }
-
         // Cancel any pending group-clear — rapid show-hide-show must not leave the group empty.
         if (clearGroupCoroutine != null)
         {
@@ -94,7 +66,10 @@ public class InteractGroupCamController : NetworkBehaviour
         targetGroup.AddMember(transform, weight: 1f, radius: 1f);
         targetGroup.AddMember(popupCanvasTransform, weight: 1f, radius: 0.5f);
 
-        ActivateCam();
+        // activate the camera
+        interactCam.Priority.Value   = activePriority;
+        interactCam.Priority.Enabled = true;
+        SetCamState(true);
     }
 
     /// <summary>
@@ -104,32 +79,20 @@ public class InteractGroupCamController : NetworkBehaviour
     /// </summary>
     private void OnPopupHidden()
     {
-        DeactivateCam();
-
+        SetCamState(false);
         if (clearGroupCoroutine != null) StopCoroutine(clearGroupCoroutine);
         clearGroupCoroutine = StartCoroutine(ClearGroupAfterDelay());
     }
 
-    /// <summary>Raises InteractGroupCam priority above ThirdPersonCam, triggering CinemachineBrain blend to it.</summary>
-    private void ActivateCam()
+    private void SetCamState(bool enabled = true)
     {
-        if (interactCam == null) return;
-        interactCam.Priority.Value   = activePriority;
-        interactCam.Priority.Enabled = true;
-    }
-
-    /// <summary>Drops InteractGroupCam priority to zero, making ThirdPersonCam dominant and starting the blend back.</summary>
-    private void DeactivateCam()
-    {
-        if (interactCam == null) return;
-        interactCam.Priority.Value   = inactivePriority;
+        interactCam.Priority.Value = enabled ? activePriority : inactivePriority;
         interactCam.Priority.Enabled = true;
     }
 
     /// <summary>Removes all members from the target group, freeing their Transform references.</summary>
     private void ClearTargetGroup()
     {
-        if (targetGroup == null) return;
         for (int i = targetGroup.Targets.Count - 1; i >= 0; i--)
             targetGroup.RemoveMember(targetGroup.Targets[i].Object);
     }

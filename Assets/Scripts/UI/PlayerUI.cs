@@ -52,14 +52,8 @@ public class PlayerUI : NetworkBehaviour
 
         if (!worldCam)
         {
-            var brain = FindFirstObjectByType<CinemachineBrain>();
-            var allCams = FindObjectsByType<CinemachineCamera>(FindObjectsSortMode.None);
-            var cineCam = System.Array.Find(allCams, c => c.name == "ThirdPersonCam");
-
-            if (brain) worldCam = brain.GetComponent<Camera>();
-            if (cineCam) inputAxisController = cineCam.GetComponent<CinemachineInputAxisController>();
-
-            if (!worldCam) worldCam = Camera.main;
+            worldCam = CameraManager.Instance.RenderCamera;
+            inputAxisController = CameraManager.Instance.InputAxisController;
         }
 
         trigger = gameObject.AddComponent<SphereCollider>();
