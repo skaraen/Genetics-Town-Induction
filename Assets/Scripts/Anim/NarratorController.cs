@@ -7,19 +7,14 @@ public class NarratorController : MonoBehaviour
 {
     private Animator animator;
     public UnityEvent animationComplete;
-    private bool isEntryComplete = false;
-    private int currentSway = 0;
-    public int currentStage = 0;
-    private System.Random rand;
 
-    void Start()
+    void OnEnable()
     {
-        rand = new System.Random();
+        animator = GetComponent<Animator>();
     }
 
     public void TriggerEntry()
     {
-        animator = GetComponent<Animator>();
         animator.SetTrigger("PeekTrigger");
         animator.SetTrigger("EntryTrigger");    
     }
@@ -27,25 +22,14 @@ public class NarratorController : MonoBehaviour
     public void OnAnimationComplete()
     {
         animationComplete.Invoke();
-
-        if (!isEntryComplete)
-        {
-            isEntryComplete = true;
-        }
     }
 
-    void Update()
+    public void SwayFromTo(string startPos, string endPos)
     {
-        if (isEntryComplete && Input.GetKeyDown(KeyCode.Space))
-        {
-            if (currentStage < 3)
-            {
-                currentSway = (currentSway + 1) % 3;
-                int t = currentSway + 1;
-
-                animator.SetTrigger("SwayTrigger" + t);
-            }
-            currentStage++;
-        }
+        if (string.IsNullOrEmpty(startPos) || string.IsNullOrEmpty(endPos))
+            return;
+        string transitionKey = startPos[0].ToString() + endPos[0];
+        
+        animator.SetTrigger("Sway" + transitionKey.ToUpper() + "Trigger");
     }
 }

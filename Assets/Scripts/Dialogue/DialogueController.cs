@@ -84,6 +84,13 @@ public class DialogueController : MonoBehaviour
 
     public void StartSequence(string sequence)
     {
+        if (DialogueDatabase.Instance == null)
+        {
+            Debug.LogError("DialogueDatabase is missing!");
+        } else
+        {
+            Debug.LogError("Oaky!");
+        }
         dialogues = DialogueDatabase.Instance.GetLines(sequence);
         isSequenceInProgress = true;
         currStage = 0;
@@ -99,8 +106,9 @@ public class DialogueController : MonoBehaviour
 
     void ProgressDialogue()
     {   
-        if (isNarrationMode)
-            reactChooser.SetReaction(currDialogue.emotion);
+        OnDialogueProgress?.Invoke();
+        // if (isNarrationMode)
+        //     reactChooser.SetReaction(currDialogue.emotion);
 
         if (!isActive && !isAnimating)
         {
@@ -125,7 +133,7 @@ public class DialogueController : MonoBehaviour
 
     void Update()
     {
-        if (isSequenceInProgress && (isNarrationMode || !isNarratorAnimating) && (Input.GetKeyDown(KeyCode.Space) || Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)) 
+        if (isSequenceInProgress && (isNarrationMode || !isNarratorAnimating) && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && !isTyping) 
             ProgressDialogue();
 
         if (isAnimating)

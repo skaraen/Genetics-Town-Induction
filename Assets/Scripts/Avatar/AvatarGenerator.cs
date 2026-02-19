@@ -212,11 +212,6 @@ public class AvatarGenerator : NetworkBehaviour
             switchToggles[index].onToggleChanged.AddListener((isOn) =>
             {
                 subSequenceEnabled[index] = isOn;
-                if (index == 0)
-                {
-                    FlickerComponent flickerComponent = seqTitles[index].GetComponent<FlickerComponent>();
-                    flickerComponent.FlickerUpdateText("Head component");
-                }
                 UpdateAvatar();
             });
         }
@@ -272,9 +267,9 @@ public class AvatarGenerator : NetworkBehaviour
         }
     }
 
-    IEnumerator DelayedToggleCanvas(int canvasId)
+    IEnumerator DelayedToggleCanvas(int canvasId, float delay)
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(delay);
         canvas[canvasId].SetActive(false);
 
         if (canvasId + 1 < canvas.Length)
@@ -307,11 +302,24 @@ public class AvatarGenerator : NetworkBehaviour
                 break;
             case 1:
                 cameraFocus = 1;
-                StartCoroutine(DelayedToggleCanvas(canvasId));
+                StartCoroutine(DelayedToggleCanvas(canvasId, 1));
                 break;
             case 2:
-                LoadGameScene();
+                RevealTraits();
+                StartCoroutine(DelayedToggleCanvas(canvasId, 6f));
+                // LoadGameScene();
                 break;
+        }
+    }
+
+    void RevealTraits()
+    {
+        for (int i = 0; i <= NUM_SUBSEQUENCES; i++)
+        {
+            int index = i;
+            FlickerComponent flickerComponent = seqTitles[index].GetComponent<FlickerComponent>();
+            string traitName = (index < NUM_SUBSEQUENCES) ? currProfileData.subSequencesTraitNames[index] : "Color";
+            flickerComponent.FlickerUpdateText(traitName);
         }
     }
 
