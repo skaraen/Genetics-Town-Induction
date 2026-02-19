@@ -29,6 +29,8 @@ public class AvatarGenerator : NetworkBehaviour
     public Image[] needles;
 
     [SerializeField] private int cameraFocus;
+    [SerializeField] Button funFactButton;
+    [SerializeField] GameObject funFactUI;
 
     const string set = "ATGC";
     private string[][] baseSequenceCodons;
@@ -201,6 +203,13 @@ public class AvatarGenerator : NetworkBehaviour
                 currBaseSequence = str;
             });
         }
+        funFactButton.onClick.AddListener(() =>
+        {
+            FunFactUI funFactUIComp = funFactUI.GetComponent<FunFactUI>();
+            string factInfo = "The base sequence you chose contributes to " + currProfileData.info;
+            funFactUIComp.Activate(currProfileData.avatarName, factInfo);
+            funFactUIComp.FadeIn();
+        });
     }
 
     private void SetupToggles()
