@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
@@ -7,13 +8,19 @@ using UnityEngine.UI;
 
 /// <summary>
 /// Initilizes the buttons in the title screen menu (for testing purposes)
-/// which starts the game as a host, server, or client
+/// which starts the game as a host, server, or client.
+/// Supports LAN multiplayer: host listens on all interfaces (0.0.0.0),
+/// client connects to the IP entered in the input field.
 /// </summary>
 public class NetworkUI : MonoBehaviour
 {
     [SerializeField] private Button HostButton;
     [SerializeField] private Button ServerButton;
     [SerializeField] private Button ClientButton;
+
+    [Header("LAN")]
+    [Tooltip("Input field for the host's LAN IP address (used when joining as a client).")]
+    [SerializeField] private TMP_InputField ipInputField; // default placeholder: 127.0.0.1
 
     [Header("Scenes")]
     [SerializeField] private string avatarSceneName = "IntroScene"; // set in Inspector
@@ -47,9 +54,12 @@ public class NetworkUI : MonoBehaviour
     {
         HostButton.onClick.AddListener(() =>
         {
+            // Listen on all network interfaces so other LAN devices can reach this host.
+            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            transport.SetConnectionData("0.0.0.0", 7777);
             if (NetworkManager.Singleton.StartHost())
             {
-                // 2) Server/Host drives scene change; clients follow automatically
+                // Server/Host drives scene change; clients follow automatically.
                 NetworkManager.Singleton.SceneManager.LoadScene(avatarSceneName, LoadSceneMode.Single);
             }
         });
@@ -64,6 +74,12 @@ public class NetworkUI : MonoBehaviour
 
         ClientButton.onClick.AddListener(() =>
         {
+            // Use the IP from the input field, falling back to localhost for same-machine testing.
+            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            string ip = (ipInputField != null && !string.IsNullOrWhiteSpace(ipInputField.text))
+                ? ipInputField.text.Trim()
+                : "127.0.0.1";
+            transport.SetConnectionData(ip, 7777);
             NetworkManager.Singleton.StartClient();
             // Do NOT load scenes here; server will.
         });
