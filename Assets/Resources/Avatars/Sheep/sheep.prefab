@@ -1382,12 +1382,21 @@ MonoBehaviour:
   - {r: 1, g: 0.38431, b: 0.32941, a: 1}
   - {r: 0.45882, g: 0.45882, b: 0.45882, a: 1}
   - {r: 1, g: 1, b: 1, a: 1}
-  colorPropertyName: _EmissionColor
-  colorSliderUsesValue: 0
+  colorPropertyName: _BaseColor
+  colorSliderUsesValue: 0101
+  sequenceBodyParts:
+  - bodyParts:
+    - {fileID: 5390438889368062956}
+  - bodyParts:
+    - {fileID: 437838062013823338}
+    - {fileID: 8077062036350509549}
+  - bodyParts:
+    - {fileID: 7901446040301581459}
+    - {fileID: 978063476116181302}
   info: "SIGHT!\\n This sequence contributes to this avatar\u2019s eye muscles by
     increasing its ability to regulate light intake.\\n As a result, this avatar
     has rectangular pupils and excellent peripheral vision."
-  spawnYOffset: -2
+  spawnYOffset: 0
 --- !u!1001 &994149730081685706
 PrefabInstance:
   m_ObjectHideFlags: 0

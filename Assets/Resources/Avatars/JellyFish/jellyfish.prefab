@@ -71,7 +71,16 @@ MonoBehaviour:
   - {r: 0.46667, g: 1, b: 0, a: 1}
   - {r: 0, g: 0.50196, b: 1, a: 1}
   colorPropertyName: _EmissionColor
-  colorSliderUsesValue: 0
+  colorSliderUsesValue: 
+  sequenceBodyParts:
+  - bodyParts:
+    - {fileID: 6746500681942120459}
+  - bodyParts:
+    - {fileID: 6715936289471031684}
+    - {fileID: 7578548632413629587}
+  - bodyParts:
+    - {fileID: 6835127885028735663}
+    - {fileID: 1891638868463072173}
   info: CAMOUFLAGE!\n This sequence allows this avatar to absorb blue light and emit
     green light, creating a glow.\n As a result, this avatar could distract or attract
     others with bright light flashes.

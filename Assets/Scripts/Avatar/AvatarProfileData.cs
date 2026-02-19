@@ -1,4 +1,19 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
+
+/// <summary>
+/// Holds all variant GameObjects for one DNA sequence slot.
+/// Assign every variant (e.g., both head1 and head2) so that Part2Game
+/// can grey them all out regardless of which variant is currently active.
+/// </summary>
+[Serializable]
+public class SequenceBodyPartGroup
+{
+    [Tooltip("All variant GameObjects for this sequence (e.g., both head1 and head2). " +
+             "All will be greyed out until the sequence is completed.")]
+    public List<GameObject> bodyParts = new List<GameObject>();
+}
 
 /// <summary>
 /// Defines the biological profile data for an avatar.
@@ -47,6 +62,14 @@ public class AvatarProfileData : MonoBehaviour
 
     [Tooltip("Per-slider mode: if true, that slider adjusts HSV Value (lightness); if false, it adjusts Hue")]
     public bool[] colorSliderUsesValue = new bool[NUM_SUBSEQUENCES];
+
+    [Header("Sequence Body Parts")]
+    // Index 0 = base sequence, index 1 = subSequences[0], index 2 = subSequences[1].
+    // Include ALL variant GameObjects per slot (e.g., head1 AND head2 for the head sequence)
+    // so that Part2Game can grey every variant regardless of which one the player selected.
+    [Tooltip("One group per sequence, matched by index: [0] = base sequence, [1] = subSequences[0], [2] = subSequences[1]. " +
+             "Add all variant GameObjects to each group.")]
+    public List<SequenceBodyPartGroup> sequenceBodyParts = new List<SequenceBodyPartGroup>();
 
     [Header("Display")]
     [Tooltip("Educational description of this avatar's biological trait")]
