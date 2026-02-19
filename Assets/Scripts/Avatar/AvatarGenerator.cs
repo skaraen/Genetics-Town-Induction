@@ -23,6 +23,7 @@ public class AvatarGenerator : NetworkBehaviour
     public GameObject[] canvas;
     public TextMeshProUGUI infoText;
     public GameObject[] tickerItemPrefabs;
+    public TextMeshProUGUI[] seqTitles;
     public Transform[] toggleTransforms;
     public Slider[] sliders;
     public Image[] needles;
@@ -211,6 +212,11 @@ public class AvatarGenerator : NetworkBehaviour
             switchToggles[index].onToggleChanged.AddListener((isOn) =>
             {
                 subSequenceEnabled[index] = isOn;
+                if (index == 0)
+                {
+                    FlickerComponent flickerComponent = seqTitles[index].GetComponent<FlickerComponent>();
+                    flickerComponent.FlickerUpdateText("Head component");
+                }
                 UpdateAvatar();
             });
         }

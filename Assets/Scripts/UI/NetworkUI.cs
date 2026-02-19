@@ -23,7 +23,12 @@ public class NetworkUI : MonoBehaviour
     [SerializeField] private TMP_InputField ipInputField; // default placeholder: 127.0.0.1
 
     [Header("Scenes")]
-    [SerializeField] private string avatarSceneName = "IntroScene"; // set in Inspector
+    [SerializeField] private string avatarSceneName = "IntroScene";
+
+    [Header("Network Specs")]
+    [SerializeField]
+    public string hostIp = "10.150.3.226";
+    public ushort port = 7777;
 
     void Awake()
     {
@@ -81,7 +86,6 @@ public class NetworkUI : MonoBehaviour
                 : "127.0.0.1";
             transport.SetConnectionData(ip, 7777);
             NetworkManager.Singleton.StartClient();
-            // Do NOT load scenes here; server will.
         });
     }
 }

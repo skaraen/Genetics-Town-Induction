@@ -1829,6 +1829,10 @@ MonoBehaviour:
   - {fileID: 1100484954}
   - {fileID: 2108890706}
   - {fileID: 971744390}
+  seqTitles:
+  - {fileID: 840540376}
+  - {fileID: 1975209410}
+  - {fileID: 1389415270}
   toggleTransforms:
   - {fileID: 398307426}
   - {fileID: 1733395607}
@@ -3075,6 +3079,7 @@ GameObject:
   - component: {fileID: 840540375}
   - component: {fileID: 840540377}
   - component: {fileID: 840540376}
+  - component: {fileID: 840540378}
   m_Layer: 5
   m_Name: Text (TMP) (1)
   m_TagString: Untagged
@@ -3203,6 +3208,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 840540374}
   m_CullTransparentMesh: 1
+--- !u!114 &840540378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 840540374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f9131258290241f9893baa1f3fb538c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FlickerComponent
 --- !u!1 &855350005
 GameObject:
   m_ObjectHideFlags: 0
