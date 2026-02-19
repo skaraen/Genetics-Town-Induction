@@ -66,12 +66,22 @@ MonoBehaviour:
   - {fileID: 2649950663973239064}
   - {fileID: 6036887609317402325}
   colorRanges:
-  - {r: 0.87059, g: 0.30980, b: 0.27059, a: 1}
+  - {r: 0.87059, g: 0.3098, b: 0.27059, a: 1}
   - {r: 0.87059, g: 0.81961, b: 0.27059, a: 1}
-  - {r: 0.36078, g: 0.25098, b: 0.20000, a: 1}
-  - {r: 0.89020, g: 0.68235, b: 0.58824, a: 1}
+  - {r: 0.36078, g: 0.25098, b: 0.2, a: 1}
+  - {r: 0.8902, g: 0.68235, b: 0.58824, a: 1}
   colorPropertyName: _BaseColor
   colorSliderUsesValue: 0001
+  sequenceBodyParts:
+  - bodyParts:
+    - {fileID: 1052390578888718973}
+    - {fileID: 1052390578888718973}
+  - bodyParts:
+    - {fileID: 4595492851554506957}
+    - {fileID: 5244346364262713088}
+  - bodyParts:
+    - {fileID: 1254086518884382332}
+    - {fileID: 3020375835897515683}
   info: SPEED!\n This sequence allows this avatar to break down sugar quicker, increasing
     its energy output to muscles.\n As a result, this avatar could hover in the air,
     fly upside down, and maintain a heartbeat of 1200 bpm.

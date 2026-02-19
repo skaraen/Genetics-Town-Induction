@@ -477,10 +477,18 @@ MonoBehaviour:
   colorRanges:
   - {r: 1, g: 0.41176, b: 0.70588, a: 1}
   - {r: 0.36078, g: 0.08627, b: 0.38824, a: 1}
-  - {r: 0.96863, g: 0.70980, b: 0.88627, a: 1}
+  - {r: 0.96863, g: 0.7098, b: 0.88627, a: 1}
   - {r: 0.65098, g: 0.07843, b: 0.46667, a: 1}
   colorPropertyName: _BaseColor
   colorSliderUsesValue: 0101
+  sequenceBodyParts:
+  - bodyParts:
+    - {fileID: 8007189008481390473}
+  - bodyParts:
+    - {fileID: 6086066145003432965}
+    - {fileID: 8808933633745258761}
+  - bodyParts:
+    - {fileID: 4974869228857767246}
   info: REGENERATION!\n This sequence supports this avatar's ability to reactivate
     development pathways even in adulthood.\n As a result, this avatar could regenerate
     multiple body parts, including its spinal cord, post-injury.

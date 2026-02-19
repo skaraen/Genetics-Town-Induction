@@ -1475,6 +1475,7 @@ MonoBehaviour:
   dialogueBox: {fileID: 458723749}
   avatarSpawnPoint: {fileID: 1267188710}
   gameUI: {fileID: 1741272795}
+  greyedOutMaterial: {fileID: 2100000, guid: 8041149eb83a14416b864fdc8a6dc82d, type: 2}
 --- !u!4 &747056073
 Transform:
   m_ObjectHideFlags: 0

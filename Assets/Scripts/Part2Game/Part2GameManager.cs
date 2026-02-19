@@ -43,6 +43,10 @@ public class Part2GameManager : MonoBehaviour
     [Tooltip("CanvasGroup for the game UI, fades in after dialogue ends")]
     [SerializeField] private CanvasGroup gameUI;
 
+    [Header("Grey-Out Effect")]
+    [Tooltip("Material applied to avatar body parts that have not yet been unlocked by completing their sequence")]
+    [SerializeField] private Material greyedOutMaterial;
+
     /// <summary>
     /// Manual Y offset adjustments for avatars that overlap with UI due to height differences.
     /// Key: avatar ID, Value: Y offset to apply.
@@ -56,6 +60,12 @@ public class Part2GameManager : MonoBehaviour
     private Animator narratorAnimator;
     private GameObject currentAvatar;
     private PlayerCustoms targetCustoms;
+
+    // Maps sequence index → list of (renderer, originalMaterials) for restoration after grey-out
+    private Dictionary<int, List<(Renderer renderer, Material[] origMaterials)>> originalMaterialsBySequence;
+
+    // Index of the currently selected trait, matching sequenceBodyParts order in AvatarProfileData
+    private int currentlySelectedTraitIndex = -1;
 
     /// <summary>
     /// Tracks dialogue phase to differentiate intro vs final dialogue in HandleDialogueEnded.
@@ -152,30 +162,31 @@ public class Part2GameManager : MonoBehaviour
             List<(string traitName, string sequence)> traitSequences = GetTraitSequencesFromProfile(targetCustoms.avatarType);
 
             // Loop through each trait and create a toggle for it
-            foreach(var trait in traitSequences)
+            for (int i = 0; i < traitSequences.Count; i++)
             {
-                print($"Trait: {trait.traitName}, Sequence: {trait.sequence}");
+                print($"Trait: {traitSequences[i].traitName}, Sequence: {traitSequences[i].sequence}");
                 // Capture variables for lambda
-                string name = trait.traitName;
-                string seq = trait.sequence;
-                
+                int index = i;
+                string name = traitSequences[i].traitName;
+                string seq = traitSequences[i].sequence;
+
                 // Spawn the trait selection toggle
                 GameObject toggleObj = Instantiate(traitSelectionToggle, traitButtonParent);
-                
+
                 // Set the toggle text to the trait name
                 TextMeshProUGUI toggleText = toggleObj.GetComponentInChildren<TextMeshProUGUI>();
                 if(toggleText != null)
                 {
                     toggleText.text = name;
                 }
-                
+
                 // Add onValueChanged listener to handle toggle state changes
                 Toggle toggle = toggleObj.GetComponentInChildren<Toggle>();
                 if(toggle != null)
                 {
                     toggle.onValueChanged.AddListener((isOn) => {
                         if(isOn)
-                            SelectTraitButtonPressed(toggle, name, seq);
+                            SelectTraitButtonPressed(toggle, name, seq, index);
                         else if(currentlySelectedTraitToggle == toggle)
                             ClearSequence();
                     });
@@ -194,16 +205,18 @@ public class Part2GameManager : MonoBehaviour
     /// <param name="selectedToggle">The toggle that was selected</param>
     /// <param name="traitName">The name of the trait selected</param>
     /// <param name="sequence">The DNA sequence associated with the trait</param>
+    /// <param name="traitIndex">Index of this trait in sequenceBodyParts (0 = base, 1-2 = sub-sequences)</param>
     /// </summary>
-    public void SelectTraitButtonPressed(Toggle selectedToggle, string traitName, string sequence){
+    public void SelectTraitButtonPressed(Toggle selectedToggle, string traitName, string sequence, int traitIndex){
         // Restore the previously selected toggle if there is one
         if(currentlySelectedTraitToggle != null && currentlySelectedTraitToggle != selectedToggle)
         {
             currentlySelectedTraitToggle.isOn = false;
         }
 
-        // Store the newly selected toggle
+        // Store the newly selected toggle and its sequence index
         currentlySelectedTraitToggle = selectedToggle;
+        currentlySelectedTraitIndex = traitIndex;
 
         // Set up the sequence for this trait
         SetupSequence(traitName, sequence);
@@ -290,6 +303,7 @@ public class Part2GameManager : MonoBehaviour
         if (gameUI == null) return;
 
         SpawnAvatarDisplay();
+        GreyOutAllBodyParts();
         gameUI.gameObject.SetActive(true);
         gameUI.DOFade(1f, 1f);
     }
@@ -337,6 +351,7 @@ public class Part2GameManager : MonoBehaviour
         bool isCorrect = VerifySequence();
         if(isCorrect){
             Toggle completedToggle = currentlySelectedTraitToggle;
+            RestoreBodyParts(currentlySelectedTraitIndex);
             // Set interactable = false first, so when isOn changes, the visibility update shows the checkmark
             completedToggle.interactable = false;
             // Setting isOn = false triggers EnlargeToggleWhenSelected (scale down) and
@@ -436,6 +451,58 @@ public class Part2GameManager : MonoBehaviour
         narrator.GetComponent<ReactionChooser>().SetReaction("happy");
         narratorAnimator.SetTrigger("EntryTrigger");
         dialogueController.StartSequence("narrator-part2-final");
+    }
+
+    /// <summary>
+    /// Replaces materials on all sequence-mapped body parts with greyedOutMaterial at game start,
+    /// and stores the originals keyed by sequence index for later restoration.
+    /// Only runs if greyedOutMaterial is assigned and the avatar has an AvatarProfileData component.
+    /// </summary>
+    private void GreyOutAllBodyParts()
+    {
+        if (currentAvatar == null || greyedOutMaterial == null) return;
+
+        AvatarProfileData profile = currentAvatar.GetComponent<AvatarProfileData>();
+        if (profile == null) return;
+
+        originalMaterialsBySequence = new Dictionary<int, List<(Renderer, Material[])>>();
+
+        for (int i = 0; i < profile.sequenceBodyParts.Count; i++)
+        {
+            SequenceBodyPartGroup group = profile.sequenceBodyParts[i];
+            if (group == null) continue;
+
+            var rendererData = new List<(Renderer, Material[])>();
+            foreach (GameObject obj in group.bodyParts)
+            {
+                if (obj == null) continue;
+                foreach (Renderer r in obj.GetComponentsInChildren<Renderer>(true))
+                {
+                    rendererData.Add((r, r.materials));
+                    Material[] grey = new Material[r.sharedMaterials.Length];
+                    for (int j = 0; j < grey.Length; j++) grey[j] = greyedOutMaterial;
+                    r.materials = grey;
+                }
+            }
+            originalMaterialsBySequence[i] = rendererData;
+        }
+    }
+
+    /// <summary>
+    /// Restores original materials for the body part at the given sequence index.
+    /// Called when the player successfully completes the matching DNA sequence.
+    /// </summary>
+    private void RestoreBodyParts(int sequenceIndex)
+    {
+        if (originalMaterialsBySequence == null) return;
+        if (!originalMaterialsBySequence.TryGetValue(sequenceIndex, out var rendererData)) return;
+
+        foreach (var (renderer, origMaterials) in rendererData)
+        {
+            if (renderer != null)
+                renderer.materials = origMaterials;
+        }
+        originalMaterialsBySequence.Remove(sequenceIndex);
     }
 
 }
