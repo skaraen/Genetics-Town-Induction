@@ -292,7 +292,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -118.59446, y: -79.063}
+  m_AnchoredPosition: {x: -118.59448, y: -79.06299}
   m_SizeDelta: {x: 150, y: 150}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &47068164
@@ -434,9 +434,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Drag the colored letters into a sequence box in the correct order by matching
-    the order of the flashing colors. There are 4 unique genetic sequences. After
-    completing all 4, click next.
+  m_text: Drag the colored letters into a box in the correct order by matching the
+    order of the flashing colors. Select every feature to repeat this process three
+    times, one for each.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1737,9 +1737,10 @@ MonoBehaviour:
   greyedOutMaterial: {fileID: 2100000, guid: 8041149eb83a14416b864fdc8a6dc82d, type: 2}
   infoButton: {fileID: 47068164}
   funFactUI: {fileID: 1886523733}
-  fact: This part of the game is based on a real scientific process. Scientists have
-    used this process to discover more than 55,000 genetic sequences that are linked
-    to an illness or a trait.
+  fact: "This game is based on a real scientific process called \u201Csequencing!\u201D
+    Scientists use sequencing to discover the genetic sequences of any living thing.
+    This specific process, called \u201CIllumina Sequencing,\u201D uses colors to
+    identify the sequences, just as you are doing now."
 --- !u!4 &747056073
 Transform:
   m_ObjectHideFlags: 0

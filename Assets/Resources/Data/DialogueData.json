@@ -26,7 +26,7 @@
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "It is responsible for determining nearly every aspect of who you are – your appearance, your personality, and even how likely you are to get something as simple as a sunburn or as complex as an illness."
+                "text"    : "It is responsible for determining nearly every aspect of who you are - your appearance, your personality, and even how likely you are to get something as simple as a sunburn or as complex as an illness."
             },
             {
                 "speaker" : "Gregor",
@@ -37,48 +37,6 @@
                 "speaker" : "Gregor",
                 "emotion": "happy",
                 "text"    : "While you're in Genetics Town, you can use genetic code to create your own avatar. Let's go!"
-            }
-        ]
-    },
-    {
-        "sequence": "narrator-memory-intro",
-        "mode": "overlay",
-        "dialogues": [
-            {
-                "speaker" : "Gregor",
-                "emotion": "smile",
-                "text"    : "Let’s learn this avatar’s name and genetic code. But, learning can be tricky – it takes time and effort."
-            },
-            {
-                "speaker" : "Gregor",
-                "emotion": "neutral",
-                "text"    : "To learn this information and form a memory of the avatar, you must match a memory device on the top row with its partner on the bottom row, indicated by matching colors."
-            },
-            {
-                "speaker" : "Gregor",
-                "emotion": "neutral",
-                "text"    : "All colors will flash briefly, then disappear. It is up to you to remember the colors and create the correct match."
-            },
-            {
-                "speaker" : "Gregor",
-                "emotion": "neutral",
-                "text"    : "But be careful – only one set of memory devices will yield the correct learning. Matching any other set will result in a failed trial, as it will trigger the wrong response."
-            },
-            {
-                "speaker" : "Gregor",
-                "emotion": "smile",
-                "text"    : "You must match the correct set 3 times to complete the game and fully unlock all information about the other avatar. Good luck!"
-            }
-        ]
-    },
-    {
-        "sequence": "narrator-memory-final",
-        "mode": "overlay",
-        "dialogues": [
-            {
-                "speaker" : "Gregor",
-                "emotion": "happy",
-                "text"    : "Fantastic! This player’s information, including their genetic code, will now be stored as a memory bubble in your inventory for future reference."
             }
         ]
     },
@@ -94,17 +52,59 @@
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "Have fun exploring by approaching other avatars and selecting \"interact\" to discover their genetic sequences."
+                "text"    : "Have fun exploring by going up to other avatars and selecting \"Hello\" to discover their genetic sequences."
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "By uncovering another's genetic sequence, we can better understand how our diversity is created! Discovering the genetic root of our diversity can tell us why one avatar glows or why another can fly."
+                "text"    : "Try meeting as many avatars as possible, as friendship and knowledge are powerful. As you keep exploring, you'll discover why…"
+            }
+        ]
+    },
+    {
+        "sequence": "narrator-memory-intro",
+        "mode": "overlay",
+        "dialogues": [
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "Let's learn this avatar's name and genetic code. But, learning can be tricky - it takes time and effort."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "neutral",
+                "text"    : "To learn this information and form a memory of the avatar, you must match a memory device on the top row with its partner on the bottom row, indicated by matching colors."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "neutral",
+                "text"    : "All colors will flash briefly, then disappear. It is up to you to remember the colors and create the correct match."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "neutral",
+                "text"    : "But be careful - only one set of memory devices will yield the correct learning. Matching any other set will result in a failed trial, as it will trigger the wrong response."
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "Try interacting with as many avatars as possible, as friendship and knowledge are powerful, especially here. And the more sequences uncovered, the better prepared you will be for any future dangers in Genetics Town..."
+                "text"    : "You must match the correct set 3 times to complete the game and fully unlock all information about the other avatar. Good luck!"
+            }
+        ]
+    },
+    {
+        "sequence": "narrator-memory-final",
+        "mode": "overlay",
+        "dialogues": [
+            {
+                "speaker" : "Gregor",
+                "emotion": "happy",
+                "text"    : "Nice work! You've unlocked your friend's full genetic code, let's take a look!"
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "happy",
+                "text"    : "When you're ready, you can click \"Next\" to reenter Genetics Town to meet more friends."
             }
         ]
     },
@@ -115,33 +115,27 @@
             {
                 "speaker" : "Gregor",
                 "emotion": "shock",
-                "text"    : "Attention everyone, no need to panic, but it looks like a bug has invaded our code, damaging all avatars. I’ve received word that this bug has a genetic code of its own that’s been inserted into every avatar in the Land."
+                "text"    : "Attention everyone, no need to p-p-p-PANIC!!!"
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "shock",
-                "text"    : "We need your help to fix this! You need to find the bug’s genetic code and design a cure to bring your avatar back to health. Let’s go!"
-            }
-        ]
-    },
-    {
-        "sequence": "narrator-bug-intro",
-        "mode": "overlay",
-        "dialogues": [
+                "text"    : "It looks like there's a bug! This bug has a genetic code of its own that's snuck into every avatar's genetic code."
+            },
             {
                 "speaker" : "Gregor",
-                "emotion": "neutral",
-                "text"    : "To cure your avatar, we must first determine the genetic sequence of the bug. We know it is 6 letters long. We also know that it has inserted itself into every avatar."
+                "emotion": "shock",
+                "text"    : "We need your help to fix this! Figure out the bug's genetic code to find a cure and bring Genetics Town back to health. Let's go!"
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "neutral",
-                "text"    : "Therefore, we can look through our memory bubbles to find the six letters that are shared across every avatar. Notice that some avatars will have a lot of genetic code similarity, but others will look completely different."
+                "text"    : "To cure your avatar, first figure out the genetic sequence of the bug. To find the genetic sequence of the bug, look through the sequences of all the avatar friends you've made and find the 6 letters that are ordered the same in everyone's code."
             },
             {
                 "speaker" : "Gregor",
-                "emotion": "neutral",
-                "text"    : "Regardless, the same bug will be found amongst all. Once you find the bug sequence, please type it into the indicated box."
+                "emotion": "smile",
+                "text"    : "Genetics Town is counting on you!"
             }
         ]
     },
@@ -152,17 +146,27 @@
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "Now that we know the bug sequence, we can create a cure to stop it! Our cure is called an ASO."
+                "text"    : "Now that you’ve found the genetic sequence of the bug, you can create a cure!"
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "Our ASO will be created by matching every letter of the bug sequence with its assigned DNA partner. A and T are partners, while C and G are partners."
+                "text"    : "To cure the bug, we must stop it from creating harm. If we cover up, or silence, the bug’s code, then it can’t function."
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "Please drag the letters from the right to the bug sequence on the left accordingly."
+                "text"    : "This is how we can cure our avatars! This kind of cure is called an ASO."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "To create an ASO, we must hide the letters in the bug’s genetic sequence with certain other letters. Specifically, we must hide an A with a T and a T with an A, or a C with a G and a G with a C."
+            },
+            {
+                "speaker" : "Gregor",
+                "emotion": "smile",
+                "text"    : "Here, you will see the 6 letters in the bug sequence you’ve already found. Now it's time to create the ASO. We believe in you!"
             }
         ]
     },
@@ -184,59 +188,7 @@
             {
                 "speaker" : "Gregor",
                 "emotion": "happy",
-                "text"    : "Amazing work! Let's deliver the cure to bring your avatar back to health."
-            }
-        ]
-    },
-    {
-        "sequence": "narrator-part2-intro",
-        "mode": "overlay",
-        "dialogues": [
-            {
-                "speaker": "Gregor",
-                "emotion": "smile",
-                "text": "By interacting with [NAME], we will uncover the genetic sequences that make them unique! First, click on the avatar's four highlighted features to collect the needed DNA."
-            },
-            {
-                "speaker": "Gregor",
-                "emotion": "smile",
-                "text": "Great! Now, let's discover the genetic sequence that determines each selected feature. This process is called reading."
-            },
-            {
-                "speaker": "Gregor",
-                "emotion": "neutral",
-                "text": "Once you begin your reading, you will see flashes of color in some order. Every color corresponds to a letter."
-            },
-            {
-                "speaker": "Gregor",
-                "emotion": "neutral",
-                "text": "It is your job to translate all of the colors into their letters in the correct order. There will be four unique genetic sequences to translate, one for each feature."
-            },
-            {
-                "speaker": "Gregor",
-                "emotion": "smile",
-                "text": "Once all translations are finished, you will have unlocked the avatar's full genetic code."
-            },
-            {
-                "speaker": "Gregor",
-                "emotion": "happy",
-                "text": "This information will be stored in your inventory for safekeeping, to be used in case any trouble Genetics Town arises. Good luck!"
-            }
-        ]
-    },
-    {
-        "sequence": "narrator-part2-final",
-        "mode": "overlay",
-        "dialogues": [
-            {
-                "speaker": "Gregor",
-                "emotion": "happy",
-                "text": "Nice work! You've completed the full genetic sequence for your new friend. This information will be stored in your inventory."
-            },
-            {
-                "speaker": "Gregor",
-                "emotion": "smile",
-                "text": "Now, click back into Genetics Town to make more friends and discover more sequences."
+                "text"    : "You saved Genetics Town! Now your avatar can continue exploring. Please play again to meet new friends by creating more avatars with their own genetic sequences. I hope you had fun visiting Genetics Town!"
             }
         ]
     }

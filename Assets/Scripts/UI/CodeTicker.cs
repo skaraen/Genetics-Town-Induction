@@ -64,7 +64,7 @@ public class CodeTicker : MonoBehaviour
     {
         foreach (VerticalTickItem vt in vtItems)
         {
-            vt.FlickerUpdateText(RandomSequence(geneticChars, 9));
+            vt.ColoredFlickerUpdateText(RandomSequence(geneticChars, 9));
         }
     }
 
