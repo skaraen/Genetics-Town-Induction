@@ -499,7 +499,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3245756075982797272}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7071068, y: 0.000000057601163, z: 0.000000057601163, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.91138643, y: -1.2075901, z: -0.3741222}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -558,7 +558,7 @@ SkinnedMeshRenderer:
   m_Quality: 0
   m_UpdateWhenOffscreen: 1
   m_SkinnedMotionVectors: 1
-  m_Mesh: {fileID: 3915384240943180417, guid: ecc26014aaa71412faa959d6c4331351, type: 3}
+  m_Mesh: {fileID: 3915384240943180417, guid: 7c3db37aaac1e499dbf58b026a9ec138, type: 3}
   m_Bones: []
   m_BlendShapeWeights:
   - 0
@@ -616,7 +616,7 @@ Animator:
   m_GameObject: {fileID: 3245756075982797272}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 2dc626acb80d942bfb993b819decb64a, type: 2}
+  m_Controller: {fileID: 9100000, guid: 294812e7e6e9f4e60ad7b2e17bc48269, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1396,7 +1396,7 @@ MonoBehaviour:
   info: "SIGHT!\\n This sequence contributes to this avatar\u2019s eye muscles by
     increasing its ability to regulate light intake.\\n As a result, this avatar
     has rectangular pupils and excellent peripheral vision."
-  spawnYOffset: 0
+  spawnYOffset: -1
 --- !u!1001 &994149730081685706
 PrefabInstance:
   m_ObjectHideFlags: 0
