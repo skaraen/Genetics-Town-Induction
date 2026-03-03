@@ -207,8 +207,8 @@ Transform:
   m_GameObject: {fileID: 7184872571080587012}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0.5, y: 8.58, z: 0.05}
-  m_LocalScale: {x: 4.5185704, y: 4.5185704, z: 4.5185704}
+  m_LocalPosition: {x: 0.1, y: 6.14, z: 0.05}
+  m_LocalScale: {x: 4.2342215, y: 4.2342215, z: 4.2342215}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6997347530667605319}
@@ -222,7 +222,7 @@ ParticleSystem:
   m_GameObject: {fileID: 7184872571080587012}
   serializedVersion: 8
   lengthInSec: 5
-  simulationSpeed: 0.5
+  simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
   ringBufferMode: 0
@@ -349,7 +349,7 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.5
+      scalar: 0
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -467,7 +467,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.08
+      scalar: 0.1
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -626,7 +626,7 @@ ParticleSystem:
     startRotationX:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 3.1415925
+      scalar: 0
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -784,14 +784,14 @@ ParticleSystem:
         m_RotationOrder: 4
     randomizeRotationDirection: 0
     gravitySource: 0
-    maxNumParticles: 100
+    maxNumParticles: 1000
     customEmitterVelocity: {x: 0, y: 0, z: 0}
     size3D: 0
     rotation3D: 0
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.015
+      scalar: 0.05
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -845,7 +845,7 @@ ParticleSystem:
     serializedVersion: 6
     enabled: 1
     type: 4
-    angle: 0
+    angle: 25
     length: 5
     boxThickness: {x: 0, y: 0, z: 0}
     radiusThickness: 1
@@ -1050,7 +1050,7 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 1.5
+      scalar: 0.8
       minScalar: 10
       maxCurve:
         serializedVersion: 2
@@ -2262,7 +2262,7 @@ ParticleSystem:
     m_Curve:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 1
+      scalar: 0
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -2373,7 +2373,7 @@ ParticleSystem:
     x:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.05
+      scalar: 0
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -2426,7 +2426,7 @@ ParticleSystem:
     y:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.05
+      scalar: 0
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -2479,7 +2479,7 @@ ParticleSystem:
     z:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.05
+      scalar: 0
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -5025,7 +5025,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6997347530667605319}
-  - component: {fileID: 5596063350300061751}
+  - component: {fileID: 526712580411759557}
   m_Layer: 0
   m_Name: tree
   m_TagString: Untagged
@@ -5051,7 +5051,7 @@ Transform:
   - {fileID: 8974018068997229612}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!205 &5596063350300061751
+--- !u!205 &526712580411759557
 LODGroup:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5059,21 +5059,25 @@ LODGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7660695731322644477}
   serializedVersion: 2
-  m_LocalReferencePoint: {x: -0.6864643, y: 8.511206, z: 0.17468452}
-  m_Size: 26.152111
+  m_LocalReferencePoint: {x: 0, y: 0, z: 0}
+  m_Size: 1
   m_FadeMode: 0
   m_AnimateCrossFading: 0
   m_LastLODIsBillboard: 0
   m_LODs:
-  - screenRelativeHeight: 0.3071191
+  - screenRelativeHeight: 0.3981702
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 1546793238259303937}
     - renderer: {fileID: 2791860312027965198}
-  - screenRelativeHeight: 0.20456234
+  - screenRelativeHeight: 0.15533917
     fadeTransitionWidth: 0
-    renderers: []
-  - screenRelativeHeight: 0.1
+    renderers:
+    - renderer: {fileID: 1546793238259303937}
+    - renderer: {fileID: 2791860312027965198}
+  - screenRelativeHeight: 0.003481714
     fadeTransitionWidth: 0
-    renderers: []
+    renderers:
+    - renderer: {fileID: 1546793238259303937}
+    - renderer: {fileID: 2791860312027965198}
   m_Enabled: 1
