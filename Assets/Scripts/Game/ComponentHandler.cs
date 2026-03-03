@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 /// <summary>
 /// Component handler needs to be renamed
@@ -11,6 +10,8 @@ public class ComponentHandler : MonoBehaviour
     const int NUM_COMPONENTS = 12;
     const string BUG_SEQ = "ACTGCT";
     const string set = "ATGC";
+
+
     public GameObject LContainer;
     public GameObject RContainer;
     public GameObject CompContainer;
@@ -41,6 +42,9 @@ public class ComponentHandler : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Instantiates the left-strand nucleotide prefabs into LContainer, one per character in BUG_SEQ.
+    /// </summary>
     void PopulateLContainer()
     {
         foreach (char c in BUG_SEQ)
@@ -49,24 +53,46 @@ public class ComponentHandler : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Spawns shuffled nucleotides into CompContainer with boid swimming behavior.
+    /// Expects CompContainer to already have a SlotHandler and no GridLayoutGroup in the scene.
+    /// </summary>
     void PopulateCompContainer()
     {
-        char[] compTypes = new char[NUM_COMPONENTS];
+        SlotHandler poolSlot = CompContainer.GetComponent<SlotHandler>();
 
+        // Build shuffled array of nucleotide types (3 of each)
+        char[] compTypes = new char[NUM_COMPONENTS];
         for (int i = 0; i < set.Length; i++)
         {
             int k = i * (NUM_COMPONENTS / set.Length);
             for (int j = 0; j < NUM_COMPONENTS / set.Length; j++)
-            {
                 compTypes[k + j] = set[i];
-            }
         }
-
         ArrayUtils.ShuffleArray(compTypes);
+
+        // Instantiate nucleotides directly under CompContainer with boid behavior
+        RectTransform containerRect = CompContainer.GetComponent<RectTransform>();
+        Rect bounds = containerRect.rect;
+        float margin = 100f;
+
         for (int i = 0; i < compTypes.Length; i++)
         {
-            GameObject component = Instantiate(prefabMap[compTypes[i] + "_R"], CompContainer.transform.GetChild(i));
-            component.GetComponent<DraggableItem>().compType = compTypes[i];
+            GameObject component = Instantiate(prefabMap[compTypes[i] + "_R"], CompContainer.transform);
+
+            RectTransform rt = component.GetComponent<RectTransform>();
+            // Spawn boids in random position inside parent rect
+            rt.anchoredPosition = new Vector2(
+                Random.Range(bounds.xMin + margin, bounds.xMax - margin),
+                Random.Range(bounds.yMin + margin, bounds.yMax - margin)
+            );
+
+            DraggableItem dItem = component.GetComponent<DraggableItem>();
+            dItem.compType = compTypes[i];
+            dItem.slotAfterDrag = poolSlot;
+
+            BoidController boid = component.AddComponent<BoidController>();
+            boid.Initialize(containerRect);
         }
     }
 

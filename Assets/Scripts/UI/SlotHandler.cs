@@ -17,6 +17,8 @@ public class SlotHandler : MonoBehaviour, IDropHandler
     [SerializeField] public bool lerpItemsToCenter = true;
     [Tooltip("If true, items that are dropped outside of any slot will be destroyed")]
     [SerializeField] public bool destroyItemOnFailedDrop = false;
+    [Tooltip("If true, this slot can hold multiple items simultaneously (e.g., a pool container)")]
+    [SerializeField] public bool acceptMultipleItems = false;
     [Tooltip("Called whenever an item is dropped into or removed from this slot")]
     [SerializeField] public List<UnityEvent> callOnStateChange;
     public void OnDrop(PointerEventData eventData)
@@ -25,7 +27,7 @@ public class SlotHandler : MonoBehaviour, IDropHandler
         if(replaceItems && transform.childCount > 0){
             Destroy(transform.GetChild(0).gameObject);
         }
-        if (transform.childCount == 0 || replaceItems)
+        if (transform.childCount == 0 || replaceItems || acceptMultipleItems)
         {
             GameObject dropped = eventData.pointerDrag;
             DraggableItem dItem = dropped.GetComponent<DraggableItem>();
