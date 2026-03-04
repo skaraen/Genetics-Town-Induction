@@ -113,10 +113,10 @@ TextureImporter:
       name: Next_0
       rect:
         serializedVersion: 2
-        x: 570
-        y: 825
-        width: 1386
-        height: 617
+        x: 577
+        y: 829
+        width: 1372
+        height: 609
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -125,8 +125,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7d1910371f114465898ad77e3f6a45e8
-      internalID: -1417980623
+      spriteID: 3044f235617c64e3a97dc2922ff410f4
+      internalID: -1438670903
       vertices: []
       indices: 
       edges: []
@@ -145,7 +145,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Next_0: -1417980623
+      Next_0: -1438670903
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

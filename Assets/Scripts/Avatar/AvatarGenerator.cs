@@ -19,7 +19,7 @@ public class AvatarGenerator : NetworkBehaviour
 
     [Header("UI References")]
     public Button[] sequenceButtons;
-    public Button[] goButtons;
+    public Button nextButton;
     public GameObject[] canvas;
     public TextMeshProUGUI infoText;
     public GameObject[] tickerItemPrefabs;
@@ -53,6 +53,8 @@ public class AvatarGenerator : NetworkBehaviour
     private bool[] subSequenceEnabled;
     private SwitchToggle[] switchToggles;
     private Material[,] targetMaterials;
+
+    private int currentStage = 0;
 
     void Start()
     {
@@ -182,11 +184,7 @@ public class AvatarGenerator : NetworkBehaviour
 
     void SetupButtons()
     {
-        for (int i = 0; i < NUM_CANVAS; i++)
-        {
-            int index = i;
-            goButtons[i].onClick.AddListener(() => SetCanvas(index));
-        }
+        nextButton.onClick.AddListener(() => AdvanceStage());
 
         int buttonCount = Mathf.Min(baseSequenceCodons.Length, sequenceButtons.Length);
         for (int i = 0; i < buttonCount; i++)
@@ -288,14 +286,20 @@ public class AvatarGenerator : NetworkBehaviour
         }
     }
 
-    IEnumerator DelayedToggleCanvas(int canvasId, float delay)
+    IEnumerator DelayedToggleCanvas(float delay)
     {
         yield return new WaitForSeconds(delay);
-        canvas[canvasId].SetActive(false);
+        ToggleCanvas();
+    }
 
-        if (canvasId + 1 < canvas.Length)
+    private void ToggleCanvas()
+    {
+        canvas[currentStage].SetActive(false);
+
+        if (currentStage + 1 < canvas.Length)
         {
-            canvas[canvasId + 1].SetActive(true);
+            currentStage++;
+            canvas[currentStage].SetActive(true);
         }
         else
         {
@@ -303,35 +307,21 @@ public class AvatarGenerator : NetworkBehaviour
         }
     }
 
-    private void ToggleCanvas(int canvasId)
+    void AdvanceStage()
     {
-        canvas[canvasId].SetActive(false);
-
-        if (canvasId + 1 < canvas.Length)
-        {
-            canvas[canvasId + 1].SetActive(true);
-        }
-        else
-        {
-            LoadGameScene();
-        }
-    }
-
-    void SetCanvas(int canvasId)
-    {
-        switch (canvasId)
+        switch (currentStage)
         {
             case 0:
                 LoadAvatar();
-                ToggleCanvas(canvasId);
+                ToggleCanvas();
                 break;
             case 1:
                 cameraFocus = 1;
-                StartCoroutine(DelayedToggleCanvas(canvasId, 1));
+                StartCoroutine(DelayedToggleCanvas(1f));
                 break;
             case 2:
                 RevealTraits();
-                StartCoroutine(DelayedToggleCanvas(canvasId, 6f));
+                StartCoroutine(DelayedToggleCanvas(6f));
                 break;
         }
     }
