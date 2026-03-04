@@ -11,7 +11,6 @@ public class AvatarGenerator : NetworkBehaviour
 {
     const int NUM_SUBSEQUENCES = 2;
     const int NUM_CHOICES = 2;
-    const int NUM_CANVAS = 3;
 
     [Header("Avatar Spawn")]
     public Transform avatarSpawnPoint;
@@ -21,7 +20,6 @@ public class AvatarGenerator : NetworkBehaviour
     public Button[] sequenceButtons;
     public Button nextButton;
     public GameObject[] canvas;
-    public TextMeshProUGUI infoText;
     public GameObject[] tickerItemPrefabs;
     public TextMeshProUGUI[] seqTitles;
     public Transform[] toggleTransforms;
@@ -32,6 +30,8 @@ public class AvatarGenerator : NetworkBehaviour
     [SerializeField] private int cameraFocus;
     [SerializeField] Button funFactButton;
     [SerializeField] GameObject funFactUI;
+
+    [SerializeField] TMP_InputField playerNameInput;
 
     const string set = "ATGC";
     private string[][] baseSequenceCodons;
@@ -53,6 +53,7 @@ public class AvatarGenerator : NetworkBehaviour
     private bool[] subSequenceEnabled;
     private SwitchToggle[] switchToggles;
     private Material[,] targetMaterials;
+    private string playerName;
 
     private int currentStage = 0;
 
@@ -69,7 +70,7 @@ public class AvatarGenerator : NetworkBehaviour
         ArrayUtils.ShuffleRows(baseSequenceCodons);
 
         canvas[0].SetActive(true);
-        for (int i = 1; i < NUM_CANVAS; i++)
+        for (int i = 1; i < canvas.Length; i++)
         {
             canvas[i].SetActive(false);
         }
@@ -286,6 +287,15 @@ public class AvatarGenerator : NetworkBehaviour
         }
     }
 
+    IEnumerator DelayedReveal(float revealDelay, float toggleDelay)
+    {
+        RevealTraits();
+        yield return new WaitForSeconds(revealDelay);
+
+        cameraFocus = 0;
+        ToggleCanvas();
+    }
+
     IEnumerator DelayedToggleCanvas(float delay)
     {
         yield return new WaitForSeconds(delay);
@@ -294,10 +304,9 @@ public class AvatarGenerator : NetworkBehaviour
 
     private void ToggleCanvas()
     {
-        canvas[currentStage].SetActive(false);
-
         if (currentStage + 1 < canvas.Length)
         {
+            canvas[currentStage].SetActive(false);
             currentStage++;
             canvas[currentStage].SetActive(true);
         }
@@ -320,8 +329,11 @@ public class AvatarGenerator : NetworkBehaviour
                 StartCoroutine(DelayedToggleCanvas(1f));
                 break;
             case 2:
-                RevealTraits();
-                StartCoroutine(DelayedToggleCanvas(6f));
+                StartCoroutine(DelayedReveal(6f, 1f));
+                break;
+            case 3:
+                playerName = playerNameInput.text;
+                StartCoroutine(DelayedToggleCanvas(1f));
                 break;
         }
     }
@@ -369,7 +381,6 @@ public class AvatarGenerator : NetworkBehaviour
         }
 
         AvatarProfileData prefabProfile = prefab.GetComponent<AvatarProfileData>();
-        infoText.text = "The base sequence you chose contributes to " + prefabProfile.info;
 
         if (currentAvatar != null)
         {
@@ -465,26 +476,7 @@ public class AvatarGenerator : NetworkBehaviour
             TogglePart(partName, i == activeIndex);
         }
     }
-
-    /// <summary>
-    /// Gets a placeholder name (should be user selected in future) for multiplayer
-    /// based on avatar type.
-    /// </summary>
-    private string GetMultiplayerName(int avatarType)
-    {
-        switch (avatarType)
-        {
-            case 1:
-                return "Katara";
-            case 2:
-                return "Toph";
-            case 3:
-                return "Aang";
-            case 4:
-                return "Zuko";
-        }
-        return "Ozai";
-    }
+    
 
     /// <summary>
     /// Builds PlayerMetadata from the current AvatarProfileData and user selections,
@@ -493,7 +485,7 @@ public class AvatarGenerator : NetworkBehaviour
     private void LoadGameScene()
     {
         PlayerMetadata metadata = new PlayerMetadata(currProfileData);
-        metadata.name = GetMultiplayerName(currProfileData.id);
+        metadata.name = playerName;
 
         for (int i = 0; i < 2; i++)
         {

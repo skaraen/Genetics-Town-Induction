@@ -921,7 +921,7 @@ MonoBehaviour:
   spawnerObj: {fileID: 1068678453}
   narrator: {fileID: 916616143}
   dialogueCanvas: {fileID: 1152661664}
-  dialogueBox: {fileID: 0}
+  dialogueBox: {fileID: 866662870}
   planeDistance: 5
   memoryButton: {fileID: 1252760012}
   glitchButton: {fileID: 1102856791}
@@ -1528,6 +1528,11 @@ PrefabInstance:
 --- !u!224 &866662869 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5374736117822404488, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
+  m_PrefabInstance: {fileID: 866662868}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &866662870 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1269092188379960631, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
   m_PrefabInstance: {fileID: 866662868}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &916616141

@@ -1703,7 +1703,7 @@ MonoBehaviour:
   - {fileID: 1260729816}
   - {fileID: 844446648}
   componentHandler: {fileID: 796375647}
-  dialogueBox: {fileID: 0}
+  dialogueBox: {fileID: 944392414}
   funFactUI: {fileID: 75487068}
   facts:
   - This part of the game is based on a real scientific process. Scientists have
@@ -5429,6 +5429,11 @@ PrefabInstance:
 --- !u!224 &944392413 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5374736117822404488, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
+  m_PrefabInstance: {fileID: 944392412}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &944392414 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1269092188379960631, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
   m_PrefabInstance: {fileID: 944392412}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &983261436
