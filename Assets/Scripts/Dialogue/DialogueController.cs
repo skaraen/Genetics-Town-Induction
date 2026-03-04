@@ -87,11 +87,7 @@ public class DialogueController : MonoBehaviour
         if (DialogueDatabase.Instance == null)
         {
             Debug.LogError("DialogueDatabase is missing!");
-        } else
-        {
-            Debug.LogError("Oaky!");
-        }
-        dialogues = DialogueDatabase.Instance.GetLines(sequence);
+        }        dialogues = DialogueDatabase.Instance.GetLines(sequence);
         isSequenceInProgress = true;
         currStage = 0;
         ProgressDialogue();
