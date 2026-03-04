@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class SequenceController : MonoBehaviour
 {
     [SerializeField] GameObject narrator;
-    [SerializeField] GameObject dialogueBox;
+    [SerializeField] GameObject dialogueUI;
     [SerializeField] GameObject coderTickerObj;
     [SerializeField] GameObject dnaObj;
     [SerializeField] GameObject variantObj;
@@ -14,7 +14,6 @@ public class SequenceController : MonoBehaviour
     [SerializeField] Image bgImage;
     [SerializeField] Image lensImage;
     [SerializeField] Image geneImage;
-    [SerializeField] Button skipButton;
     [SerializeField] private float fadeSpeed = 0.5f;
 
     private NarratorController narratorController;
@@ -51,9 +50,9 @@ public class SequenceController : MonoBehaviour
         narratorController = narrator.GetComponent<NarratorController>();
         codeTicker = coderTickerObj.GetComponent<CodeTicker>();
 
-        if (dialogueBox != null)
+        if (dialogueUI != null)
         {
-            dialogueController = dialogueBox.GetComponent<DialogueController>();
+            dialogueController = dialogueUI.GetComponent<DialogueController>();
             dialogueController.SetNarrationMode(false);
 
             dialogueController.OnDialogueEnded += HandleSceneEnd; 
@@ -70,10 +69,6 @@ public class SequenceController : MonoBehaviour
             }
         });
 
-        skipButton.onClick.AddListener(() =>
-        {
-            SceneManager.LoadScene("AvatarSelection");
-        });
         narratorController.TriggerEntry();
 
         dnaImages = dnaObj.GetComponentsInChildren<Image>(true);

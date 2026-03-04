@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DialogueController : MonoBehaviour
 {
     [SerializeField] private GameObject header;
     [SerializeField] private GameObject body;
     [SerializeField] private GameObject narrator;
+    [SerializeField] private Button nextButton;
 
     private DialogueLine[] dialogues;
     private TextMeshProUGUI dialogueText;
@@ -76,6 +78,9 @@ public class DialogueController : MonoBehaviour
             narratorAnimator = narrator.GetComponent<Animator>();
             reactChooser = narrator.GetComponent<ReactionChooser>();
         }
+
+        nextButton.enabled = false;
+        nextButton.onClick.AddListener(() => NextButtonClick());
     }
 
     public void SetNarrationMode(bool mode) {
@@ -85,14 +90,17 @@ public class DialogueController : MonoBehaviour
     public void StartSequence(string sequence)
     {
         if (DialogueDatabase.Instance == null)
-        {
             Debug.LogError("DialogueDatabase is missing!");
-        }        dialogues = DialogueDatabase.Instance.GetLines(sequence);
+
+        if (isNarrationMode)
+            narratorAnimator.SetTrigger("EntryTrigger");        
+        
+        dialogues = DialogueDatabase.Instance.GetLines(sequence);
         isSequenceInProgress = true;
         currStage = 0;
+        nextButton.enabled = true;
+
         ProgressDialogue();
-        if (isNarrationMode)
-            narratorAnimator.SetTrigger("EntryTrigger");
     }
 
     public void SignalNarratorAnimComplete()
@@ -126,12 +134,14 @@ public class DialogueController : MonoBehaviour
                 EndDialogue();
         }
     }
+    void NextButtonClick()
+    {
+        if (isSequenceInProgress && (isNarrationMode || !isNarratorAnimating) && !isTyping) 
+            ProgressDialogue();
+    }
 
     void Update()
     {
-        if (isSequenceInProgress && (isNarrationMode || !isNarratorAnimating) && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && !isTyping) 
-            ProgressDialogue();
-
         if (isAnimating)
         {
             body.transform.position = Vector3.SmoothDamp(
@@ -198,6 +208,7 @@ public class DialogueController : MonoBehaviour
         isActive = false;
         dialogueText.text = "";
         isAnimating = true;
+        nextButton.enabled = false;
 
         if (isNarrationMode)
             narratorAnimator.SetTrigger("ExitTrigger");
