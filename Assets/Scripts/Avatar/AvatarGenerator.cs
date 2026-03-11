@@ -6,22 +6,23 @@ using TMPro;
 using System.Collections;
 using System.Linq;
 using Unity.Netcode;
+using System;
 
 public class AvatarGenerator : NetworkBehaviour
 {
     const int NUM_SUBSEQUENCES = 2;
     const int NUM_CHOICES = 2;
-    const int NUM_CANVAS = 3;
 
     [Header("Avatar Spawn")]
     public Transform avatarSpawnPoint;
-    public Transform mainCamera;
+    public CameraRig cameraRig;
+    public float xCamOffset = 3;
+    public float zCamOffset = 6;
 
     [Header("UI References")]
     public Button[] sequenceButtons;
-    public Button[] goButtons;
+    public Button nextButton;
     public GameObject[] canvas;
-    public TextMeshProUGUI infoText;
     public GameObject[] tickerItemPrefabs;
     public TextMeshProUGUI[] seqTitles;
     public Transform[] toggleTransforms;
@@ -29,21 +30,18 @@ public class AvatarGenerator : NetworkBehaviour
     public Image[] dials;
     public Image[] needles;
 
-    [SerializeField] private int cameraFocus;
     [SerializeField] Button funFactButton;
     [SerializeField] GameObject funFactUI;
 
+    [SerializeField] TMP_InputField playerNameInput;
+    [SerializeField] TextMeshProUGUI nameTitle;
+    [SerializeField] TextMeshProUGUI waitMessage;
+
+
     const string set = "ATGC";
+    string[] partNames = { "head", "torso" };
     private string[][] baseSequenceCodons;
     private Dictionary<string, GameObject> prefabMap;
-
-    private Vector3 straightFocus = new Vector3(0, 0, -6);
-    private Vector3 sideFocus = new Vector3(-3, 0, -6);
-
-    private Vector3 headFocus = new Vector3(-3, 0.5f, -6);
-    private Vector3 torsoFocus = new Vector3(-3, -0.5f, -6);
-    private Vector3 velocity = Vector3.zero;
-
 
     private string currBaseSequence;
     private AvatarProfileData currProfileData;
@@ -53,6 +51,9 @@ public class AvatarGenerator : NetworkBehaviour
     private bool[] subSequenceEnabled;
     private SwitchToggle[] switchToggles;
     private Material[,] targetMaterials;
+    private string playerName;
+
+    private int currentStage = 0;
 
     void Start()
     {
@@ -61,13 +62,12 @@ public class AvatarGenerator : NetworkBehaviour
         subSequenceEnabled = new bool[NUM_SUBSEQUENCES];
         switchToggles = new SwitchToggle[NUM_SUBSEQUENCES];
         targetMaterials = new Material[NUM_SUBSEQUENCES, NUM_CHOICES];
-        cameraFocus = 0;
 
         BuildBaseSequenceCodons();
         ArrayUtils.ShuffleRows(baseSequenceCodons);
 
         canvas[0].SetActive(true);
-        for (int i = 1; i < NUM_CANVAS; i++)
+        for (int i = 1; i < canvas.Length; i++)
         {
             canvas[i].SetActive(false);
         }
@@ -120,33 +120,6 @@ public class AvatarGenerator : NetworkBehaviour
         return codons;
     }
 
-
-    void LateUpdate()
-    {
-        Vector3 targetPosition;
-        switch (cameraFocus)
-        {
-            case 0:
-                targetPosition = straightFocus;
-                break;
-            case 1:
-                targetPosition = sideFocus;
-                break;
-            case 2:
-                targetPosition = headFocus;
-                break;
-            case 3:
-                targetPosition = torsoFocus;
-                break;
-            default:
-                targetPosition = straightFocus;
-                break;
-        }
-
-        if (targetPosition != mainCamera.position)
-            mainCamera.position = Vector3.SmoothDamp(mainCamera.position, targetPosition, ref velocity, 0.3f);
-    }
-
     /// <summary>
     /// Returns whether the given slider adjusts Value instead of Hue.
     /// Falls back to false (Hue mode) if the array is unset or too short.
@@ -182,11 +155,7 @@ public class AvatarGenerator : NetworkBehaviour
 
     void SetupButtons()
     {
-        for (int i = 0; i < NUM_CANVAS; i++)
-        {
-            int index = i;
-            goButtons[i].onClick.AddListener(() => SetCanvas(index));
-        }
+        nextButton.onClick.AddListener(() => StartCoroutine(AdvanceStage()));
 
         int buttonCount = Mathf.Min(baseSequenceCodons.Length, sequenceButtons.Length);
         for (int i = 0; i < buttonCount; i++)
@@ -229,6 +198,8 @@ public class AvatarGenerator : NetworkBehaviour
 
                 subSequenceEnabled[index] = isOn;
                 UpdateAvatar();
+
+                FocusToggleTarget(index, isOn);
             });
         }
     }
@@ -265,7 +236,6 @@ public class AvatarGenerator : NetworkBehaviour
             sliders[i].maxValue = Mathf.Max(minVal, maxVal);
             float colorValue = GetSliderValue(i, defaultColor[i]);
 
-            Debug.Log($"(Slider {i + 1}) Min value: {sliders[i].minValue}, Max value: {sliders[i].maxValue} ");
             sliders[i].value = Mathf.Clamp(colorValue, sliders[i].minValue, sliders[i].maxValue);
             RotateNeedle(i);
 
@@ -284,18 +254,20 @@ public class AvatarGenerator : NetworkBehaviour
                 {
                     SetMaterialColor(targetMaterials[index, j], Color.HSVToRGB(currColor[index].x, currColor[index].y, currColor[index].z, true));
                 }
+
+                FocusSliderTarget(index);
             });
         }
     }
-
-    IEnumerator DelayedToggleCanvas(int canvasId, float delay)
+    
+    private void ToggleCanvas()
     {
-        yield return new WaitForSeconds(delay);
-        canvas[canvasId].SetActive(false);
-
-        if (canvasId + 1 < canvas.Length)
+        if (currentStage + 1 < canvas.Length)
         {
-            canvas[canvasId + 1].SetActive(true);
+            canvas[currentStage].SetActive(false);
+            currentStage++;
+            canvas[currentStage].SetActive(true);
+            nextButton.interactable = true;
         }
         else
         {
@@ -303,37 +275,37 @@ public class AvatarGenerator : NetworkBehaviour
         }
     }
 
-    private void ToggleCanvas(int canvasId)
+    IEnumerator AdvanceStage()
     {
-        canvas[canvasId].SetActive(false);
+        nextButton.interactable = false;
 
-        if (canvasId + 1 < canvas.Length)
-        {
-            canvas[canvasId + 1].SetActive(true);
-        }
-        else
-        {
-            LoadGameScene();
-        }
-    }
-
-    void SetCanvas(int canvasId)
-    {
-        switch (canvasId)
+        switch (currentStage)
         {
             case 0:
                 LoadAvatar();
-                ToggleCanvas(canvasId);
                 break;
             case 1:
-                cameraFocus = 1;
-                StartCoroutine(DelayedToggleCanvas(canvasId, 1));
+                cameraRig.MoveToLeft();
+                yield return new WaitForSeconds(1f);
                 break;
             case 2:
                 RevealTraits();
-                StartCoroutine(DelayedToggleCanvas(canvasId, 6f));
+                yield return new WaitForSeconds(6f);
+                cameraRig.MoveStraight();
+                break;
+            case 3:
+                playerName = playerNameInput.text;
+                playerNameInput.gameObject.SetActive(false);
+                nextButton.enabled = false;
+
+                FlickerComponent nameFlickerCo = nameTitle.GetComponent<FlickerComponent>();
+                nameFlickerCo.FlickerUpdateText($"hello {playerNameInput.text.ToUpper()} !");
+                waitMessage.gameObject.SetActive(true);
+                yield return new WaitForSeconds(3f);
                 break;
         }
+
+        ToggleCanvas();
     }
 
     void RevealTraits()
@@ -379,7 +351,6 @@ public class AvatarGenerator : NetworkBehaviour
         }
 
         AvatarProfileData prefabProfile = prefab.GetComponent<AvatarProfileData>();
-        infoText.text = "The base sequence you chose contributes to " + prefabProfile.info;
 
         if (currentAvatar != null)
         {
@@ -396,6 +367,7 @@ public class AvatarGenerator : NetworkBehaviour
         currProfileData = currentAvatar.GetComponent<AvatarProfileData>();
 
         InitDefaults();
+        cameraRig.InitRig(currentAvatar.transform, xCamOffset, 0f, zCamOffset);
     }
 
     /// <summary>
@@ -440,16 +412,53 @@ public class AvatarGenerator : NetworkBehaviour
         SetupSliders();
     }
 
+    private float GetAvatarHeight()
+    {
+        Renderer[] renderers = currentAvatar.GetComponentsInChildren<Renderer>();
+        Bounds bounds = renderers[0].bounds;
+
+        foreach (Renderer r in renderers)
+            bounds.Encapsulate(r.bounds);
+
+        return bounds.size.y;
+    }
+
+    public void FocusToggleTarget(int index, bool isOn)
+    {
+        if (currentAvatar == null) return;
+
+        int activeIndex = isOn ? 1 : 0;
+        string partName =  $"{partNames[index]}{activeIndex + 1}";
+
+        Transform part = currentAvatar.GetComponentsInChildren<Transform>(true)
+            .FirstOrDefault(t => t.name == partName);
+
+        Renderer r = currProfileData.colorTargetRenderers[index * NUM_CHOICES + activeIndex]
+            .GetComponentInChildren<Renderer>();
+
+        cameraRig.FocusOnComponent(part);
+    }
+
+    public void FocusSliderTarget(int index)
+    {
+        if (currentAvatar == null) return;
+
+        int activeIndex = subSequenceEnabled[index] ? 1 : 0;
+
+        Renderer r = currProfileData.colorTargetRenderers[index * NUM_CHOICES + activeIndex]
+            .GetComponentInChildren<Renderer>();
+
+        cameraRig.FocusOnRenderer(r);
+    }
+
     private void UpdateAvatar()
     {
         if (currentAvatar == null) return;
 
-        string[] parts = { "head", "torso" };
-
         for (int i = 0; i < 2; i++)
         {
             int activeIndex = subSequenceEnabled[i] ? 1 : 0;
-            ToggleParts(parts[i], activeIndex);
+            ToggleParts(partNames[i], activeIndex);
         }
     }
 
@@ -475,26 +484,7 @@ public class AvatarGenerator : NetworkBehaviour
             TogglePart(partName, i == activeIndex);
         }
     }
-
-    /// <summary>
-    /// Gets a placeholder name (should be user selected in future) for multiplayer
-    /// based on avatar type.
-    /// </summary>
-    private string GetMultiplayerName(int avatarType)
-    {
-        switch (avatarType)
-        {
-            case 1:
-                return "Katara";
-            case 2:
-                return "Toph";
-            case 3:
-                return "Aang";
-            case 4:
-                return "Zuko";
-        }
-        return "Ozai";
-    }
+    
 
     /// <summary>
     /// Builds PlayerMetadata from the current AvatarProfileData and user selections,
@@ -503,7 +493,7 @@ public class AvatarGenerator : NetworkBehaviour
     private void LoadGameScene()
     {
         PlayerMetadata metadata = new PlayerMetadata(currProfileData);
-        metadata.name = GetMultiplayerName(currProfileData.id);
+        metadata.name = playerName;
 
         for (int i = 0; i < 2; i++)
         {

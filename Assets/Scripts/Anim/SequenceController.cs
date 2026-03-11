@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class SequenceController : MonoBehaviour
 {
     [SerializeField] GameObject narrator;
-    [SerializeField] GameObject dialogueBox;
+    [SerializeField] GameObject dialogueUI;
     [SerializeField] GameObject coderTickerObj;
     [SerializeField] GameObject dnaObj;
     [SerializeField] GameObject variantObj;
@@ -14,7 +14,7 @@ public class SequenceController : MonoBehaviour
     [SerializeField] Image bgImage;
     [SerializeField] Image lensImage;
     [SerializeField] Image geneImage;
-    [SerializeField] Button skipButton;
+    [SerializeField] Image dnaLensImage;
     [SerializeField] private float fadeSpeed = 0.5f;
 
     private NarratorController narratorController;
@@ -34,7 +34,9 @@ public class SequenceController : MonoBehaviour
     bool lensTiltOut = false;
     bool lensFadedIn = false;
     bool lensFadedOut = false;
-    bool geneFadeIn = false;
+    bool dnaLensFadedIn = false;
+    bool dnaLensFadedOut = false;
+    bool geneFadedIn = false;
     bool geneFadedOut = false;
     Image[] dnaImages;
     Image[] variantImages;
@@ -51,9 +53,9 @@ public class SequenceController : MonoBehaviour
         narratorController = narrator.GetComponent<NarratorController>();
         codeTicker = coderTickerObj.GetComponent<CodeTicker>();
 
-        if (dialogueBox != null)
+        if (dialogueUI != null)
         {
-            dialogueController = dialogueBox.GetComponent<DialogueController>();
+            dialogueController = dialogueUI.GetComponent<DialogueController>();
             dialogueController.SetNarrationMode(false);
 
             dialogueController.OnDialogueEnded += HandleSceneEnd; 
@@ -70,10 +72,6 @@ public class SequenceController : MonoBehaviour
             }
         });
 
-        skipButton.onClick.AddListener(() =>
-        {
-            SceneManager.LoadScene("AvatarSelection");
-        });
         narratorController.TriggerEntry();
 
         dnaImages = dnaObj.GetComponentsInChildren<Image>(true);
@@ -205,14 +203,19 @@ public class SequenceController : MonoBehaviour
                         lensTiltIn = true;
                     } else if (!lensFadedIn) {
                         lensFadedIn = FadeToImage(lensImage, 1.0f);
-                    } else if (!lensAnim.IsPlaying("TiltLensIn") && !geneFadeIn)
-                    {
-                        geneFadeIn = FadeToImage(geneImage, 1.0f);
+                    } else if (!lensAnim.IsPlaying("TiltLensIn") && !dnaLensFadedIn) {
+                        dnaLensFadedIn = FadeToImage(dnaLensImage, 1.0f);
+                    } else if (dnaLensFadedIn && (!dnaLensFadedOut || !geneFadedIn)) {
+                        dnaLensFadedOut = FadeToImage(dnaLensImage, 0.0f);
+                        geneFadedIn = FadeToImage(geneImage, 1.0f);
                     }
                 }
                 break;
             case 7:
-                if (!lensTiltOut)
+                if (!geneFadedOut)
+                {
+                    geneFadedOut = FadeToImage(geneImage, 0.0f);
+                } else if (!lensTiltOut)
                 {
                     lensAnim.Play("TiltLensOut");
                     lensTiltOut = true;

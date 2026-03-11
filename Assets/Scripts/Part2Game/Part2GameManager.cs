@@ -286,7 +286,7 @@ public class Part2GameManager : MonoBehaviour
 
         narrator.GetComponent<ReactionChooser>().SetReaction("smile");
         narratorAnimator.SetTrigger("EntryTrigger");
-        dialogueController.StartSequence("narrator-part2-intro");
+        dialogueController.StartSequence("narrator-memory-intro");
     }
 
     /// <summary>
@@ -463,7 +463,7 @@ public class Part2GameManager : MonoBehaviour
         currentDialoguePhase = DialoguePhase.Final;
         narrator.GetComponent<ReactionChooser>().SetReaction("happy");
         narratorAnimator.SetTrigger("EntryTrigger");
-        dialogueController.StartSequence("narrator-part2-final");
+        dialogueController.StartSequence("narrator-memory-final");
     }
 
     /// <summary>

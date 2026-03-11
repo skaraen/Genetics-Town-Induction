@@ -1,5 +1,7 @@
 using UnityEngine;
 using TMPro;
+using System.Collections.Generic;
+using System.Linq;
 
 [RequireComponent(typeof(RectTransform))]
 [RequireComponent(typeof(TextMeshProUGUI))]
@@ -54,16 +56,21 @@ public class VerticalTickItem : MonoBehaviour
 
     public void FlickerUpdateText(string text)
     {
-        FlickerUpdateText(text, 3f, 10); 
+        FlickerUpdateText(text, 3f, 10, false); 
     }
 
-    public void FlickerUpdateText(string text, float duration, int cps)
+    public void ColoredFlickerUpdateText(string text)
+    {
+        FlickerUpdateText(text, 3f, 10,true); 
+    }
+
+    public void FlickerUpdateText(string text, float duration, int cps, bool isColor)
     {
         if (flickerCo != null) StopCoroutine(flickerCo);
-        flickerCo = StartCoroutine(FlickerRoutine(text, duration, cps));
+        flickerCo = StartCoroutine(FlickerRoutine(text, duration, cps, isColor));
     }
 
-    System.Collections.IEnumerator FlickerRoutine(string finalText, float duration, int cps)
+    System.Collections.IEnumerator FlickerRoutine(string finalText, float duration, int cps, bool isColor)
     {
         float interval = 1f / Mathf.Max(1, cps);
         float elapsed = 0f;
@@ -74,11 +81,20 @@ public class VerticalTickItem : MonoBehaviour
         while (elapsed < duration)
         {
             scratch.Clear();
-            for (int i = 0; i < L; i++)
+            string c;
+            foreach (char ch in finalText)
             {
                 // 70% random char, 30% show the real char (so it "locks in" over time)
                 bool showReal = rng.NextDouble() < (elapsed / duration) * 0.6 + 0.3;
-                char c = showReal ? finalText[i] : FLICKER_CHARS[rng.Next(FLICKER_CHARS.Length)];
+                if (showReal)
+                {
+                    c = ch.ToString();
+                    if (isColor)
+                        c = $"<color={GeneUtils.GetHexCode(ch)}>{c}</color>";
+                } else
+                {
+                    c = FLICKER_CHARS[rng.Next(FLICKER_CHARS.Length)].ToString();
+                }
                 scratch.Append(c);
             }
 
@@ -90,7 +106,17 @@ public class VerticalTickItem : MonoBehaviour
         }
 
         // Land on the final text and fix the rect height
-        tmp.text = finalText;
+        if (isColor)
+        {
+            string str = "";
+            foreach (char ch in finalText)
+            {
+                str += $"<color={GeneUtils.GetHexCode(ch)}>{ch}</color>";
+            }
+            tmp.text = str;
+        }
+        else
+            tmp.text = finalText;
         tmp.ForceMeshUpdate();
         float ph = tmp.preferredHeight;
         if (ph > rt.sizeDelta.y)
