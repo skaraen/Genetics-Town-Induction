@@ -274,7 +274,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &47068163
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1550,6 +1550,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DialogueUI
       objectReference: {fileID: 0}
+    - target: {fileID: 4352788822806558984, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
+      propertyPath: narrator
+      value: 
+      objectReference: {fileID: 754705733}
     - target: {fileID: 5374736117822404488, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -4454,6 +4458,10 @@ PrefabInstance:
     - target: {fileID: 5359823400574622603, guid: 1cd24dfe96a9743c98fd8feb55e7065e, type: 3}
       propertyPath: m_Name
       value: FunFactUI
+      objectReference: {fileID: 0}
+    - target: {fileID: 5359823400574622603, guid: 1cd24dfe96a9743c98fd8feb55e7065e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8698167411121124667, guid: 1cd24dfe96a9743c98fd8feb55e7065e, type: 3}
       propertyPath: m_Pivot.x

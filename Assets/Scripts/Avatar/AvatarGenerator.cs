@@ -6,6 +6,7 @@ using TMPro;
 using System.Collections;
 using System.Linq;
 using Unity.Netcode;
+using System;
 
 public class AvatarGenerator : NetworkBehaviour
 {
@@ -14,7 +15,9 @@ public class AvatarGenerator : NetworkBehaviour
 
     [Header("Avatar Spawn")]
     public Transform avatarSpawnPoint;
-    public Transform mainCamera;
+    public CameraRig cameraRig;
+    public float xCamOffset = 3;
+    public float zCamOffset = 6;
 
     [Header("UI References")]
     public Button[] sequenceButtons;
@@ -27,23 +30,18 @@ public class AvatarGenerator : NetworkBehaviour
     public Image[] dials;
     public Image[] needles;
 
-    [SerializeField] private int cameraFocus;
     [SerializeField] Button funFactButton;
     [SerializeField] GameObject funFactUI;
 
     [SerializeField] TMP_InputField playerNameInput;
+    [SerializeField] TextMeshProUGUI nameTitle;
+    [SerializeField] TextMeshProUGUI waitMessage;
+
 
     const string set = "ATGC";
+    string[] partNames = { "head", "torso" };
     private string[][] baseSequenceCodons;
     private Dictionary<string, GameObject> prefabMap;
-
-    private Vector3 straightFocus = new Vector3(0, 0, -6);
-    private Vector3 sideFocus = new Vector3(-3, 0, -6);
-
-    private Vector3 headFocus = new Vector3(-3, 0.5f, -6);
-    private Vector3 torsoFocus = new Vector3(-3, -0.5f, -6);
-    private Vector3 velocity = Vector3.zero;
-
 
     private string currBaseSequence;
     private AvatarProfileData currProfileData;
@@ -64,7 +62,6 @@ public class AvatarGenerator : NetworkBehaviour
         subSequenceEnabled = new bool[NUM_SUBSEQUENCES];
         switchToggles = new SwitchToggle[NUM_SUBSEQUENCES];
         targetMaterials = new Material[NUM_SUBSEQUENCES, NUM_CHOICES];
-        cameraFocus = 0;
 
         BuildBaseSequenceCodons();
         ArrayUtils.ShuffleRows(baseSequenceCodons);
@@ -123,33 +120,6 @@ public class AvatarGenerator : NetworkBehaviour
         return codons;
     }
 
-
-    void LateUpdate()
-    {
-        Vector3 targetPosition;
-        switch (cameraFocus)
-        {
-            case 0:
-                targetPosition = straightFocus;
-                break;
-            case 1:
-                targetPosition = sideFocus;
-                break;
-            case 2:
-                targetPosition = headFocus;
-                break;
-            case 3:
-                targetPosition = torsoFocus;
-                break;
-            default:
-                targetPosition = straightFocus;
-                break;
-        }
-
-        if (targetPosition != mainCamera.position)
-            mainCamera.position = Vector3.SmoothDamp(mainCamera.position, targetPosition, ref velocity, 0.3f);
-    }
-
     /// <summary>
     /// Returns whether the given slider adjusts Value instead of Hue.
     /// Falls back to false (Hue mode) if the array is unset or too short.
@@ -185,7 +155,7 @@ public class AvatarGenerator : NetworkBehaviour
 
     void SetupButtons()
     {
-        nextButton.onClick.AddListener(() => AdvanceStage());
+        nextButton.onClick.AddListener(() => StartCoroutine(AdvanceStage()));
 
         int buttonCount = Mathf.Min(baseSequenceCodons.Length, sequenceButtons.Length);
         for (int i = 0; i < buttonCount; i++)
@@ -228,6 +198,8 @@ public class AvatarGenerator : NetworkBehaviour
 
                 subSequenceEnabled[index] = isOn;
                 UpdateAvatar();
+
+                FocusToggleTarget(index, isOn);
             });
         }
     }
@@ -264,7 +236,6 @@ public class AvatarGenerator : NetworkBehaviour
             sliders[i].maxValue = Mathf.Max(minVal, maxVal);
             float colorValue = GetSliderValue(i, defaultColor[i]);
 
-            Debug.Log($"(Slider {i + 1}) Min value: {sliders[i].minValue}, Max value: {sliders[i].maxValue} ");
             sliders[i].value = Mathf.Clamp(colorValue, sliders[i].minValue, sliders[i].maxValue);
             RotateNeedle(i);
 
@@ -283,25 +254,12 @@ public class AvatarGenerator : NetworkBehaviour
                 {
                     SetMaterialColor(targetMaterials[index, j], Color.HSVToRGB(currColor[index].x, currColor[index].y, currColor[index].z, true));
                 }
+
+                FocusSliderTarget(index);
             });
         }
     }
-
-    IEnumerator DelayedReveal(float revealDelay, float toggleDelay)
-    {
-        RevealTraits();
-        yield return new WaitForSeconds(revealDelay);
-
-        cameraFocus = 0;
-        ToggleCanvas();
-    }
-
-    IEnumerator DelayedToggleCanvas(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        ToggleCanvas();
-    }
-
+    
     private void ToggleCanvas()
     {
         if (currentStage + 1 < canvas.Length)
@@ -309,6 +267,7 @@ public class AvatarGenerator : NetworkBehaviour
             canvas[currentStage].SetActive(false);
             currentStage++;
             canvas[currentStage].SetActive(true);
+            nextButton.interactable = true;
         }
         else
         {
@@ -316,26 +275,37 @@ public class AvatarGenerator : NetworkBehaviour
         }
     }
 
-    void AdvanceStage()
+    IEnumerator AdvanceStage()
     {
+        nextButton.interactable = false;
+
         switch (currentStage)
         {
             case 0:
                 LoadAvatar();
-                ToggleCanvas();
                 break;
             case 1:
-                cameraFocus = 1;
-                StartCoroutine(DelayedToggleCanvas(1f));
+                cameraRig.MoveToLeft();
+                yield return new WaitForSeconds(1f);
                 break;
             case 2:
-                StartCoroutine(DelayedReveal(6f, 1f));
+                RevealTraits();
+                yield return new WaitForSeconds(6f);
+                cameraRig.MoveStraight();
                 break;
             case 3:
                 playerName = playerNameInput.text;
-                StartCoroutine(DelayedToggleCanvas(1f));
+                playerNameInput.gameObject.SetActive(false);
+                nextButton.enabled = false;
+
+                FlickerComponent nameFlickerCo = nameTitle.GetComponent<FlickerComponent>();
+                nameFlickerCo.FlickerUpdateText($"hello {playerNameInput.text.ToUpper()} !");
+                waitMessage.gameObject.SetActive(true);
+                yield return new WaitForSeconds(3f);
                 break;
         }
+
+        ToggleCanvas();
     }
 
     void RevealTraits()
@@ -397,6 +367,7 @@ public class AvatarGenerator : NetworkBehaviour
         currProfileData = currentAvatar.GetComponent<AvatarProfileData>();
 
         InitDefaults();
+        cameraRig.InitRig(currentAvatar.transform, xCamOffset, 0f, zCamOffset);
     }
 
     /// <summary>
@@ -441,16 +412,53 @@ public class AvatarGenerator : NetworkBehaviour
         SetupSliders();
     }
 
+    private float GetAvatarHeight()
+    {
+        Renderer[] renderers = currentAvatar.GetComponentsInChildren<Renderer>();
+        Bounds bounds = renderers[0].bounds;
+
+        foreach (Renderer r in renderers)
+            bounds.Encapsulate(r.bounds);
+
+        return bounds.size.y;
+    }
+
+    public void FocusToggleTarget(int index, bool isOn)
+    {
+        if (currentAvatar == null) return;
+
+        int activeIndex = isOn ? 1 : 0;
+        string partName =  $"{partNames[index]}{activeIndex + 1}";
+
+        Transform part = currentAvatar.GetComponentsInChildren<Transform>(true)
+            .FirstOrDefault(t => t.name == partName);
+
+        Renderer r = currProfileData.colorTargetRenderers[index * NUM_CHOICES + activeIndex]
+            .GetComponentInChildren<Renderer>();
+
+        cameraRig.FocusOnComponent(part);
+    }
+
+    public void FocusSliderTarget(int index)
+    {
+        if (currentAvatar == null) return;
+
+        int activeIndex = subSequenceEnabled[index] ? 1 : 0;
+
+        Renderer r = currProfileData.colorTargetRenderers[index * NUM_CHOICES + activeIndex]
+            .GetComponentInChildren<Renderer>();
+
+        cameraRig.FocusOnRenderer(r);
+    }
+
     private void UpdateAvatar()
     {
         if (currentAvatar == null) return;
 
-        string[] parts = { "head", "torso" };
-
         for (int i = 0; i < 2; i++)
         {
             int activeIndex = subSequenceEnabled[i] ? 1 : 0;
-            ToggleParts(parts[i], activeIndex);
+            ToggleParts(partNames[i], activeIndex);
         }
     }
 

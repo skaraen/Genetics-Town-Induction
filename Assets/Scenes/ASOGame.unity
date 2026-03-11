@@ -4389,6 +4389,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5c31d698090e0413baf4b197adc954f0, type: 3}
+--- !u!1 &754705733 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5575113701297423450, guid: 5c31d698090e0413baf4b197adc954f0, type: 3}
+  m_PrefabInstance: {fileID: 754705732}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &777724546
 GameObject:
   m_ObjectHideFlags: 0
@@ -5341,6 +5346,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DialogueUI
       objectReference: {fileID: 0}
+    - target: {fileID: 4352788822806558984, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
+      propertyPath: narrator
+      value: 
+      objectReference: {fileID: 754705733}
     - target: {fileID: 5374736117822404488, guid: bab72d8ec8d4547c99ef00e8c9918ac0, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
