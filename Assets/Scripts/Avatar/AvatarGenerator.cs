@@ -229,6 +229,14 @@ public class AvatarGenerator : NetworkBehaviour
             Vector3 minColor = new Vector3(minH, minS, minV);
             Color.RGBToHSV(currProfileData.colorRanges[2 * i + 1], out float maxH, out float maxS, out float maxV);
             Vector3 maxColor = new Vector3(maxH, maxS, maxV);
+            // When in Value mode, override hue/saturation from colorRanges
+            // so the slider adjusts brightness of the intended color, not the initial material color
+            if (SliderUsesValue(i))
+            {
+                currColor[i].x = minColor.x;
+                currColor[i].y = minColor.y;
+            }
+
             float minVal = GetSliderValue(i, minColor);
             float maxVal = GetSliderValue(i, maxColor);
             // Ensure min <= max so the slider isn't stuck when color ranges are ordered bright-to-dark
