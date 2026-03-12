@@ -388,7 +388,12 @@ public class AvatarGenerator : NetworkBehaviour
             {
                 int idx = i * NUM_CHOICES + j;
                 if (idx < rendererCount && currProfileData.colorTargetRenderers[idx] != null)
-                    targetMaterials[i, j] = currProfileData.colorTargetRenderers[idx].material;
+                {
+                    int matIdx = (currProfileData.colorTargetMaterialIndices != null && idx < currProfileData.colorTargetMaterialIndices.Length)
+                        ? currProfileData.colorTargetMaterialIndices[idx] : 0;
+                    Material[] mats = currProfileData.colorTargetRenderers[idx].materials;
+                    targetMaterials[i, j] = (matIdx < mats.Length) ? mats[matIdx] : mats[0];
+                }
             }
             if (targetMaterials[i, 0] != null)
             {
