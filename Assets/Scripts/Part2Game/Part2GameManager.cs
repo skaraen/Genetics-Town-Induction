@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
@@ -50,6 +51,23 @@ public class Part2GameManager : MonoBehaviour
     [SerializeField] private GameObject funFactUI;
     [SerializeField] private string fact;
 
+    [Header("Completed Sequence Strip")]
+    [Tooltip("VerticalLayoutGroup container at the bottom of the screen where completed nucleotide rows accumulate")]
+    [SerializeField] private RectTransform completedSequenceStrip;
+    [Tooltip("Prefab for a horizontal row that holds one completed sequence's nucleotides. Must have RectTransform, HorizontalLayoutGroup, and ContentSizeFitter.")]
+    [SerializeField] private GameObject sequenceRowPrefab;
+
+    [Header("Sequence Review Screen")]
+    private readonly float annotationLabelYOffset = -50f;
+    [SerializeField] private GameObject reviewContinueButton;
+    [Tooltip("Prefab for annotation labels spawned below each sequence segment")]
+    [SerializeField] private GameObject annotationLabelPrefab;
+    [Tooltip("Prefabs for A, T, G nucleotide labels inserted as start/stop codons in the review strip")]
+    [SerializeField] private GameObject nucleotideAPrefab;
+    [SerializeField] private GameObject nucleotideTPrefab;
+    [SerializeField] private GameObject nucleotideGPrefab;
+    [SerializeField] private GameObject nucleotideCPrefab;
+
     /// <summary>
     /// Manual Y offset adjustments for avatars that overlap with UI due to height differences.
     /// Key: avatar ID, Value: Y offset to apply.
@@ -70,10 +88,16 @@ public class Part2GameManager : MonoBehaviour
     // Index of the currently selected trait, matching sequenceBodyParts order in AvatarProfileData
     private int currentlySelectedTraitIndex = -1;
 
+    // Maps trait index → list of nucleotide GameObjects for reordering in the review screen
+    private Dictionary<int, List<GameObject>> nucleotidesByTraitIndex = new Dictionary<int, List<GameObject>>();
+
+    // Maps trait index → the horizontal row RectTransform for that trait's completed nucleotides
+    private Dictionary<int, RectTransform> sequenceRows = new Dictionary<int, RectTransform>();
+
     /// <summary>
     /// Tracks dialogue phase to differentiate intro vs final dialogue in HandleDialogueEnded.
     /// </summary>
-    private enum DialoguePhase { Intro, Final }
+    private enum DialoguePhase { Intro, SequenceReview, Final }
     private DialoguePhase currentDialoguePhase = DialoguePhase.Intro;
 
     /// <summary>
@@ -86,6 +110,88 @@ public class Part2GameManager : MonoBehaviour
         currentlySelectedTraitToggle = null;
         // Stop the color cycler by setting an empty color sequence
         colorCycler.SetColorSequence(colors: new List<Color>(), periodToDisplayColor: 0f, periodInBetween: 0f, inBetweenColor: Color.clear);
+    }
+
+    /// <summary>
+    /// Instantiates the sequenceRowPrefab and parents it under the vertical completedSequenceStrip.
+    /// </summary>
+    private RectTransform CreateSequenceRow(int traitIndex)
+    {
+        GameObject rowObj = Instantiate(sequenceRowPrefab, completedSequenceStrip);
+        rowObj.name = $"SequenceRow_{traitIndex}";
+
+        RectTransform rowRect = rowObj.GetComponent<RectTransform>();
+        sequenceRows[traitIndex] = rowRect;
+        return rowRect;
+    }
+
+    /// <summary>
+    /// Returns the full-length DNA sequence for a trait index from the avatar profile.
+    /// Index 0 = baseSequence, 1 = subSequences[0], 2 = subSequences[1].
+    /// </summary>
+    private string GetFullSequence(int traitIndex)
+    {
+        AvatarProfileData profile = AvatarRegistry.Instance.GetProfileById(targetCustoms.avatarType);
+        if (profile == null) return null;
+
+        return traitIndex switch
+        {
+            0 => profile.baseSequence,
+            1 => profile.subSequences.Length > 0 ? profile.subSequences[0] : null,
+            2 => profile.subSequences.Length > 1 ? profile.subSequences[1] : null,
+            _ => null
+        };
+    }
+
+    /// <summary>
+    /// Instantiates nucleotides for the portion of the full sequence beyond the gameplay length
+    /// and appends them to the trait's sequence row. Returns the list of newly created GameObjects.
+    /// </summary>
+    private List<GameObject> ExpandSequenceRow(int traitIndex, RectTransform row)
+    {
+        List<GameObject> expanded = new List<GameObject>();
+        string fullSequence = GetFullSequence(traitIndex);
+        if (string.IsNullOrEmpty(fullSequence)) return expanded;
+
+        int gameplayLength = OrderedSequenceSlots.Count;
+        if (fullSequence.Length <= gameplayLength) return expanded;
+
+        for (int i = gameplayLength; i < fullSequence.Length; i++)
+        {
+            GameObject prefab = GetNucleotidePrefab(fullSequence[i]);
+            if (prefab == null) continue;
+            GameObject instance = Instantiate(prefab, row);
+            expanded.Add(instance);
+        }
+        return expanded;
+    }
+
+    /// <summary>
+    /// Expands all sequence rows from their 9 gameplay nucleotides to the full sequence length.
+    /// Called during the review transition after all traits are completed.
+    /// Updates nucleotidesByTraitIndex to include the expanded nucleotides.
+    /// </summary>
+    private void ExpandAllSequenceRows()
+    {
+        foreach (var kvp in sequenceRows)
+        {
+            int traitIndex = kvp.Key;
+            RectTransform row = kvp.Value;
+
+            List<GameObject> expandedNucs = ExpandSequenceRow(traitIndex, row);
+
+            if (nucleotidesByTraitIndex.TryGetValue(traitIndex, out List<GameObject> existing))
+                existing.AddRange(expandedNucs);
+
+            // Enable the background image and add padding now that the full sequence is shown
+            Image rowBg = row.GetComponent<Image>();
+            if (rowBg != null)
+                rowBg.enabled = true;
+
+            GridLayoutGroup grid = row.GetComponent<GridLayoutGroup>();
+            if (grid != null)
+                grid.padding = new RectOffset(50, 50, 50, 50);
+        }
     }
 
     /// <summary>
@@ -302,6 +408,10 @@ public class Part2GameManager : MonoBehaviour
             case DialoguePhase.Intro:
                 ShowGameUI();
                 break;
+            case DialoguePhase.SequenceReview:
+                if (reviewContinueButton != null)
+                    reviewContinueButton.SetActive(true);
+                break;
             case DialoguePhase.Final:
                 UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync("Part2Scene");
                 break;
@@ -358,13 +468,14 @@ public class Part2GameManager : MonoBehaviour
 
 
     /// <summary>
-    /// Called when the player submits their sequence for verification
+    /// Called when the player submits their sequence for verification.
     /// </summary>
     public void SubmitSequence(){
         bool isCorrect = VerifySequence();
         if(isCorrect){
+            int completedTraitIndex = currentlySelectedTraitIndex;
             Toggle completedToggle = currentlySelectedTraitToggle;
-            RestoreBodyParts(currentlySelectedTraitIndex);
+            RestoreBodyParts(completedTraitIndex);
             // Set interactable = false first, so when isOn changes, the visibility update shows the checkmark
             completedToggle.interactable = false;
             // Setting isOn = false triggers EnlargeToggleWhenSelected (scale down) and
@@ -372,18 +483,8 @@ public class Part2GameManager : MonoBehaviour
             // It also triggers ClearSequence via the onValueChanged listener
             completedToggle.isOn = false;
 
-            if (CheckAllSequencesCompleted())
-            {
-                StartCompletionFlow();
-                return;
-            }
-
-            // clear the sequence slots
-            foreach(var slot in OrderedSequenceSlots){
-                if(slot.transform.childCount > 0){
-                    Destroy(slot.transform.GetChild(0).gameObject);
-                }
-            }
+            bool allComplete = CheckAllSequencesCompleted();
+            StartCoroutine(MoveNucleotidesToStrip(allComplete, completedTraitIndex));
         }
         else{
             // Shake all DNA components in slots to indicate incorrect sequence
@@ -400,6 +501,91 @@ public class Part2GameManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Moves each nucleotide from the sequence slots into the completed row for this trait,
+    /// disabling drag behavior and lerping each to its layout position.
+    /// If allComplete is true, triggers the completion flow after the last nucleotide lands.
+    ///
+    /// Animation uses a 4-step approach to avoid the GridLayoutGroup snapping mid-tween:
+    /// 1. Temporarily parent all nucleotides to the row and rebuild layout to batch-compute target positions
+    /// 2. Unparent to canvas root so the layout group can't override DOTween during animation
+    /// 3. Stagger-animate each nucleotide to its pre-calculated target
+    /// 4. Reparent to the row as permanent children once all animations finish
+    /// </summary>
+    private IEnumerator MoveNucleotidesToStrip(bool triggerCompletionAfter, int traitIndex)
+    {
+        // Get or create the horizontal row for this trait
+        if (!sequenceRows.TryGetValue(traitIndex, out RectTransform targetRow))
+            targetRow = CreateSequenceRow(traitIndex);
+
+        // Collect nucleotides from slots before reparenting changes child counts
+        List<GameObject> nucleotides = new List<GameObject>();
+        foreach (var slot in OrderedSequenceSlots)
+        {
+            if (slot.transform.childCount > 0)
+                nucleotides.Add(slot.transform.GetChild(0).gameObject);
+        }
+
+        // Disable interaction on all nucleotides
+        foreach (GameObject nucleotide in nucleotides)
+        {
+            DraggableItem draggable = nucleotide.GetComponent<DraggableItem>();
+            if (draggable != null)
+                draggable.enabled = false;
+
+            CanvasGroup cg = nucleotide.GetComponent<CanvasGroup>();
+            if (cg != null)
+                cg.blocksRaycasts = false;
+        }
+
+        // Record starting positions, then temporarily parent all to the row
+        Vector3[] startPositions = new Vector3[nucleotides.Count];
+        Vector3[] targetPositions = new Vector3[nucleotides.Count];
+        for (int i = 0; i < nucleotides.Count; i++)
+        {
+            startPositions[i] = nucleotides[i].transform.position;
+            nucleotides[i].transform.SetParent(targetRow, worldPositionStays: true);
+        }
+
+        // Rebuild layout on both the row and the vertical container to compute target positions
+        LayoutRebuilder.ForceRebuildLayoutImmediate(targetRow);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(completedSequenceStrip);
+        for (int i = 0; i < nucleotides.Count; i++)
+            targetPositions[i] = nucleotides[i].transform.position;
+
+        // Move nucleotides to the canvas root so the layout group can't fight DOTween
+        // during animation. Existing row children stay put (left-aligned, unaffected).
+        Transform animationParent = completedSequenceStrip.root;
+        for (int i = 0; i < nucleotides.Count; i++)
+        {
+            nucleotides[i].transform.SetParent(animationParent, worldPositionStays: false);
+            nucleotides[i].transform.position = startPositions[i];
+            nucleotides[i].transform.SetAsLastSibling();
+        }
+
+        // Staggered animation: lerp each nucleotide to its pre-calculated target
+        Tween lastTween = null;
+        for (int i = 0; i < nucleotides.Count; i++)
+        {
+            lastTween = nucleotides[i].transform.DOMove(targetPositions[i], 0.3f).SetEase(Ease.OutQuad);
+            yield return new WaitForSeconds(0.15f);
+        }
+
+        // Wait for the final nucleotide to finish its lerp
+        if (lastTween != null)
+            yield return lastTween.WaitForCompletion();
+
+        // Reparent all to the row as permanent layout children
+        foreach (GameObject nucleotide in nucleotides)
+            nucleotide.transform.SetParent(targetRow, worldPositionStays: true);
+
+        // Store gameplay nucleotides for this trait (expanded later during review)
+        nucleotidesByTraitIndex[traitIndex] = nucleotides;
+
+        if (triggerCompletionAfter)
+            StartCompletionFlow();
     }
 
     /// <summary>
@@ -433,27 +619,167 @@ public class Part2GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Starts the game completion sequence with fade-out and final dialogue.
+    /// Starts the game completion sequence with the sequence review screen.
     /// </summary>
     private void StartCompletionFlow()
     {
-        StartCoroutine(CompletionRoutine());
+        StartCoroutine(ReviewTransitionRoutine());
     }
 
-    private System.Collections.IEnumerator CompletionRoutine()
+    /// <summary>
+    /// Transitions from the game UI to the sequence review screen. Reorders nucleotides
+    /// to biological order, inserts ATG/TAG labels, spawns trait annotations, and
+    /// animates the strip to center-screen before triggering Gregor's review dialogue.
+    /// </summary>
+    private IEnumerator ReviewTransitionRoutine()
     {
+        // Hide continue button until review dialogue finishes
+        if (reviewContinueButton != null)
+            reviewContinueButton.SetActive(false);
+
+        // Reparent strip from gameUI to canvas root so it survives the fade-out
+        Transform canvasRoot = gameUI.transform.root;
+        completedSequenceStrip.SetParent(canvasRoot, worldPositionStays: true);
+
+        // Fade out and disable the game UI
         if (gameUI != null)
         {
             yield return gameUI.DOFade(0f, 1f).WaitForCompletion();
             gameUI.gameObject.SetActive(false);
         }
-        TriggerFinalDialogue();
+
+        // Reorder rows by biological order (trait 0, 1, 2)
+        for (int t = 0; t < 3; t++)
+        {
+            if (sequenceRows.TryGetValue(t, out RectTransform row))
+                row.SetSiblingIndex(t);
+        }
+
+        // Expand each row from 9 gameplay nucleotides to the full sequence length
+        ExpandAllSequenceRows();
+
+        // Insert ATG/TAG text labels at biologically correct positions
+        InsertSequenceLabels();
+
+        // Rebuild layout on each row and the container so positions are computed before spawning annotations
+        foreach (var row in sequenceRows.Values)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(row);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(completedSequenceStrip);
+
+        // Spawn annotation labels below each segment showing trait names
+        List<(string traitName, string sequence)> traits = GetTraitSequencesFromProfile(targetCustoms.avatarType);
+        SpawnAnnotationLabels(traits);
+
+        // Animate strip to center of screen
+        Vector3 worldPos = completedSequenceStrip.position;
+        completedSequenceStrip.anchorMin = new Vector2(0.5f, 0.75f);
+        completedSequenceStrip.anchorMax = new Vector2(0.5f, 0.75f);
+        completedSequenceStrip.pivot = new Vector2(0.5f, 0.5f);
+        completedSequenceStrip.position = worldPos;
+        yield return completedSequenceStrip.DOAnchorPos(Vector2.zero, 1f)
+            .SetEase(Ease.OutQuad)
+            .WaitForCompletion();
+
+        // Trigger Gregor's review dialogue
+        currentDialoguePhase = DialoguePhase.SequenceReview;
+        if (narrator != null && dialogueController != null)
+        {
+            narrator.GetComponent<ReactionChooser>().SetReaction("happy");
+            narratorAnimator.SetTrigger("EntryTrigger");
+            dialogueController.StartSequence("narrator-part2-review");
+        }
+    }
+
+    /// <summary>
+    /// Returns the nucleotide prefab corresponding to a DNA character (A, T, G, or C).
+    /// </summary>
+    private GameObject GetNucleotidePrefab(char c)
+    {
+        return c switch
+        {
+            'A' => nucleotideAPrefab,
+            'T' => nucleotideTPrefab,
+            'G' => nucleotideGPrefab,
+            'C' => nucleotideCPrefab,
+            _ => null
+        };
+    }
+
+    /// <summary>
+    /// Instantiates nucleotide prefabs for each letter in a codon (e.g. "ATG" or "TAG")
+    /// into the given parent container starting at the given sibling index.
+    /// Returns the updated insert index after all instantiated prefabs.
+    /// </summary>
+    private int InstantiateCodon(string codon, int insertIndex, RectTransform parent)
+    {
+        foreach (char c in codon)
+        {
+            GameObject prefab = GetNucleotidePrefab(c);
+            if (prefab == null) continue;
+            GameObject instance = Instantiate(prefab, parent);
+            instance.transform.SetSiblingIndex(insertIndex);
+            insertIndex++;
+        }
+        return insertIndex;
+    }
+
+    /// <summary>
+    /// Prepends ATG or TAG codons at the start of each sequence row.
+    /// ATG marks an active (enabled) gene, TAG marks an inactive (disabled) gene.
+    /// </summary>
+    private void InsertSequenceLabels()
+    {
+        // Trait 0 (base): always ATG
+        if (sequenceRows.TryGetValue(0, out RectTransform row0))
+            InstantiateCodon("ATG", 0, row0);
+
+        // Trait 1 (subSeq0): ATG if enabled, TAG if disabled
+        if (sequenceRows.TryGetValue(1, out RectTransform row1))
+            InstantiateCodon(targetCustoms.subSeq0Enabled ? "ATG" : "TAG", 0, row1);
+
+        // Trait 2 (subSeq1): ATG if enabled, TAG if disabled
+        if (sequenceRows.TryGetValue(2, out RectTransform row2))
+            InstantiateCodon(targetCustoms.subSeq1Enabled ? "ATG" : "TAG", 0, row2);
+    }
+
+    /// <summary>
+    /// Spawns annotation labels below each sequence's grid container in the review screen.
+    /// Labels use ignoreLayout and anchor to the bottom-center of their parent grid.
+    /// </summary>
+    private void SpawnAnnotationLabels(List<(string traitName, string sequence)> traits)
+    {
+        if (annotationLabelPrefab == null) return;
+
+        for (int i = 0; i < traits.Count; i++)
+        {
+            if (!sequenceRows.TryGetValue(i, out RectTransform row)) continue;
+
+            // Rebuild grid layout to get accurate size
+            LayoutRebuilder.ForceRebuildLayoutImmediate(row);
+
+            GameObject label = Instantiate(annotationLabelPrefab, row);
+
+            LayoutElement le = label.GetComponent<LayoutElement>();
+            if (le == null) le = label.AddComponent<LayoutElement>();
+            le.ignoreLayout = true;
+
+            TextMeshProUGUI tmp = label.GetComponentInChildren<TextMeshProUGUI>();
+            if (tmp != null)
+                tmp.text = traits[i].traitName;
+
+            // Anchor to bottom-center of the grid container
+            RectTransform labelRect = label.GetComponent<RectTransform>();
+            labelRect.anchorMin = new Vector2(0.5f, 0f);
+            labelRect.anchorMax = new Vector2(0.5f, 0f);
+            labelRect.pivot = new Vector2(0.5f, 1f);
+            labelRect.anchoredPosition = new Vector2(0f, annotationLabelYOffset);
+        }
     }
 
     /// <summary>
     /// Triggers Gregor's congratulatory dialogue after all sequences are completed.
     /// </summary>
-    private void TriggerFinalDialogue()
+    public void TriggerFinalDialogue()
     {
         if (narrator == null || dialogueController == null) return;
 

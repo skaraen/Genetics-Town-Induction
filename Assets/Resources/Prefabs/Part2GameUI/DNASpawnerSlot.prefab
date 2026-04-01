@@ -94,6 +94,7 @@ MonoBehaviour:
   replaceItems: 0
   lerpItemsToCenter: 1
   destroyItemOnFailedDrop: 0
+  acceptMultipleItems: 0
   callOnStateChange: []
 --- !u!1 &4374755968773309922
 GameObject:
