@@ -229,17 +229,6 @@
         ]
     },
     {
-        "sequence": "narrator-part2-review",
-        "mode": "overlay",
-        "dialogues": [
-            {
-                "speaker": "Gregor",
-                "emotion": "happy",
-                "text": "Nice work! You've unlocked your friend's full genetic code, let's take a look!"
-            }
-        ]
-    },
-    {
         "sequence": "narrator-part2-final",
         "mode": "overlay",
         "dialogues": [

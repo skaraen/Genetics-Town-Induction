@@ -58,7 +58,6 @@ public class Part2GameManager : MonoBehaviour
     [SerializeField] private GameObject sequenceRowPrefab;
 
     [Header("Sequence Review Screen")]
-    [SerializeField] private GameObject reviewContinueButton;
     [Tooltip("Prefabs for A, T, G nucleotide labels inserted as start/stop codons in the review strip")]
     [SerializeField] private GameObject nucleotideAPrefab;
     [SerializeField] private GameObject nucleotideTPrefab;
@@ -96,7 +95,7 @@ public class Part2GameManager : MonoBehaviour
     /// <summary>
     /// Tracks dialogue phase to differentiate intro vs final dialogue in HandleDialogueEnded.
     /// </summary>
-    private enum DialoguePhase { Intro, SequenceReview, Final }
+    private enum DialoguePhase { Intro, Final }
     private DialoguePhase currentDialoguePhase = DialoguePhase.Intro;
 
     /// <summary>
@@ -427,11 +426,9 @@ public class Part2GameManager : MonoBehaviour
             case DialoguePhase.Intro:
                 ShowGameUI();
                 break;
-            case DialoguePhase.SequenceReview:
-                if (reviewContinueButton != null)
-                    reviewContinueButton.SetActive(true);
-                break;
             case DialoguePhase.Final:
+                if (currentAvatar != null)
+                    currentAvatar.SetActive(false);
                 UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync("Part2Scene");
                 break;
         }
@@ -648,14 +645,10 @@ public class Part2GameManager : MonoBehaviour
     /// <summary>
     /// Transitions from the game UI to the sequence review screen. Reorders nucleotides
     /// to biological order, inserts ATG/TAG labels, spawns trait annotations, and
-    /// animates the strip to center-screen before triggering Gregor's review dialogue.
+    /// animates the strip to center-screen before triggering Gregor's final dialogue.
     /// </summary>
     private IEnumerator ReviewTransitionRoutine()
     {
-        // Hide continue button until review dialogue finishes
-        if (reviewContinueButton != null)
-            reviewContinueButton.SetActive(false);
-
         // Reparent strip from gameUI to canvas root so it survives the fade-out
         Transform canvasRoot = gameUI.transform.root;
         completedSequenceStrip.SetParent(canvasRoot, worldPositionStays: true);
@@ -695,13 +688,13 @@ public class Part2GameManager : MonoBehaviour
             .SetEase(Ease.OutQuad)
             .WaitForCompletion();
 
-        // Trigger Gregor's review dialogue
-        currentDialoguePhase = DialoguePhase.SequenceReview;
+        // Trigger Gregor's final dialogue
+        currentDialoguePhase = DialoguePhase.Final;
         if (narrator != null && dialogueController != null)
         {
             narrator.GetComponent<ReactionChooser>().SetReaction("happy");
             narratorAnimator.SetTrigger("EntryTrigger");
-            dialogueController.StartSequence("narrator-part2-review");
+            dialogueController.StartSequence("narrator-memory-final");
         }
     }
 
@@ -757,22 +750,6 @@ public class Part2GameManager : MonoBehaviour
             InstantiateCodon(targetCustoms.subSeq1Enabled ? "ATG" : "TAG", 0, row2);
     }
 
-
-    /// <summary>
-    /// Triggers Gregor's congratulatory dialogue after all sequences are completed.
-    /// </summary>
-    public void TriggerFinalDialogue()
-    {
-        if (narrator == null || dialogueController == null) return;
-
-        if (currentAvatar != null)
-            currentAvatar.SetActive(false);
-
-        currentDialoguePhase = DialoguePhase.Final;
-        narrator.GetComponent<ReactionChooser>().SetReaction("happy");
-        narratorAnimator.SetTrigger("EntryTrigger");
-        dialogueController.StartSequence("narrator-memory-final");
-    }
 
     /// <summary>
     /// Replaces materials on all sequence-mapped body parts with greyedOutMaterial at game start,
