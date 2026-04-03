@@ -2224,6 +2224,8 @@ MonoBehaviour:
   ClientButton: {fileID: 920637801}
   ipInputField: {fileID: 1881872933}
   avatarSceneName: IntroScene
+  hostIp: 10.150.3.226
+  port: 7777
 --- !u!1 &1603799533
 GameObject:
   m_ObjectHideFlags: 0

@@ -58,15 +58,14 @@ public class Part2GameManager : MonoBehaviour
     [SerializeField] private GameObject sequenceRowPrefab;
 
     [Header("Sequence Review Screen")]
-    private readonly float annotationLabelYOffset = -50f;
     [SerializeField] private GameObject reviewContinueButton;
-    [Tooltip("Prefab for annotation labels spawned below each sequence segment")]
-    [SerializeField] private GameObject annotationLabelPrefab;
     [Tooltip("Prefabs for A, T, G nucleotide labels inserted as start/stop codons in the review strip")]
     [SerializeField] private GameObject nucleotideAPrefab;
     [SerializeField] private GameObject nucleotideTPrefab;
     [SerializeField] private GameObject nucleotideGPrefab;
     [SerializeField] private GameObject nucleotideCPrefab;
+    [Tooltip("Text prefab spawned to the left of each sequence row showing the trait name during review")]
+    [SerializeField] private GameObject sequenceNameLabelPrefab;
 
     /// <summary>
     /// Manual Y offset adjustments for avatars that overlap with UI due to height differences.
@@ -173,6 +172,8 @@ public class Part2GameManager : MonoBehaviour
     /// </summary>
     private void ExpandAllSequenceRows()
     {
+        List<(string traitName, string sequence)> traits = GetTraitSequencesFromProfile(targetCustoms.avatarType);
+
         foreach (var kvp in sequenceRows)
         {
             int traitIndex = kvp.Key;
@@ -191,7 +192,25 @@ public class Part2GameManager : MonoBehaviour
             GridLayoutGroup grid = row.GetComponent<GridLayoutGroup>();
             if (grid != null)
                 grid.padding = new RectOffset(50, 50, 50, 50);
+
+            // Spawn trait name label to the left of the row
+            if (sequenceNameLabelPrefab != null && traitIndex < traits.Count)
+                SpawnSequenceNameLabel(row, traits[traitIndex].traitName);
         }
+    }
+
+    /// <summary>
+    /// Instantiates a trait name label as a child of the sequence row.
+    /// The prefab must have LayoutElement (ignoreLayout), anchors at left-middle,
+    /// and pivot at right-middle so it sits to the left of the row's content.
+    /// </summary>
+    private void SpawnSequenceNameLabel(RectTransform row, string traitName)
+    {
+        GameObject label = Instantiate(sequenceNameLabelPrefab, row);
+
+        TextMeshProUGUI tmp = label.GetComponentInChildren<TextMeshProUGUI>();
+        if (tmp != null)
+            tmp.text = traitName;
     }
 
     /// <summary>
@@ -661,14 +680,10 @@ public class Part2GameManager : MonoBehaviour
         // Insert ATG/TAG text labels at biologically correct positions
         InsertSequenceLabels();
 
-        // Rebuild layout on each row and the container so positions are computed before spawning annotations
+        // Rebuild layout on each row and the container so positions are finalized
         foreach (var row in sequenceRows.Values)
             LayoutRebuilder.ForceRebuildLayoutImmediate(row);
         LayoutRebuilder.ForceRebuildLayoutImmediate(completedSequenceStrip);
-
-        // Spawn annotation labels below each segment showing trait names
-        List<(string traitName, string sequence)> traits = GetTraitSequencesFromProfile(targetCustoms.avatarType);
-        SpawnAnnotationLabels(traits);
 
         // Animate strip to center of screen
         Vector3 worldPos = completedSequenceStrip.position;
@@ -742,39 +757,6 @@ public class Part2GameManager : MonoBehaviour
             InstantiateCodon(targetCustoms.subSeq1Enabled ? "ATG" : "TAG", 0, row2);
     }
 
-    /// <summary>
-    /// Spawns annotation labels below each sequence's grid container in the review screen.
-    /// Labels use ignoreLayout and anchor to the bottom-center of their parent grid.
-    /// </summary>
-    private void SpawnAnnotationLabels(List<(string traitName, string sequence)> traits)
-    {
-        if (annotationLabelPrefab == null) return;
-
-        for (int i = 0; i < traits.Count; i++)
-        {
-            if (!sequenceRows.TryGetValue(i, out RectTransform row)) continue;
-
-            // Rebuild grid layout to get accurate size
-            LayoutRebuilder.ForceRebuildLayoutImmediate(row);
-
-            GameObject label = Instantiate(annotationLabelPrefab, row);
-
-            LayoutElement le = label.GetComponent<LayoutElement>();
-            if (le == null) le = label.AddComponent<LayoutElement>();
-            le.ignoreLayout = true;
-
-            TextMeshProUGUI tmp = label.GetComponentInChildren<TextMeshProUGUI>();
-            if (tmp != null)
-                tmp.text = traits[i].traitName;
-
-            // Anchor to bottom-center of the grid container
-            RectTransform labelRect = label.GetComponent<RectTransform>();
-            labelRect.anchorMin = new Vector2(0.5f, 0f);
-            labelRect.anchorMax = new Vector2(0.5f, 0f);
-            labelRect.pivot = new Vector2(0.5f, 1f);
-            labelRect.anchoredPosition = new Vector2(0f, annotationLabelYOffset);
-        }
-    }
 
     /// <summary>
     /// Triggers Gregor's congratulatory dialogue after all sequences are completed.

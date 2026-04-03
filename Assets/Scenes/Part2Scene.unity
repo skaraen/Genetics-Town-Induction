@@ -1978,11 +1978,12 @@ MonoBehaviour:
   completedSequenceStrip: {fileID: 459665150}
   sequenceRowPrefab: {fileID: 2143749626215938145, guid: 3a4802e3ce2f34ed0b4ef0748d790c3b, type: 3}
   reviewContinueButton: {fileID: 686695957}
-  annotationLabelPrefab: {fileID: 6899403390802764092, guid: fd1c3282431cd49159a8761df5e0bbae, type: 3}
+  annotationLabelPrefab: {fileID: 3327901884412834201, guid: e90ac6616abe545d59340a36e6339139, type: 3}
   nucleotideAPrefab: {fileID: 2459902767342568017, guid: 1cfd52ecc5c4d4e91b137803ae9813ef, type: 3}
   nucleotideTPrefab: {fileID: 2567098366195910751, guid: fe009cc72f630431b82ca8a2bf0bff96, type: 3}
   nucleotideGPrefab: {fileID: 4431720348049318296, guid: b92630a4652824ebdbe8e80ec166fa61, type: 3}
   nucleotideCPrefab: {fileID: 5595239792655079134, guid: 22c0b09ece50448ef9e2443e6b35f364, type: 3}
+  sequenceNameLabelPrefab: {fileID: 3327901884412834201, guid: e90ac6616abe545d59340a36e6339139, type: 3}
 --- !u!4 &747056073
 Transform:
   m_ObjectHideFlags: 0
