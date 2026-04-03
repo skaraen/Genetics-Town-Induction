@@ -1842,6 +1842,7 @@ MonoBehaviour:
   fact: This part of the game is based on a real scientific process. Scientists have
     used this process to discover more than 55,000 genetic sequences that are linked
     to an illness or a trait.
+  confettiPrefab: {fileID: 8217979659151199949, guid: 5c811e2a63f5d47dda2fb0ab4aeec7d3, type: 3}
   completedSequenceStrip: {fileID: 459665150}
   sequenceRowPrefab: {fileID: 2143749626215938145, guid: 3a4802e3ce2f34ed0b4ef0748d790c3b, type: 3}
   nucleotideAPrefab: {fileID: 2459902767342568017, guid: 1cfd52ecc5c4d4e91b137803ae9813ef, type: 3}

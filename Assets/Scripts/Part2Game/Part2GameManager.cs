@@ -51,6 +51,10 @@ public class Part2GameManager : MonoBehaviour
     [SerializeField] private GameObject funFactUI;
     [SerializeField] private string fact;
 
+    [Header("Effects")]
+    [Tooltip("Particle system prefab spawned at avatar body parts on trait completion. Should have Stop Action = Destroy.")]
+    [SerializeField] private GameObject confettiPrefab;
+
     [Header("Completed Sequence Strip")]
     [Tooltip("VerticalLayoutGroup container at the bottom of the screen where completed nucleotide rows accumulate")]
     [SerializeField] private RectTransform completedSequenceStrip;
@@ -511,6 +515,10 @@ public class Part2GameManager : MonoBehaviour
             int completedTraitIndex = currentlySelectedTraitIndex;
             Toggle completedToggle = currentlySelectedTraitToggle;
             RestoreBodyParts(completedTraitIndex);
+
+            // Spawn confetti at the center of the restored body parts
+            Instantiate(confettiPrefab, GetBodyPartCenter(completedTraitIndex), Quaternion.identity);
+
             // Set interactable = false first, so when isOn changes, the visibility update shows the checkmark
             completedToggle.interactable = false;
             // Setting isOn = false triggers EnlargeToggleWhenSelected (scale down) and
@@ -820,6 +828,28 @@ public class Part2GameManager : MonoBehaviour
                 renderer.materials = origMaterials;
         }
         originalMaterialsBySequence.Remove(sequenceIndex);
+    }
+
+    /// <summary>
+    /// Computes the world-space center of all renderers belonging to a trait's body parts.
+    /// Used to position the confetti burst at the correct avatar location.
+    /// </summary>
+    private Vector3 GetBodyPartCenter(int traitIndex)
+    {
+        AvatarProfileData profile = currentAvatar.GetComponent<AvatarProfileData>();
+        SequenceBodyPartGroup group = profile.sequenceBodyParts[traitIndex];
+        Bounds bounds = new Bounds();
+        bool first = true;
+        foreach (GameObject obj in group.bodyParts)
+        {
+            if (obj == null) continue;
+            foreach (Renderer r in obj.GetComponentsInChildren<Renderer>(true))
+            {
+                if (first) { bounds = r.bounds; first = false; }
+                else bounds.Encapsulate(r.bounds);
+            }
+        }
+        return bounds.center;
     }
 
 }
