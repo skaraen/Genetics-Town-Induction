@@ -76,6 +76,7 @@ public class Part2GameManager : MonoBehaviour
     };
 
     private DialogueController dialogueController;
+    private Button dialogueNextButton;
     private Animator narratorAnimator;
     private GameObject currentAvatar;
     private PlayerCustoms targetCustoms;
@@ -95,7 +96,7 @@ public class Part2GameManager : MonoBehaviour
     /// <summary>
     /// Tracks dialogue phase to differentiate intro vs final dialogue in HandleDialogueEnded.
     /// </summary>
-    private enum DialoguePhase { Intro, Final }
+    private enum DialoguePhase { Intro, SequenceReview }
     private DialoguePhase currentDialoguePhase = DialoguePhase.Intro;
 
     /// <summary>
@@ -383,6 +384,8 @@ public class Part2GameManager : MonoBehaviour
     {
         if (dialogueController != null)
             dialogueController.OnDialogueEnded -= HandleDialogueEnded;
+        if (dialogueNextButton != null)
+            dialogueNextButton.onClick.RemoveListener(HandleFinalDismiss);
     }
 
     /// <summary>
@@ -394,6 +397,7 @@ public class Part2GameManager : MonoBehaviour
         {
             dialogueController = dialogueBox.GetComponent<DialogueController>();
             dialogueController.OnDialogueEnded += HandleDialogueEnded;
+            dialogueNextButton = dialogueBox.GetComponentInChildren<Button>(true);
         }
         if (narrator != null)
         {
@@ -426,12 +430,27 @@ public class Part2GameManager : MonoBehaviour
             case DialoguePhase.Intro:
                 ShowGameUI();
                 break;
-            case DialoguePhase.Final:
-                if (currentAvatar != null)
-                    currentAvatar.SetActive(false);
-                UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync("Part2Scene");
+            case DialoguePhase.SequenceReview:
+                if (dialogueNextButton != null)
+                {
+                    dialogueNextButton.enabled = true;
+                    dialogueNextButton.onClick.AddListener(HandleFinalDismiss);
+                }
                 break;
         }
+    }
+
+    /// <summary>
+    /// One-shot click handler for the dialogue Next button after the review dialogue ends.
+    /// Hides the avatar and unloads the Part2Scene.
+    /// </summary>
+    private void HandleFinalDismiss()
+    {
+        dialogueNextButton.onClick.RemoveListener(HandleFinalDismiss);
+        dialogueNextButton.enabled = false;
+        if (currentAvatar != null)
+            Destroy(currentAvatar);
+        UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync("Part2Scene");
     }
 
     /// <summary>
@@ -688,8 +707,8 @@ public class Part2GameManager : MonoBehaviour
             .SetEase(Ease.OutQuad)
             .WaitForCompletion();
 
-        // Trigger Gregor's final dialogue
-        currentDialoguePhase = DialoguePhase.Final;
+        // Trigger Gregor's final dialogue; scene unloads after player dismisses via Next button
+        currentDialoguePhase = DialoguePhase.SequenceReview;
         if (narrator != null && dialogueController != null)
         {
             narrator.GetComponent<ReactionChooser>().SetReaction("happy");
