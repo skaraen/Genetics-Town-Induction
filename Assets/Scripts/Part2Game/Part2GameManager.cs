@@ -516,8 +516,10 @@ public class Part2GameManager : MonoBehaviour
             Toggle completedToggle = currentlySelectedTraitToggle;
             RestoreBodyParts(completedTraitIndex);
 
-            // Spawn confetti at the center of the restored body parts
-            Instantiate(confettiPrefab, GetBodyPartCenter(completedTraitIndex), Quaternion.identity);
+            // Spawn confetti between the body parts and the camera so it renders in front of the avatar
+            Vector3 bodyCenter = GetBodyPartCenter(completedTraitIndex);
+            Vector3 toCamera = (Camera.main.transform.position - bodyCenter).normalized;
+            Instantiate(confettiPrefab, bodyCenter + toCamera * 4f, Quaternion.identity);
 
             // Set interactable = false first, so when isOn changes, the visibility update shows the checkmark
             completedToggle.interactable = false;
