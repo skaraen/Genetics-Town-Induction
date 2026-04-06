@@ -304,7 +304,7 @@ GameObject:
   - component: {fileID: 8468436423842975597}
   - component: {fileID: -5712886078090490734}
   m_Layer: 0
-  m_Name: Bird
+  m_Name: bird
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -379,7 +379,8 @@ MonoBehaviour:
   info: SPEED!\n This sequence allows this avatar to break down sugar quicker, increasing
     its energy output to muscles. In As a result, this avatar could hover in the
     air, fly upside down, and maintain a heartbeat of 1200 bpm.
-  spawnYOffset: -2
+  spawnYOffset: -0.5
+  part2GameSpawnYOffset: 0.5
 --- !u!1 &2952766395911292688
 GameObject:
   m_ObjectHideFlags: 0

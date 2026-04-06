@@ -1380,8 +1380,8 @@ MonoBehaviour:
   colorRanges:
   - {r: 0.67843, g: 0.26275, b: 0.22353, a: 1}
   - {r: 1, g: 0.38431, b: 0.32941, a: 1}
-  - {r: 0.95, g: 0.55, b: 0.70, a: 1}
-  - {r: 0.45, g: 0.18, b: 0.30, a: 1}
+  - {r: 0.95, g: 0.55, b: 0.7, a: 1}
+  - {r: 0.45, g: 0.18, b: 0.3, a: 1}
   colorTargetMaterialIndices: 00000000000000000000000000000000
   colorPropertyName: _BaseColor
   colorSliderUsesValue: 0101
@@ -1398,6 +1398,7 @@ MonoBehaviour:
     increasing its ability to regulate light intake.\\n As a result, this avatar
     has rectangular pupils and excellent peripheral vision."
   spawnYOffset: -1
+  part2GameSpawnYOffset: 0.25
 --- !u!1001 &994149730081685706
 PrefabInstance:
   m_ObjectHideFlags: 0

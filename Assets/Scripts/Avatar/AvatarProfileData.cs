@@ -83,4 +83,7 @@ public class AvatarProfileData : MonoBehaviour
 
     [Tooltip("Y position offset when spawning this avatar in selection/display scenes")]
     public float spawnYOffset = -2f;
+
+    [Tooltip("Y position offset when spawning this avatar in the Part2Game scene")]
+    public float part2GameSpawnYOffset = 0f;
 }

@@ -70,15 +70,6 @@ public class Part2GameManager : MonoBehaviour
     [Tooltip("Text prefab spawned to the left of each sequence row showing the trait name during review")]
     [SerializeField] private GameObject sequenceNameLabelPrefab;
 
-    /// <summary>
-    /// Manual Y offset adjustments for avatars that overlap with UI due to height differences.
-    /// Key: avatar ID, Value: Y offset to apply.
-    /// </summary>
-    private static readonly Dictionary<int, float> AvatarYOffsets = new Dictionary<int, float>
-    {
-        { 2, -0.6f } // Sheep
-    };
-
     private DialogueController dialogueController;
     private Button dialogueNextButton;
     private Animator narratorAnimator;
@@ -482,10 +473,9 @@ public class Part2GameManager : MonoBehaviour
             Destroy(currentAvatar);
 
         Vector3 spawnPos = avatarSpawnPoint.position;
-        if (AvatarYOffsets.TryGetValue(targetCustoms.avatarType, out float yOffset))
-        {
-            spawnPos.y += yOffset;
-        }
+        AvatarProfileData profile = AvatarRegistry.Instance.GetProfileById(targetCustoms.avatarType);
+        if (profile != null)
+            spawnPos.y += profile.part2GameSpawnYOffset;
 
         currentAvatar = AvatarLoader.Load(targetCustoms, spawnPos, avatarSpawnPoint.rotation, avatarSpawnPoint);
     }
