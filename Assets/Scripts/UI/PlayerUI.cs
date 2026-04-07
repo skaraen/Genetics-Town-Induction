@@ -28,6 +28,7 @@ public class PlayerUI : NetworkBehaviour
     [SerializeField] private Canvas canvas;
     [SerializeField] private TextMeshProUGUI descTmp;
     [SerializeField] private Button interactBtn;
+    [SerializeField] Sprite replySprite;
 
     [Header("Trackers")]
     [SerializeField] private Camera worldCam;
@@ -75,7 +76,6 @@ public class PlayerUI : NetworkBehaviour
     {
         if (!IsOwnPlayer(other)) return;
 
-        Debug.Log("Trigger enter");
         ShowUI();
     }
 
@@ -83,7 +83,6 @@ public class PlayerUI : NetworkBehaviour
     {
         if (!IsOwnPlayer(other)) return;
 
-        Debug.Log("Trigger exit");
         HideUI();
     }
 
@@ -151,6 +150,7 @@ public class PlayerUI : NetworkBehaviour
             else
             {
                 requestReceived = false;
+                Part2DataHolder.OwnerClientId = GetComponent<NetworkObject>().OwnerClientId;
                 Part2DataHolder.TargetCustoms = pendingTargetCustoms;
                 AckOwnerServerRpc();
                 // PROBLEM: the scene is not additively loaded correctly, 
@@ -208,7 +208,8 @@ public class PlayerUI : NetworkBehaviour
     {
         requestReceived = true;
         pendingTargetCustoms = targetCustoms;
-        descTmp.text = "wants to interact with you";
+        descTmp.text = "says hello!\nPress reply to say hello back.";
+        interactBtn.GetComponent<Image>().sprite = replySprite;
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -259,6 +260,8 @@ public class PlayerUI : NetworkBehaviour
     {
         Debug.Log($"Owner {OwnerClientId} received acknowledgement from Client {senderId}");
         Part2DataHolder.TargetCustoms = senderCustoms;
+
+        PlayerMetadataRegistry.Instance.RegisterInteractionServerRpc(senderId);
         SceneManager.LoadScene("Part2Scene", LoadSceneMode.Additive);
     }
 }

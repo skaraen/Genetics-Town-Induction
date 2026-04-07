@@ -14,9 +14,14 @@ public class PlayerSpawner : NetworkBehaviour
 
     [Header("Spawn locations")]
     [SerializeField] private Transform[] spawnPoints;
+    [SerializeField] private float interval = 30f;
 
     public event Action OnSpawnComplete;
     public event Action OnInfected;
+
+    private bool isInfected = false;
+    private string bug;
+    private float timer = 0f;
 
     public override void OnNetworkSpawn()
     {
@@ -37,6 +42,20 @@ public class PlayerSpawner : NetworkBehaviour
             PlayerMetadataRegistry.Instance.OnSubmitted -= OnMetadataSubmitted;
     }
 
+    private void Update()
+    {
+        if (!IsServer || isInfected) return;
+
+        timer += Time.deltaTime;
+
+        if (timer >= interval)
+        {
+            Debug.Log("[PlayerSpawner] Checking for infection");
+            timer = 0f;
+            PlayerMetadataRegistry.Instance.InfectionReadinessServerRpc();
+        }
+    }
+
     private void OnSceneEvent(SceneEvent evt)
     {
         if (!IsServer || evt.SceneName != gameSceneName) return;
@@ -49,15 +68,6 @@ public class PlayerSpawner : NetworkBehaviour
         else if (evt.SceneEventType == SceneEventType.LoadComplete)
         {
             TrySpawnFor(evt.ClientId);
-        }
-    }
-
-    private void Update()
-    {
-        if (!IsServer) return;
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            StartInfection();
         }
     }
 
@@ -99,9 +109,12 @@ public class PlayerSpawner : NetworkBehaviour
         return (Vector3.zero, Quaternion.identity);
     }
 
-    public void StartInfection()
+    public void StartInfection(string seq)
     {
         if (!IsServer) return;
+
+        isInfected = true;
+        Debug.Log("[PlayerSpawner] Start infection");
 
         foreach (var clientId in NetworkManager.ConnectedClientsIds)
         {
@@ -118,8 +131,14 @@ public class PlayerSpawner : NetworkBehaviour
             }
         }
         
+        bug = seq;
         OnInfected?.Invoke();
-        NotifyInfectedClientRpc();
+        NotifyInfectedClientRpc(seq);
+    }
+
+    public string GetBugSequence()
+    {
+        return bug;
     }
 
     /// <summary>
@@ -129,7 +148,7 @@ public class PlayerSpawner : NetworkBehaviour
     [ClientRpc]
     private void NotifySpawnCompleteClientRpc()
     {
-        if (IsHost) return; // Host already invoked event locally
+        if (IsHost) return;
         OnSpawnComplete?.Invoke();
     }
 
@@ -138,9 +157,29 @@ public class PlayerSpawner : NetworkBehaviour
     /// Called by server after infection starts.
     /// </summary>
     [ClientRpc]
-    private void NotifyInfectedClientRpc()
+    private void NotifyInfectedClientRpc(string seq)
     {
-        if (IsHost) return; // Host already invoked event locally
+        if (IsHost) return;
+
+        bug = seq;
         OnInfected?.Invoke();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void CureInfectionServerRpc(ServerRpcParams rpcParams = default)
+    {
+        ulong senderId = rpcParams.Receive.SenderClientId;
+
+        if (!NetworkManager.ConnectedClients.TryGetValue(senderId, out var client))
+            return;
+
+        var playerObj = client.PlayerObject;
+        if (playerObj == null)
+            return;
+
+        if (playerObj.TryGetComponent<PlayerVisual>(out var visual))
+        {
+            visual.IsInfected.Value = false;
+        }
     }
 }

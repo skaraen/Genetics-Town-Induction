@@ -21,30 +21,11 @@ public class PlayerVisual : NetworkBehaviour
     public NetworkVariable<bool> IsInfected = new NetworkVariable<bool>(false, readPerm: NetworkVariableReadPermission.Everyone, writePerm: NetworkVariableWritePermission.Server);
 
     GameObject currentAvatar;
-    GameObject btnObj;
 
     public override void OnNetworkSpawn()
     {
         AvatarCustoms.OnValueChanged += OnAvatarTypeChanged;
         IsInfected.OnValueChanged += OnInfectionToggle;
-
-        btnObj = GameObject.Find("ASOBtn");
-        if (btnObj != null)
-        {
-            Button button = btnObj.GetComponent<Button>();
-            if (button != null)
-            {
-                button.onClick.AddListener(() =>
-                {
-                    SceneManager.LoadScene("ASOGame");
-                });
-                btnObj.SetActive(false);
-            }
-            else
-            {
-                Debug.LogError("No Button component found on object: MyButton");
-            }
-        }
     }
 
     public override void OnNetworkDespawn()
@@ -84,18 +65,11 @@ public class PlayerVisual : NetworkBehaviour
     }
 
     void ToggleEffect(bool isInfected)
-    {
+    {   
         if (isInfected)
         {
             foreach (Renderer r in renderers)
-            {
                 r.material = holoMat;
-            }
-
-            if (btnObj != null)
-            {
-                btnObj.SetActive(true);
-            }
         }
         else
         {
@@ -104,11 +78,6 @@ public class PlayerVisual : NetworkBehaviour
                 Material defaultMat;
                 defaultMaterial.TryGetValue(r.name, out defaultMat);
                 r.material = defaultMat;
-            }
-
-            if (btnObj != null)
-            {
-                btnObj.SetActive(true);
             }
         }
     }

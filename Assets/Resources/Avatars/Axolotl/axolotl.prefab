@@ -490,9 +490,8 @@ MonoBehaviour:
     - {fileID: 8808933633745258761}
   - bodyParts:
     - {fileID: 4974869228857767246}
-  info: REGENERATION!\n This sequence supports this avatar's ability to reactivate
-    development pathways even in adulthood.\n As a result, this avatar could regenerate
-    multiple body parts, including its spinal cord, post-injury.
+  info: 'REPAIR! its injuries in a special way: when the avatar gets hurt, this sequence
+    tells the avatar to regrow whatever was injured.'
   spawnYOffset: -2
   part2GameSpawnYOffset: -0.5
 --- !u!1 &4414012847671046490

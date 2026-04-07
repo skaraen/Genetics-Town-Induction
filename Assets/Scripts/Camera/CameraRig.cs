@@ -61,8 +61,9 @@ public class CameraRig : MonoBehaviour
         double theta = Math.Atan(Math.Abs(leftFocus.x / leftFocus.z));
         Vector3 offset;
 
-        OffsetFocusFromRight(camDistance, theta, out float xOffset, out float yOffset);
+        // OffsetFocusFromLeft(camDistance, theta, out float xOffset, out float yOffset);
         // offset = (yOffset * refTransform.forward) - (xOffset * refTransform.right);
+        OffsetFocusFromRight(camDistance, theta, out float xOffset, out float yOffset);
         offset = - (yOffset * refTransform.forward) - (xOffset * refTransform.right);
 
         return offset;

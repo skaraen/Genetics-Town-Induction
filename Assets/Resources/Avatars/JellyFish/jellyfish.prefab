@@ -82,9 +82,8 @@ MonoBehaviour:
   - bodyParts:
     - {fileID: 6835127885028735663}
     - {fileID: 1891638868463072173}
-  info: CAMOUFLAGE!\n This sequence allows this avatar to absorb blue light and emit
-    green light, creating a glow.\n As a result, this avatar could distract or attract
-    others with bright light flashes.
+  info: "SIGHT! This sequence allows this avatar\u2019s eyes to adjust, letting them
+    see more of their surroundings."
   spawnYOffset: -2
   part2GameSpawnYOffset: -0.5
 --- !u!1 &1891638868463072173

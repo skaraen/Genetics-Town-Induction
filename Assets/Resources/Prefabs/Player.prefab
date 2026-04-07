@@ -67,7 +67,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: d25d1b78c7aaf4ea0a30a0c01376cbac, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f697820d1c5c144e592f3995eea92f69, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -173,7 +173,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1102881533
+  GlobalObjectIdHash: 3685828565
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -365,6 +365,7 @@ MonoBehaviour:
   canvas: {fileID: 7295806088508609018}
   descTmp: {fileID: 7197394129777437608}
   interactBtn: {fileID: 6468705168822870301}
+  replySprite: {fileID: 21300000, guid: b25c74682f5984fb2b769c05e05dd1e0, type: 3}
   worldCam: {fileID: 0}
   triggerRadius: 5
   fadeSmoothTime: 0.75
@@ -431,7 +432,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InteractGroupCamController
   ShowTopMostFoldoutHeaderGroup: 1
-  interactCamName: InteractGroupCam
   activePriority: 200
   inactivePriority: 0
   clearGroupDelay: 2
@@ -500,7 +500,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Interact to form a memory
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
   m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
@@ -1011,7 +1011,7 @@ GameObject:
   - component: {fileID: 1459180960745627297}
   - component: {fileID: 6207050874696706845}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: PromptCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

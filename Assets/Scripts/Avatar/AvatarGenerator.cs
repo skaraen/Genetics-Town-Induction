@@ -30,6 +30,7 @@ public class AvatarGenerator : NetworkBehaviour
     public Image[] dials;
     public Image[] needles;
 
+    [SerializeField] Button zoomOutButton;
     [SerializeField] Button funFactButton;
     [SerializeField] GameObject funFactUI;
 
@@ -179,6 +180,10 @@ public class AvatarGenerator : NetworkBehaviour
             string factInfo = "The base sequence you chose contributes to " + currProfileData.info;
             funFactUIComp.Activate(currProfileData.avatarName, factInfo);
             funFactUIComp.FadeIn();
+        });
+        zoomOutButton.onClick.AddListener(() =>
+        {
+            cameraRig.MoveToLeft();
         });
     }
 
@@ -505,26 +510,26 @@ public class AvatarGenerator : NetworkBehaviour
     /// </summary>
     private void LoadGameScene()
     {
-        PlayerMetadata metadata = new PlayerMetadata(currProfileData);
-        metadata.name = playerName;
-
-        for (int i = 0; i < 2; i++)
+        PlayerCustoms customs = new PlayerCustoms()
         {
-            string subSeq = currProfileData.subSequences[i];
-            metadata.sequenceEnabled[i] = subSequenceEnabled[i];
-            metadata.subSequences[i] = subSequenceEnabled[i] ? "ATG" + subSeq : subSeq + "TAG";
-            metadata.colors[i] = Color.HSVToRGB(currColor[i].x, currColor[i].y, currColor[i].z, true);
+            name = playerName,
+            avatarType = currProfileData.id,
+            subSeq0Enabled = subSequenceEnabled[0],
+            subSeq1Enabled = subSequenceEnabled[1],
+            color0 = Color.HSVToRGB(currColor[0].x, currColor[0].y, currColor[0].z, true),
+            color1 = Color.HSVToRGB(currColor[1].x, currColor[1].y, currColor[1].z, true)
+        };
+
+        if (NetworkManager.Singleton == null)
+        {
+            Debug.LogError("NetworkManager not initialized yet");
+            return;
         }
 
-        // Optional local cache
-        PlayerMetadataManager.Instance.AddPlayerMetadata(metadata);
+        // Local Cache
+        PlayerLogbook.Instance.AddPlayerCustom(NetworkManager.Singleton.LocalClientId, customs);
 
         // Submit to server (marks this client 'ready')
-        var dto = MetaDataCustomsMapper.ToNet(metadata);
-        PlayerMetadataRegistry.Instance.SubmitMetadataServerRpc(dto);
-
-        // DO NOT call SceneManager.LoadScene here.
-        // The server will transition everyone via NetworkManager.SceneManager.LoadScene(...)
-        // when AllPlayersReady() is true.
+        PlayerMetadataRegistry.Instance.SubmitMetadataServerRpc(customs);
     }
 }

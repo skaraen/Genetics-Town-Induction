@@ -8,8 +8,14 @@ public class PlayerMetadataRegistry : NetworkBehaviour
 {
     public static PlayerMetadataRegistry Instance { get; private set; }
 
+    [SerializeField] private int interactionThreshold;
+    [SerializeField] private List<string> bugSequences = new();
     private readonly Dictionary<ulong, PlayerCustoms> store = new();
     private readonly HashSet<ulong> ready = new();
+    private HashSet<ulong> interacting = new();
+    private int numPlayers = 0;
+    private int numInteractions = 0;
+    
     private bool sceneSwitched;
 
     public event Action<ulong, PlayerCustoms> OnSubmitted;
@@ -69,6 +75,8 @@ public class PlayerMetadataRegistry : NetworkBehaviour
         if (!IsServer || sceneSwitched) return;
         if (AllPlayersReady())
         {
+            numPlayers = NetworkManager.ConnectedClients.Count;
+            interactionThreshold = (numPlayers * (numPlayers - 1) + 3) / 4;
             sceneSwitched = true;
             NetworkManager.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
         }
@@ -78,32 +86,82 @@ public class PlayerMetadataRegistry : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void RequestMetadataServerRpc(ulong targetClientId, ServerRpcParams rpcParams = default)
     {
-        var requester = rpcParams.Receive.SenderClientId;
+        var senderClientId = rpcParams.Receive.SenderClientId;
 
         if (store.TryGetValue(targetClientId, out var data))
         {
-            SendMetadataClientRpc((int)targetClientId, data, new ClientRpcParams {
-                Send = new ClientRpcSendParams { TargetClientIds = new[] { requester } }
+            SendMetadataClientRpc(targetClientId, data, new ClientRpcParams {
+                Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } }
             });
         }
         else
         {
             SendNotFoundClientRpc((int)targetClientId, new ClientRpcParams {
-                Send = new ClientRpcSendParams { TargetClientIds = new[] { requester } }
+                Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } }
             });
         }
     }
 
     [ClientRpc]
-    private void SendMetadataClientRpc(int id, PlayerCustoms data, ClientRpcParams clientRpcParams = default)
+    private void SendMetadataClientRpc(ulong id, PlayerCustoms data, ClientRpcParams clientRpcParams = default)
     {
-        var local = MetaDataCustomsMapper.ToLocal(id, data);
-        PlayerMetadataManager.Instance.AddPlayerMetadata(local);
+        PlayerLogbook.Instance.AddPlayerCustom(id, data);
     }
 
     [ClientRpc]
     private void SendNotFoundClientRpc(int targetId, ClientRpcParams clientRpcParams = default)
     {
         Debug.LogWarning($"[Registry] No metadata for id {targetId} yet.");
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void RegisterInteractionServerRpc(ulong targetClientId, ServerRpcParams rpcParams = default)
+    {
+        numInteractions += 1;
+        ulong senderClientId = rpcParams.Receive.SenderClientId;
+
+        interacting.Add(targetClientId);
+        interacting.Add(senderClientId);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void ExitInteractionServerRpc(ServerRpcParams rpcParams = default)
+    {
+        ulong senderClientId = rpcParams.Receive.SenderClientId;
+        
+        if (interacting.Contains(senderClientId))
+            interacting.Remove(senderClientId);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void InfectionReadinessServerRpc(ServerRpcParams rpcParams = default)
+    {
+        if (numInteractions >= interactionThreshold && interacting.Count == 0)
+        {
+            Debug.Log("[InfectionServerRpc] Initiate infection");
+            var rand = new System.Random();
+            int index = rand.Next(bugSequences.Count);
+            string bugSeq = bugSequences[index];
+
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            ClientRpcParams sendParams = new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams
+                {
+                    TargetClientIds = new ulong[] { senderClientId }
+                }
+            };
+            StartInfectionClientRpc(bugSeq, sendParams);
+        } else
+            Debug.Log($"[InfectionServerRpc] Not ready for infection: {interacting.Count}");
+    }
+
+    [ClientRpc] 
+    public void StartInfectionClientRpc(string bugSeq, ClientRpcParams rpcParams = default)
+    {
+        Debug.Log("[InfectionClientRpc] Use spawner to infect");
+
+        PlayerSpawner spawner = FindFirstObjectByType<PlayerSpawner>();
+        spawner.StartInfection(bugSeq);
     }
 }

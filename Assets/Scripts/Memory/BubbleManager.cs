@@ -1,64 +1,115 @@
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-using System.Text.RegularExpressions;
+using System;
 
 public class BubbleManager : MonoBehaviour
 {
     [Header("UI & Prefabs")]
-    public GameObject buttonPrefab;
-    public GameObject spawnContainer;
-    public GameObject selfContent;
-    public GameObject oppContent;
-    public TextMeshProUGUI oppTitle;
+    [SerializeField] private GameObject buttonPrefab;
+    [SerializeField] private GameObject spawnContainer;
+    [SerializeField] private Scroller selfScroller;
+    [SerializeField] private Scroller oppScroller;
 
     [Header("3D Preview")]
-    public Camera previewCamera;
-    public RenderTexture defaultTexture;
-    public RenderTexture renderTexture;
-    public Transform previewStage;
-    public GameObject defPrefab;
+    [SerializeField] private Camera previewCamera;
+    [SerializeField] private RenderTexture defaultTexture;
+    [SerializeField] private RenderTexture renderTexture;
+    [SerializeField] private Transform previewStage;
+    [SerializeField] private GameObject defPrefab;
 
-    private List<PlayerMetadata> metadata;
+    [Header ("Mode")]
+    [SerializeField] private bool isInfectionMode = false;
+
+    private List<PlayerCustoms> playerCustoms;
     private GameObject currModel;
     private Bubble currBubble;
     private int currIdx;
+    private string bug;
+    int numRows;
+    int maxStartRow;
+    
+    private Dictionary<string, string> sequenceLookup = new();
 
     void OnEnable()
     {
-        metadata = PlayerMetadataManager.Instance.GetAllPlayers();
-        Debug.Log($"Metadata size: {metadata.Count}");
-        for (int i = 0; i < metadata.Count; i++)
+        playerCustoms = PlayerLogbook.Instance.GetAllCustoms();
+
+        PlayerSpawner spawner = FindFirstObjectByType<PlayerSpawner>();
+        if (spawner != null)
         {
-            SetupMetadata(i);
+            bug = spawner.GetBugSequence();
+            Debug.Log($"[BubbleManager] The bug sequence is: {bug}");
+        }
+
+        if (isInfectionMode)
+            SetRowParams(AvatarRegistry.Instance.GetCompleteSequence(playerCustoms[0]));
+
+        for (int i = 0; i < playerCustoms.Count; i++)
+        {
+            SetupPlayerBubble(i);
         }
         currBubble = null;
         currIdx = -1;
     }
 
-    void SetupMetadata(int idx)
+    GameObject GenerateAvatarPrefab(PlayerCustoms customs)
     {
+        GameObject prefab = AvatarRegistry.Instance.GetPrefabById(customs.avatarType);
+        return prefab;
+    }
+
+    void SetRowParams(string refSeq)
+    {
+        numRows = refSeq.Length / 3;
+        maxStartRow = numRows - (bug.Length / 3);
+    }
+
+    string GetInfectedSequence(string seq)
+    {
+        if (string.IsNullOrEmpty(seq) || string.IsNullOrEmpty(bug) || seq.Length < bug.Length)
+            return seq;
+        
+        int startRow = UnityEngine.Random.Range(0, maxStartRow + 1);
+        int startIdx = startRow * 3;
+
+        string result = seq.Remove(startIdx, bug.Length)
+                        .Insert(startIdx, bug);
+
+        Debug.Log($"Infected Sequence [{startIdx}, {bug}]: {result}");
+
+        return result;
+    }
+
+    void SetupPlayerBubble(int idx)
+    {
+        PlayerCustoms customs = playerCustoms[idx];
+        string actualSeq = AvatarRegistry.Instance.GetCompleteSequence(customs);
+        string sequence = isInfectionMode ? GetInfectedSequence(actualSeq) : actualSeq;
+
+        Debug.Log($"Used Sequence: {sequence}");
+
         if (idx == 0)
         {
-            SetScrollText(selfContent, metadata[idx].GetCompleteSequence());
+            selfScroller.SetGeneSequence(sequence);
             return;
         }
+
         GameObject go = Instantiate(buttonPrefab, spawnContainer.transform);
         Bubble bubble = go.GetComponent<Bubble>();
-        bubble.SetTitle(metadata[idx].name);
-        bubble.SetColor(metadata[idx].colors[0]);
-        bubble.InitializePreview(previewCamera, defaultTexture, defPrefab);
+        bubble.SetTitle(customs.name.ToString());
+        bubble.SetColor(customs.color0);
+        sequenceLookup.Add(customs.name.ToString(), sequence);
+
+        GameObject avatarPrefab = GenerateAvatarPrefab(playerCustoms[idx]);
+        bubble.InitializePreview(previewCamera, defaultTexture, avatarPrefab);
 
         bubble.button.onClick.AddListener(() => OnBubbleClicked(idx, bubble));
     }
 
     void OnBubbleClicked(int idx, Bubble bubble)
     {
-        if (currBubble != null) {
-            Debug.Log("Reset bubble");
+        if (currBubble != null)
             ResetBubble(currBubble, currIdx);
-        }
         currBubble = bubble;
         currIdx = idx;
 
@@ -78,13 +129,15 @@ public class BubbleManager : MonoBehaviour
 
         bubble.SetTexture(renderTexture);
         bubble.SetTitle("");
-        SetScrollTitle(metadata[idx].name);
-        SetScrollText(oppContent, metadata[idx].GetCompleteSequence());
+        oppScroller.SetScrollTitle(playerCustoms[idx].name.ToString());
+        string sequence = sequenceLookup[playerCustoms[idx].name.ToString()];
+        if (!String.IsNullOrEmpty(sequence))
+            oppScroller.SetGeneSequence(sequence);
     }
 
     void ResetBubble(Bubble bubble, int idx) {
-        bubble.SetTitle(metadata[idx].name);
-        bubble.SetColor(metadata[idx].colors[0]);
+        bubble.SetTitle(playerCustoms[idx].name.ToString());
+        bubble.SetColor(playerCustoms[idx].color0);
         bubble.SetTexture(defaultTexture);
     }
 
@@ -98,14 +151,5 @@ public class BubbleManager : MonoBehaviour
         obj.layer = layer;
         foreach (Transform t in obj.GetComponentsInChildren<Transform>(true))
             t.gameObject.layer = layer;
-    }
-
-    void SetScrollText(GameObject content, string text)
-        => content.GetComponent<TextMeshProUGUI>().text = text;
-
-    void SetScrollTitle(string name)
-    {
-        string str = name.EndsWith("s") ? $"{name}' Code" : $"{name}'s Code";
-        oppTitle.text = str;
     }
 }

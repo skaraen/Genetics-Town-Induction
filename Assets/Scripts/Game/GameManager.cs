@@ -10,9 +10,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] Canvas dialogueCanvas;
     [SerializeField] GameObject dialogueBox;
     [SerializeField] float planeDistance = 5f;
-
-    [SerializeField] Button memoryButton;
-    [SerializeField] Button glitchButton; // <-- Add your Glitch button reference
+    [SerializeField] Button ASOButton;
 
     private PlayerSpawner spawner;
     DialogueController dialogueController;
@@ -39,8 +37,11 @@ public class GameManager : MonoBehaviour
         if (narratorAnimator == null)
             narratorAnimator = narrator.GetComponent<Animator>();
 
-        memoryButton.onClick.AddListener(OnMemoryButtonClicked);
-        glitchButton.onClick.AddListener(OnGlitchButtonClicked); // <-- Hook it here
+        ASOButton.gameObject.SetActive(false);
+        ASOButton.onClick.AddListener(() =>
+        {
+            SceneManager.LoadScene("ASOGame", LoadSceneMode.Additive);
+        });
     }
 
     void OnDisable()
@@ -69,16 +70,7 @@ public class GameManager : MonoBehaviour
         narrator.GetComponent<ReactionChooser>().SetReaction("shock");
         narratorAnimator.SetTrigger("EntryTrigger");
         dialogueController.StartSequence("narrator-glitch-panic");
-    }
 
-    void OnMemoryButtonClicked()
-    {
-        SceneManager.LoadScene("MemoryGame", LoadSceneMode.Additive);
-    }
-
-    void OnGlitchButtonClicked()
-    {
-        if (spawner != null)
-            spawner.StartInfection();
+        ASOButton.gameObject.SetActive(true);
     }
 }

@@ -352,7 +352,8 @@ public class Part2GameManager : MonoBehaviour
         SetupGameScreen();
         HideGameUI();
         InitializeDialogue();
-        TriggerIntroDialogue();
+        // TriggerIntroDialogue();
+        HandleDialogueEnded();
     }
 
     /// <summary>
@@ -405,10 +406,8 @@ public class Part2GameManager : MonoBehaviour
     /// </summary>
     private void TriggerIntroDialogue()
     {
-        if (narrator == null || dialogueController == null) return;
+        if (dialogueController == null) return;
 
-        narrator.GetComponent<ReactionChooser>().SetReaction("smile");
-        narratorAnimator.SetTrigger("EntryTrigger");
         dialogueController.StartSequence("narrator-memory-intro");
     }
 
@@ -417,9 +416,6 @@ public class Part2GameManager : MonoBehaviour
     /// </summary>
     private void HandleDialogueEnded()
     {
-        if (narratorAnimator != null)
-            narratorAnimator.SetTrigger("ExitTrigger");
-
         switch (currentDialoguePhase)
         {
             case DialoguePhase.Intro:
@@ -445,6 +441,7 @@ public class Part2GameManager : MonoBehaviour
         dialogueNextButton.enabled = false;
         if (currentAvatar != null)
             Destroy(currentAvatar);
+        PlayerMetadataRegistry.Instance.ExitInteractionServerRpc();
         UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync("Part2Scene");
     }
 
@@ -711,14 +708,21 @@ public class Part2GameManager : MonoBehaviour
         currentDialoguePhase = DialoguePhase.SequenceReview;
         if (narrator != null && dialogueController != null)
         {
-            narrator.GetComponent<ReactionChooser>().SetReaction("happy");
-            narratorAnimator.SetTrigger("EntryTrigger");
+            RecordPlayerMemory();
             dialogueController.StartSequence("narrator-memory-final");
         }
     }
 
     /// <summary>
-    /// Returns the nucleotide prefab corresponding to a DNA character (A, T, G, or C).
+    /// Stores the details about the player (customs) in the local logbook
+    /// </summary>
+    private void RecordPlayerMemory()
+    {
+        PlayerLogbook.Instance.AddPlayerCustom(Part2DataHolder.OwnerClientId, targetCustoms);
+    }
+
+    /// <summary>
+    /// Triggers Gregor's congratulatory dialogue after all sequences are completed.
     /// </summary>
     private GameObject GetNucleotidePrefab(char c)
     {

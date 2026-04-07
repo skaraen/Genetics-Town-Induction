@@ -103,4 +103,20 @@ public class AvatarRegistry : ScriptableObject
             .Where(p => p != null)
             .ToArray();
     }
+
+    /// <summary>
+    /// Returns the full constructed sequence based on the player
+    /// customs according to the rules of genetic biology 
+    /// </summary>
+    public string GetCompleteSequence(PlayerCustoms customs)
+    {
+        AvatarProfileData profileData = GetProfileById(customs.avatarType);
+        string fullSeq = "";
+        
+        fullSeq += "ATG" + profileData.baseSequence;
+        fullSeq += customs.subSeq0Enabled ? $"ATG{profileData.subSequences[0]}" : $"{profileData.subSequences[0]}TAG";
+        fullSeq += customs.subSeq1Enabled ? $"ATG{profileData.subSequences[1]}" : $"{profileData.subSequences[1]}TAG";
+
+        return fullSeq;
+    }
 }

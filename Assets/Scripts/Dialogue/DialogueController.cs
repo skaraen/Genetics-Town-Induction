@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -79,7 +78,7 @@ public class DialogueController : MonoBehaviour
             reactChooser = narrator.GetComponent<ReactionChooser>();
         }
 
-        nextButton.enabled = false;
+        nextButton.gameObject.SetActive(false);
         nextButton.onClick.AddListener(() => NextButtonClick());
     }
 
@@ -98,7 +97,7 @@ public class DialogueController : MonoBehaviour
         dialogues = DialogueDatabase.Instance.GetLines(sequence);
         isSequenceInProgress = true;
         currStage = 0;
-        nextButton.enabled = true;
+        nextButton.gameObject.SetActive(true);
 
         ProgressDialogue();
     }
@@ -208,7 +207,7 @@ public class DialogueController : MonoBehaviour
         isActive = false;
         dialogueText.text = "";
         isAnimating = true;
-        nextButton.enabled = false;
+        nextButton.gameObject.SetActive(false);
 
         if (isNarrationMode)
             narratorAnimator.SetTrigger("ExitTrigger");
