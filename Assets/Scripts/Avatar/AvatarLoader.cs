@@ -55,20 +55,24 @@ public static class AvatarLoader
         for (int i = 0; i < profile.colorTargetRenderers.Length; i++)
         {
             Color color = (i < 2) ? customs.color0 : customs.color1;
-            SetMaterialColor(profile, profile.colorTargetRenderers[i], color);
+            int matIdx = (profile.colorTargetMaterialIndices != null && i < profile.colorTargetMaterialIndices.Length)
+                ? profile.colorTargetMaterialIndices[i] : 0;
+            SetMaterialColor(profile, profile.colorTargetRenderers[i], color, matIdx);
         }
     }
 
     /// <summary>
-    /// Sets the color property specified by the profile's colorPropertyName on a renderer's material.
+    /// Sets the color property specified by the profile's colorPropertyName on a specific material slot of a renderer.
     /// </summary>
-    private static void SetMaterialColor(AvatarProfileData profile, Renderer renderer, Color color)
+    private static void SetMaterialColor(AvatarProfileData profile, Renderer renderer, Color color, int materialIndex)
     {
         if (renderer == null) return;
-        Material mat = renderer.material;
-        if (mat.HasProperty(profile.colorPropertyName))
+        Material[] mats = renderer.materials;
+        int idx = (materialIndex < mats.Length) ? materialIndex : 0;
+        if (mats[idx].HasProperty(profile.colorPropertyName))
         {
-            mat.SetColor(profile.colorPropertyName, color);
+            mats[idx].SetColor(profile.colorPropertyName, color);
+            renderer.materials = mats;
         }
     }
 

@@ -57,6 +57,11 @@ public class AvatarProfileData : MonoBehaviour
     [Tooltip("Color range pairs (min/max) for each color slider")]
     public Color[] colorRanges = new Color[2 * NUM_SUBSEQUENCES];
 
+    // Use this if you want to override whic material the color shifting changes.
+    // Otherwise it defaults to the renderer's 0th material
+    [Tooltip("Material index to use on each colorTargetRenderer. Defaults to 0 if unset.")]
+    public int[] colorTargetMaterialIndices = new int[2 * NUM_SUBSEQUENCES];
+
     [Tooltip("Material color property to set (e.g., _EmissionColor or _BaseColor)")]
     public string colorPropertyName = "_EmissionColor";
 
@@ -78,4 +83,7 @@ public class AvatarProfileData : MonoBehaviour
 
     [Tooltip("Y position offset when spawning this avatar in selection/display scenes")]
     public float spawnYOffset = -2f;
+
+    [Tooltip("Y position offset when spawning this avatar in the Part2Game scene")]
+    public float part2GameSpawnYOffset = 0f;
 }

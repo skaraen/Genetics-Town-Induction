@@ -70,6 +70,7 @@ MonoBehaviour:
   - {r: 0, g: 0.50196, b: 1, a: 1}
   - {r: 0.46667, g: 1, b: 0, a: 1}
   - {r: 0, g: 0.50196, b: 1, a: 1}
+  colorTargetMaterialIndices: 00000000000000000000000000000000
   colorPropertyName: _EmissionColor
   colorSliderUsesValue: 
   sequenceBodyParts:
@@ -85,6 +86,7 @@ MonoBehaviour:
     green light, creating a glow.\n As a result, this avatar could distract or attract
     others with bright light flashes.
   spawnYOffset: -2
+  part2GameSpawnYOffset: -0.5
 --- !u!1 &1891638868463072173
 GameObject:
   m_ObjectHideFlags: 0

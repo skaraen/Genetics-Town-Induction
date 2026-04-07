@@ -479,6 +479,7 @@ MonoBehaviour:
   - {r: 0.36078, g: 0.08627, b: 0.38824, a: 1}
   - {r: 0.96863, g: 0.7098, b: 0.88627, a: 1}
   - {r: 0.65098, g: 0.07843, b: 0.46667, a: 1}
+  colorTargetMaterialIndices: 00000000000000000000000000000000
   colorPropertyName: _BaseColor
   colorSliderUsesValue: 0101
   sequenceBodyParts:
@@ -493,6 +494,7 @@ MonoBehaviour:
     development pathways even in adulthood.\n As a result, this avatar could regenerate
     multiple body parts, including its spinal cord, post-injury.
   spawnYOffset: -2
+  part2GameSpawnYOffset: -0.5
 --- !u!1 &4414012847671046490
 GameObject:
   m_ObjectHideFlags: 0
