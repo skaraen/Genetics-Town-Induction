@@ -65,9 +65,6 @@ public class AvatarProfileData : MonoBehaviour
     [Tooltip("Material color property to set (e.g., _EmissionColor or _BaseColor)")]
     public string colorPropertyName = "_EmissionColor";
 
-    [Tooltip("Per-slider mode: if true, that slider adjusts HSV Value (lightness); if false, it adjusts Hue")]
-    public bool[] colorSliderUsesValue = new bool[NUM_SUBSEQUENCES];
-
     [Header("Sequence Body Parts")]
     // Index 0 = base sequence, index 1 = subSequences[0], index 2 = subSequences[1].
     // Include ALL variant GameObjects per slot (e.g., head1 AND head2 for the head sequence)
@@ -82,7 +79,10 @@ public class AvatarProfileData : MonoBehaviour
     public string info;
 
     [Tooltip("Y position offset when spawning this avatar in selection/display scenes")]
-    public float spawnYOffset = -2f;
+    public float canvasYOffset = -2f;
+
+    [Tooltip("Y position offset when spawning this avatar in 3D real world")]
+    public float realWorldYOffset = -2f;
 
     [Tooltip("Y position offset when spawning this avatar in the Part2Game scene")]
     public float part2GameSpawnYOffset = 0f;

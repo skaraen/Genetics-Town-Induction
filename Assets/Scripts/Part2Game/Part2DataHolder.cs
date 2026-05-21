@@ -5,6 +5,10 @@
 public static class Part2DataHolder
 {
     /// <summary>
+    /// Client ID of the player with whom the interaction is initiated
+    /// </summary>
+    public static ulong OwnerClientId;
+    /// <summary>
     /// Full visual customization of the other player whose DNA the local player will edit.
     /// Contains avatar type, part toggles, and colors so the avatar renders with the same 
     /// customized effect that the other player has selected in the title screen.

@@ -8,7 +8,7 @@ using UnityEngine;
 public class ComponentHandler : MonoBehaviour
 {
     const int NUM_COMPONENTS = 12;
-    const string BUG_SEQ = "ACTGCT";
+    string bug;
     const string set = "ATGC";
 
 
@@ -33,6 +33,11 @@ public class ComponentHandler : MonoBehaviour
         PopulateCompContainer();
     }
 
+    public void SetBug(string bug)
+    {
+        this.bug = bug;
+    }
+
     void LoadPrefabs()
     {
         foreach (char c in set)
@@ -47,7 +52,7 @@ public class ComponentHandler : MonoBehaviour
     /// </summary>
     void PopulateLContainer()
     {
-        foreach (char c in BUG_SEQ)
+        foreach (char c in bug)
         {
             GameObject component = Instantiate(prefabMap[c + "_L"], LContainer.transform);
         }
@@ -114,13 +119,13 @@ public class ComponentHandler : MonoBehaviour
 
     public bool IsASOCorrect()
     {
-        if (ASO.Length != BUG_SEQ.Length)
+        if (ASO.Length != bug.Length)
             return false;
         for (int i = 0; i < ASO.Length; i++)
         {
-            if (compMap[ASO[i]] != BUG_SEQ[i])
+            if (compMap[ASO[i]] != bug[i])
             {
-                Debug.Log($"Failed at {i}, ASO: {ASO}, Bug: {BUG_SEQ}");
+                Debug.Log($"Failed at {i}, ASO: {ASO}, Bug: {bug}");
                 return false;   
             }
         }

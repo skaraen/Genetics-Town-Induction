@@ -14,6 +14,6 @@ public class UpDownMotion : MonoBehaviour
     void Update()
     {
         float newY = startPos.y + Mathf.Sin(Time.time * frequency) * amplitude;
-        transform.position = new Vector3(startPos.x, newY, startPos.z);
+        // transform.position = new Vector3(startPos.x, newY, startPos.z);
     }
 }

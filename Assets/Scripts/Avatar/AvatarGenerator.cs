@@ -14,27 +14,33 @@ public class AvatarGenerator : NetworkBehaviour
     const int NUM_CHOICES = 2;
 
     [Header("Avatar Spawn")]
-    public Transform avatarSpawnPoint;
-    public CameraRig cameraRig;
-    public float xCamOffset = 3;
-    public float zCamOffset = 6;
+    [SerializeField] Transform avatarSpawnPoint;
+    [SerializeField] CameraRig cameraRig;
+    [SerializeField] float xCamOffset = 3;
+    [SerializeField] float yCamOffset = 1.5f;
+    [SerializeField] float zCamOffset = 6;
 
     [Header("UI References")]
-    public Button[] sequenceButtons;
-    public Button nextButton;
-    public GameObject[] canvas;
-    public GameObject[] tickerItemPrefabs;
-    public TextMeshProUGUI[] seqTitles;
-    public Transform[] toggleTransforms;
-    public Slider[] sliders;
-    public Image[] dials;
-    public Image[] needles;
+    [SerializeField] Button[] sequenceButtons;
+    [SerializeField] Button nextButton;
+    [SerializeField] GameObject[] canvas;
+    [SerializeField] GameObject[] tickerItemPrefabs;
+    [SerializeField] TextMeshProUGUI[] seqTitles;
+    [SerializeField] Transform[] toggleTransforms;
+    [SerializeField] Slider[] sliders;
+    [SerializeField] Image[] dials;
+    [SerializeField] Image[] needles;
 
+    [SerializeField] TextMeshProUGUI titleTmp;
+    [SerializeField] string[] titles;
+    [SerializeField] GameObject subtitleObj;
+    [SerializeField] TextMeshProUGUI subtitleTmp;
+    [SerializeField] string[] subtitles;
+    [SerializeField] Button zoomOutButton;
     [SerializeField] Button funFactButton;
     [SerializeField] GameObject funFactUI;
 
     [SerializeField] TMP_InputField playerNameInput;
-    [SerializeField] TextMeshProUGUI nameTitle;
     [SerializeField] TextMeshProUGUI waitMessage;
 
 
@@ -46,8 +52,8 @@ public class AvatarGenerator : NetworkBehaviour
     private string currBaseSequence;
     private AvatarProfileData currProfileData;
     private GameObject currentAvatar;
-    private Vector3[] defaultColor;  // HSV stored as (x=h, y=s, z=v)
-    private Vector3[] currColor;     // HSV stored as (x=h, y=s, z=v)
+    private Color[] defaultColor;
+    private Color[] currColor;
     private bool[] subSequenceEnabled;
     private SwitchToggle[] switchToggles;
     private Material[,] targetMaterials;
@@ -57,8 +63,8 @@ public class AvatarGenerator : NetworkBehaviour
 
     void Start()
     {
-        defaultColor = new Vector3[NUM_SUBSEQUENCES];
-        currColor = new Vector3[NUM_SUBSEQUENCES];
+        defaultColor = new Color[NUM_SUBSEQUENCES];
+        currColor = new Color[NUM_SUBSEQUENCES];
         subSequenceEnabled = new bool[NUM_SUBSEQUENCES];
         switchToggles = new SwitchToggle[NUM_SUBSEQUENCES];
         targetMaterials = new Material[NUM_SUBSEQUENCES, NUM_CHOICES];
@@ -67,6 +73,8 @@ public class AvatarGenerator : NetworkBehaviour
         ArrayUtils.ShuffleRows(baseSequenceCodons);
 
         canvas[0].SetActive(true);
+        titleTmp.text = titles[0];
+        subtitleTmp.text = subtitles[0];
         for (int i = 1; i < canvas.Length; i++)
         {
             canvas[i].SetActive(false);
@@ -120,26 +128,10 @@ public class AvatarGenerator : NetworkBehaviour
         return codons;
     }
 
-    /// <summary>
-    /// Returns whether the given slider adjusts Value instead of Hue.
-    /// Falls back to false (Hue mode) if the array is unset or too short.
-    /// </summary>
-    private bool SliderUsesValue(int sliderIndex)
+    void GetColorRangeBounds(int index, out Color lowerColor, out Color higherColor)
     {
-        if (currProfileData.colorSliderUsesValue == null || sliderIndex >= currProfileData.colorSliderUsesValue.Length)
-            return false;
-        return currProfileData.colorSliderUsesValue[sliderIndex];
-    }
-
-    /// <summary>
-    /// Extracts the HSV component that the given slider controls (Hue or Value).
-    /// </summary>
-    private float GetSliderValue(int sliderIndex, Vector3 hsv)
-    {
-        if (SliderUsesValue(sliderIndex))
-            return hsv.z;
-
-        return hsv.x;
+        lowerColor = currProfileData.colorRanges[2 * index + 0];
+        higherColor = currProfileData.colorRanges[2 * index + 1];
     }
 
     /// <summary>
@@ -147,15 +139,14 @@ public class AvatarGenerator : NetworkBehaviour
     /// </summary>
     private void SetColorValue(int index, float val)
     {
-        if (SliderUsesValue(index))
-            currColor[index].z = val;
-        else
-            currColor[index].x = val;
+        GetColorRangeBounds(index, out Color lowerColor, out Color higherColor);
+        currColor[index] = Color.Lerp(lowerColor, higherColor, val);
     }
 
     void SetupButtons()
     {
         nextButton.onClick.AddListener(() => StartCoroutine(AdvanceStage()));
+        nextButton.interactable = false;
 
         int buttonCount = Mathf.Min(baseSequenceCodons.Length, sequenceButtons.Length);
         for (int i = 0; i < buttonCount; i++)
@@ -170,15 +161,25 @@ public class AvatarGenerator : NetworkBehaviour
 
             sequenceButtons[index].onClick.AddListener(() =>
             {
+                if (!nextButton.interactable)
+                    nextButton.interactable = true;
+
                 currBaseSequence = str;
             });
         }
         funFactButton.onClick.AddListener(() =>
         {
             FunFactUI funFactUIComp = funFactUI.GetComponent<FunFactUI>();
-            string factInfo = "The base sequence you chose contributes to " + currProfileData.info;
+            string factInfo = currProfileData.info;
             funFactUIComp.Activate(currProfileData.avatarName, factInfo);
             funFactUIComp.FadeIn();
+        });
+
+        zoomOutButton.gameObject.SetActive(false);
+        zoomOutButton.onClick.AddListener(() =>
+        {
+            cameraRig.MoveToLeft();
+            zoomOutButton.gameObject.SetActive(false);
         });
     }
 
@@ -189,7 +190,7 @@ public class AvatarGenerator : NetworkBehaviour
             int index = i;
             switchToggles[index] = toggleTransforms[index].GetComponent<SwitchToggle>();
             switchToggles[index].onToggleChanged.AddListener((isOn) =>
-            {   
+            {
                 GeneTickerItem ti = tickerItemPrefabs[index].GetComponent<GeneTickerItem>();
                 if (!isOn)
                     ti.UpdateDisabledText("");
@@ -200,6 +201,9 @@ public class AvatarGenerator : NetworkBehaviour
                 UpdateAvatar();
 
                 FocusToggleTarget(index, isOn);
+
+                if (!zoomOutButton.IsActive())
+                    zoomOutButton.gameObject.SetActive(true);
             });
         }
     }
@@ -225,26 +229,11 @@ public class AvatarGenerator : NetworkBehaviour
                 Debug.LogWarning($"Avatar profile missing colorRanges for subsequence {i} (has {rangeCount}, needs {2 * i + 2})");
                 continue;
             }
-            Color.RGBToHSV(currProfileData.colorRanges[2 * i + 0], out float minH, out float minS, out float minV);
-            Vector3 minColor = new Vector3(minH, minS, minV);
-            Color.RGBToHSV(currProfileData.colorRanges[2 * i + 1], out float maxH, out float maxS, out float maxV);
-            Vector3 maxColor = new Vector3(maxH, maxS, maxV);
-            // When in Value mode, override hue/saturation from colorRanges
-            // so the slider adjusts brightness of the intended color, not the initial material color
-            if (SliderUsesValue(i))
-            {
-                currColor[i].x = minColor.x;
-                currColor[i].y = minColor.y;
-            }
 
-            float minVal = GetSliderValue(i, minColor);
-            float maxVal = GetSliderValue(i, maxColor);
-            // Ensure min <= max so the slider isn't stuck when color ranges are ordered bright-to-dark
-            sliders[i].minValue = Mathf.Min(minVal, maxVal);
-            sliders[i].maxValue = Mathf.Max(minVal, maxVal);
-            float colorValue = GetSliderValue(i, defaultColor[i]);
+            Color lowerColor = currProfileData.colorRanges[2 * i + 0];
+            Color higherColor = currProfileData.colorRanges[2 * i + 1];
 
-            sliders[i].value = Mathf.Clamp(colorValue, sliders[i].minValue, sliders[i].maxValue);
+            sliders[i].value = InverseLerpColor(lowerColor, higherColor, defaultColor[i]);
             RotateNeedle(i);
 
             int index = i;
@@ -260,14 +249,43 @@ public class AvatarGenerator : NetworkBehaviour
 
                 for (int j = 0; j < NUM_CHOICES; j++)
                 {
-                    SetMaterialColor(targetMaterials[index, j], Color.HSVToRGB(currColor[index].x, currColor[index].y, currColor[index].z, true));
+                    SetMaterialColor(targetMaterials[index, j], currColor[index]);
                 }
 
                 FocusSliderTarget(index);
+
+                if (!zoomOutButton.IsActive())
+                    zoomOutButton.gameObject.SetActive(true);
             });
         }
     }
-    
+
+    float InverseLerpColor(Color lowerColor, Color higherColor, Color targetColor)
+    {
+        float tr = (higherColor.r != lowerColor.r) 
+            ? (targetColor.r - lowerColor.r) / (higherColor.r - lowerColor.r) 
+            : 0f;
+
+        float tg = (higherColor.g != lowerColor.g) 
+            ? (targetColor.g - lowerColor.g) / (higherColor.g - lowerColor.g) 
+            : 0f;
+
+        float tb = (higherColor.b != lowerColor.b) 
+            ? (targetColor.b - lowerColor.b) / (higherColor.b - lowerColor.b) 
+            : 0f;
+
+        int count = 0;
+        float sum = 0f;
+
+        if (higherColor.r != lowerColor.r) { sum += tr; count++; }
+        if (higherColor.g != lowerColor.g) { sum += tg; count++; }
+        if (higherColor.b != lowerColor.b) { sum += tb; count++; }
+
+        if (count == 0) return 0f;
+
+        return Mathf.Clamp01(sum / count);
+    }
+        
     private void ToggleCanvas()
     {
         if (currentStage + 1 < canvas.Length)
@@ -275,11 +293,29 @@ public class AvatarGenerator : NetworkBehaviour
             canvas[currentStage].SetActive(false);
             currentStage++;
             canvas[currentStage].SetActive(true);
+            ToggleTitles();
             nextButton.interactable = true;
         }
         else
         {
             LoadGameScene();
+        }
+    }
+
+    private void ToggleTitles()
+    {
+        if (currentStage >= 4)
+            return;
+        
+        titleTmp.text = titles[currentStage];
+
+        if (string.IsNullOrEmpty(subtitles[currentStage]))
+            subtitleObj.SetActive(false);
+        else
+        {
+            if (!subtitleObj.activeSelf)
+                subtitleObj.SetActive(true);
+            subtitleTmp.text = subtitles[currentStage];
         }
     }
 
@@ -291,6 +327,7 @@ public class AvatarGenerator : NetworkBehaviour
         {
             case 0:
                 LoadAvatar();
+                cameraRig.MoveStraight();
                 break;
             case 1:
                 cameraRig.MoveToLeft();
@@ -299,6 +336,7 @@ public class AvatarGenerator : NetworkBehaviour
             case 2:
                 RevealTraits();
                 yield return new WaitForSeconds(6f);
+                zoomOutButton.gameObject.SetActive(false);
                 cameraRig.MoveStraight();
                 break;
             case 3:
@@ -306,10 +344,10 @@ public class AvatarGenerator : NetworkBehaviour
                 playerNameInput.gameObject.SetActive(false);
                 nextButton.enabled = false;
 
-                FlickerComponent nameFlickerCo = nameTitle.GetComponent<FlickerComponent>();
-                nameFlickerCo.FlickerUpdateText($"hello {playerNameInput.text.ToUpper()} !");
+                FlickerComponent titleFlickerCo = titleTmp.GetComponent<FlickerComponent>();
+                titleFlickerCo.FlickerUpdateText($"hello {playerNameInput.text.ToUpper()} !");
                 waitMessage.gameObject.SetActive(true);
-                yield return new WaitForSeconds(3f);
+                yield return new WaitForSeconds(4f);
                 break;
         }
 
@@ -366,7 +404,7 @@ public class AvatarGenerator : NetworkBehaviour
         }
 
         Vector3 pos = avatarSpawnPoint.position;
-        pos.y = prefabProfile.spawnYOffset;
+        pos.y = prefabProfile.canvasYOffset;
         avatarSpawnPoint.position = pos;
 
         currentAvatar = Instantiate(prefab, avatarSpawnPoint.position, avatarSpawnPoint.rotation);
@@ -375,7 +413,7 @@ public class AvatarGenerator : NetworkBehaviour
         currProfileData = currentAvatar.GetComponent<AvatarProfileData>();
 
         InitDefaults();
-        cameraRig.InitRig(currentAvatar.transform, xCamOffset, 0f, zCamOffset);
+        cameraRig.InitRig(currentAvatar.transform, xCamOffset, yCamOffset, zCamOffset);
     }
 
     /// <summary>
@@ -403,10 +441,9 @@ public class AvatarGenerator : NetworkBehaviour
                     targetMaterials[i, j] = (matIdx < mats.Length) ? mats[matIdx] : mats[0];
                 }
             }
-            if (targetMaterials[i, 0] != null)
+            if (targetMaterials[i, 1] != null)
             {
-                Color.RGBToHSV(GetMaterialColor(targetMaterials[i, 0]), out float h, out float s, out float v);
-                defaultColor[i] = new Vector3(h, s, v);
+                defaultColor[i] = GetMaterialColor(targetMaterials[i, 1]);
                 currColor[i] = defaultColor[i];
             }
         }
@@ -440,16 +477,18 @@ public class AvatarGenerator : NetworkBehaviour
     {
         if (currentAvatar == null) return;
 
-        int activeIndex = isOn ? 1 : 0;
-        string partName =  $"{partNames[index]}{activeIndex + 1}";
+        string[] targetPartNames = new string[]
+        {
+            $"{partNames[index]}1",
+            $"{partNames[index]}2"
+        };
 
-        Transform part = currentAvatar.GetComponentsInChildren<Transform>(true)
-            .FirstOrDefault(t => t.name == partName);
+        Transform[] parts = currentAvatar
+            .GetComponentsInChildren<Transform>(true)
+            .Where(t => targetPartNames.Contains(t.name))
+            .ToArray();
 
-        Renderer r = currProfileData.colorTargetRenderers[index * NUM_CHOICES + activeIndex]
-            .GetComponentInChildren<Renderer>();
-
-        cameraRig.FocusOnComponent(part);
+        cameraRig.FocusOnComponents(parts, currProfileData.id);
     }
 
     public void FocusSliderTarget(int index)
@@ -461,7 +500,7 @@ public class AvatarGenerator : NetworkBehaviour
         Renderer r = currProfileData.colorTargetRenderers[index * NUM_CHOICES + activeIndex]
             .GetComponentInChildren<Renderer>();
 
-        cameraRig.FocusOnRenderer(r);
+        cameraRig.FocusOnRenderer(r, currProfileData.id);
     }
 
     private void UpdateAvatar()
@@ -505,26 +544,32 @@ public class AvatarGenerator : NetworkBehaviour
     /// </summary>
     private void LoadGameScene()
     {
-        PlayerMetadata metadata = new PlayerMetadata(currProfileData);
-        metadata.name = playerName;
+        nextButton.gameObject.SetActive(false);
 
-        for (int i = 0; i < 2; i++)
+        PlayerCustoms customs = new PlayerCustoms()
         {
-            string subSeq = currProfileData.subSequences[i];
-            metadata.sequenceEnabled[i] = subSequenceEnabled[i];
-            metadata.subSequences[i] = subSequenceEnabled[i] ? "ATG" + subSeq : subSeq + "TAG";
-            metadata.colors[i] = Color.HSVToRGB(currColor[i].x, currColor[i].y, currColor[i].z, true);
+            name = playerName,
+            avatarType = currProfileData.id,
+            subSeq0Enabled = subSequenceEnabled[0],
+            subSeq1Enabled = subSequenceEnabled[1],
+            color0 = currColor[0],
+            color1 = currColor[1]
+        };
+
+        if (NetworkManager.Singleton == null)
+        {
+            Debug.LogError("NetworkManager not initialized yet");
+            return;
         }
 
-        // Optional local cache
-        PlayerMetadataManager.Instance.AddPlayerMetadata(metadata);
+        SceneMusic music = FindObjectOfType<SceneMusic>();
+        if (music != null)
+            music.StartFadeOutAndDestroy(1.5f);
+
+        // Local Cache
+        PlayerLogbook.Instance.AddPlayerCustom(NetworkManager.Singleton.LocalClientId, customs);
 
         // Submit to server (marks this client 'ready')
-        var dto = MetaDataCustomsMapper.ToNet(metadata);
-        PlayerMetadataRegistry.Instance.SubmitMetadataServerRpc(dto);
-
-        // DO NOT call SceneManager.LoadScene here.
-        // The server will transition everyone via NetworkManager.SceneManager.LoadScene(...)
-        // when AllPlayersReady() is true.
+        PlayerMetadataRegistry.Instance.SubmitMetadataServerRpc(customs);
     }
 }

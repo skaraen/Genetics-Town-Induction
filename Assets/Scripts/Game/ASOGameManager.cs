@@ -13,39 +13,47 @@ public class ASOGameManager : MonoBehaviour
     [SerializeField] Button verifySequenceButton;
     [SerializeField] Button verifyASOButton;
     [SerializeField] Button[] infoButton;
-    [SerializeField] GameObject componentHandler;
-    [SerializeField] GameObject dialogueBox;
+    [SerializeField] GameObject componentHandlerObj;
+    [SerializeField] DialogueController dialogueUI;
     [SerializeField] GameObject funFactUI;
     [SerializeField] string[] facts;
 
-    DialogueController dialogueController;
+    string bug;
+    int currStageId;
+    PlayerSpawner spawner;
+    bool isGameComplete = false;
 
     void OnEnable()
     {
-        int currId = 0;
-        canvas[currId].SetActive(true);
+        currStageId = 0;
+        canvas[currStageId].SetActive(true);
+
+        dialogueUI.OnDialogueEnded += HandleDialogueEnd;
+
+        spawner = FindFirstObjectByType<PlayerSpawner>();
+        if (spawner != null)
+        {
+            bug = spawner.GetBugSequence();
+            Debug.Log($"[ASOGame] The bug sequence is: {bug}");
+        }
 
         verifySequenceButton.onClick.AddListener(() =>
         {
             if (VerifySequence())
             {
-                canvas[currId].SetActive(false);
-                canvas[++currId].SetActive(true);
-                dialogueController.StartSequence("narrator-aso-intro");
+                ComponentHandler componentHandler = componentHandlerObj.GetComponent<ComponentHandler>();
+                componentHandler.SetBug(bug);
+
+                canvas[currStageId].SetActive(false);
+                canvas[++currStageId].SetActive(true);
+
+                dialogueUI.StartSequence("narrator-aso-intro");
             }
         });
         resultSequenceText.enabled = false;
 
         verifyASOButton.onClick.AddListener(() => VerifyASO());
         resultASOText.enabled = false;
-
-        if (dialogueBox != null)
-        {
-            dialogueController = dialogueBox.GetComponent<DialogueController>();
-            if (dialogueController != null) {
-                dialogueController.StartSequence("narrator-bug-intro");
-            }
-        }
 
         for (int i = 0; i < 2; i++)
         {
@@ -78,7 +86,7 @@ public class ASOGameManager : MonoBehaviour
             else
                 errorMessage = "Sequence is 6 characters long.";
         }
-        else if (input != "ACTGCT")
+        else if (input != bug)
         {
             errorMessage = "Sequence is wrong. Try again.";
         }
@@ -94,7 +102,7 @@ public class ASOGameManager : MonoBehaviour
     void VerifyASO()
     {
         string message;
-        ComponentHandler handler = componentHandler.GetComponent<ComponentHandler>();
+        ComponentHandler handler = componentHandlerObj.GetComponent<ComponentHandler>();
         if (!handler.IsASOValid())
             message = "Complete the ASO to synthesize.";
         else if (!handler.IsASOCorrect())
@@ -106,7 +114,8 @@ public class ASOGameManager : MonoBehaviour
             resultASOText.text = "ASO Synthesis successful.";
             resultASOText.color = Color.green;
 
-            dialogueController.StartSequence("narrator-aso-final");
+            isGameComplete = true;
+            dialogueUI.StartSequence("narrator-aso-final");
             return;   
         }
 
@@ -117,5 +126,14 @@ public class ASOGameManager : MonoBehaviour
         if (!tmp.enabled)
             tmp.enabled = true;
         tmp.text = error;
+    }
+
+    void HandleDialogueEnd()
+    {
+        if (!isGameComplete) return;
+
+        if (spawner != null)
+            spawner.CureInfectionServerRpc();
+        UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync("ASOGame");
     }
 }

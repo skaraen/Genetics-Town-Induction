@@ -26,12 +26,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 71940573155300650}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0.7071068, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.6, y: 1.6, z: 1.6}
+  m_LocalRotation: {x: 0.7071068, y: -0, z: 0, w: -0.7071068}
+  m_LocalPosition: {x: -3.92507, y: 0, z: 14.77411}
+  m_LocalScale: {x: 1.6000004, y: 1.6000003, z: 1.6000003}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 8468436423842975597}
+  m_Father: {fileID: 7550096169873940745}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 180}
 --- !u!33 &4616354926303821365
 MeshFilter:
@@ -117,12 +117,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 88550124327667339}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0.7071068, w: 0}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: 0.7071068, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.6, y: 1.6, z: 1.6}
+  m_LocalScale: {x: 1.6, y: 1.6000003, z: 1.6000003}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 8468436423842975597}
+  m_Father: {fileID: 2834621411393291950}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 180}
 --- !u!33 &3326046088837942363
 MeshFilter:
@@ -302,7 +302,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8468436423842975597}
-  - component: {fileID: -5712886078090490734}
+  - component: {fileID: 1607327187516213176}
   m_Layer: 0
   m_Name: bird
   m_TagString: Untagged
@@ -320,17 +320,17 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_ConstrainProportionsScale: 1
   m_Children:
-  - {fileID: 3130401112775557533}
-  - {fileID: 2560145352737182194}
   - {fileID: 6019889293296821576}
-  - {fileID: 5154606403612036947}
-  - {fileID: 6302212736071345781}
+  - {fileID: 2834621411393291950}
+  - {fileID: 4017797448523664303}
+  - {fileID: 6053870094791818724}
+  - {fileID: 7550096169873940745}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!114 &-5712886078090490734
+--- !u!114 &1607327187516213176
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -350,8 +350,8 @@ MonoBehaviour:
   - GACATTTAGACTCCAGGCTTCAACCTGTTTACA
   - GGAAGATGCGAGAAGGCAGAGGAGGAGGGAGGG
   subSequencesTraitNames:
-  - Beak Shape
   - Propellers
+  - Beak Shape
   colorSequence: GGTGGTGTCTCGGGATACCTTGTTTATAGTACC
   colorTargetRenderers:
   - {fileID: 8063856550232711268}
@@ -359,28 +359,59 @@ MonoBehaviour:
   - {fileID: 6524220985414385473}
   - {fileID: 5928692086663674438}
   colorRanges:
-  - {r: 0.80784315, g: 0.34901962, b: 0.29803923, a: 0}
-  - {r: 0.8627451, g: 0.8235294, b: 0.36862746, a: 0}
-  - {r: 0.34509805, g: 0.25490198, b: 0.20784314, a: 0}
-  - {r: 0.85882354, g: 0.6901961, b: 0.6039216, a: 0}
+  - {r: 0.87059, g: 0.3098, b: 0.27059, a: 1}
+  - {r: 0.87059, g: 0.81961, b: 0.27059, a: 1}
+  - {r: 0.36078, g: 0.25098, b: 0.2, a: 1}
+  - {r: 0.8902, g: 0.68235, b: 0.58824, a: 1}
   colorTargetMaterialIndices: 01000000010000000000000000000000
   colorPropertyName: _BaseColor
-  colorSliderUsesValue: 0001
   sequenceBodyParts:
   - bodyParts:
     - {fileID: 2952766395911292688}
-    - {fileID: 2952766395911292688}
-  - bodyParts:
-    - {fileID: 6099875284491081719}
-    - {fileID: 71940573155300650}
   - bodyParts:
     - {fileID: 88550124327667339}
     - {fileID: 3582978564103820665}
-  info: SPEED!\n This sequence allows this avatar to break down sugar quicker, increasing
-    its energy output to muscles. In As a result, this avatar could hover in the
-    air, fly upside down, and maintain a heartbeat of 1200 bpm.
-  spawnYOffset: -0.5
-  part2GameSpawnYOffset: 0.5
+  - bodyParts:
+    - {fileID: 6099875284491081719}
+    - {fileID: 71940573155300650}
+  info: The sequence you chose contributes to SPEED! This sequence allows this avatar
+    to break down sugar faster, increasing its energy to make it a more powerful
+    flier.
+  canvasYOffset: 1.5
+  realWorldYOffset: 2.5
+  part2GameSpawnYOffset: 0
+--- !u!1 &2645865222401146800
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4017797448523664303}
+  m_Layer: 0
+  m_Name: head2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4017797448523664303
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2645865222401146800}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2560145352737182194}
+  m_Father: {fileID: 8468436423842975597}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2952766395911292688
 GameObject:
   m_ObjectHideFlags: 0
@@ -518,6 +549,38 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &2966491645726137154
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6053870094791818724}
+  m_Layer: 0
+  m_Name: torso1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6053870094791818724
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2966491645726137154}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0}
+  m_LocalPosition: {x: -3.92507, y: 0, z: 14.77411}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6302212736071345781}
+  m_Father: {fileID: 8468436423842975597}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3582978564103820665
 GameObject:
   m_ObjectHideFlags: 0
@@ -546,12 +609,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3582978564103820665}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0.7071068, w: 0}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: 0.7071068, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.6, y: 1.6, z: 1.6}
+  m_LocalScale: {x: 1.6, y: 1.6000003, z: 1.6000003}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 8468436423842975597}
+  m_Father: {fileID: 4017797448523664303}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 180}
 --- !u!33 &2947296974385179139
 MeshFilter:
@@ -629,7 +692,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 1
+  m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -8484818585897656739, guid: e872a96437a0045fcb26590185b23578, type: 3}
 --- !u!95 &2973058697487660868
@@ -687,6 +750,38 @@ Transform:
   - {fileID: 7306342117981533287}
   m_Father: {fileID: 8468436423842975597}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5261591039542174249
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2834621411393291950}
+  m_Layer: 0
+  m_Name: head1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2834621411393291950
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5261591039542174249}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3130401112775557533}
+  m_Father: {fileID: 8468436423842975597}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6099875284491081719
 GameObject:
   m_ObjectHideFlags: 0
@@ -713,12 +808,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6099875284491081719}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0.7071068, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.6, y: 1.6, z: 1.6}
+  m_LocalRotation: {x: 0.7071068, y: -0, z: 0, w: -0.7071068}
+  m_LocalPosition: {x: -3.92507, y: 0, z: 14.77411}
+  m_LocalScale: {x: 1.6000004, y: 1.6000003, z: 1.6000003}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 8468436423842975597}
+  m_Father: {fileID: 6053870094791818724}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 180}
 --- !u!33 &2652873234133759076
 MeshFilter:
@@ -777,3 +872,35 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &8407014246522156341
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7550096169873940745}
+  m_Layer: 0
+  m_Name: torso2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7550096169873940745
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8407014246522156341}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0}
+  m_LocalPosition: {x: -3.92507, y: 0, z: 14.77411}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5154606403612036947}
+  m_Father: {fileID: 8468436423842975597}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

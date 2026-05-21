@@ -1,12 +1,14 @@
+using System;
 using UnityEngine;
 
 [System.Serializable]
 public class PlayerMetadata
 {
     const int NUM_SUBSEQUENCES = 2;
-    public int id; // the player's randomly generated unique ID
+    public int id;
     public int avatarType;
-    public string name; // the player's custom online name - different from their avatar name
+
+    public string name;
     public string baseSequence;
     public string[] subSequences;
     public bool[] sequenceEnabled;
@@ -19,21 +21,18 @@ public class PlayerMetadata
         sequenceEnabled = new bool[NUM_SUBSEQUENCES];
     }
 
-    public PlayerMetadata(AvatarProfileData profile)
+    public PlayerMetadata(AvatarProfileData profile) : this()
     {
-        subSequences = new string[NUM_SUBSEQUENCES];
-        colors = new Color[NUM_SUBSEQUENCES];
-        sequenceEnabled = new bool[NUM_SUBSEQUENCES];
-
         avatarType = profile.id;
         baseSequence = profile.baseSequence;
+        Array.Copy(profile.subSequences, subSequences, NUM_SUBSEQUENCES);
     }
 
     public string GetCompleteSequence()
     {
         string subStr = "";
         for (int i = 0; i < NUM_SUBSEQUENCES; i++)
-            subStr += subSequences[i];
+            subStr += sequenceEnabled[i] ? $"ATG{subSequences[i]}" : $"{subSequences[i]}TAG";
         return "ATG" + baseSequence + subStr;
     }
 }

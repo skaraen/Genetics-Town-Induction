@@ -10,12 +10,39 @@ using UnityEngine.UI; // for GraphicRaycaster
 /// </summary>
 public class MinigameSceneGuard : MonoBehaviour
 {
-    private readonly List<Behaviour> disabledBehaviours = new(); // EventSystems, Cameras
-    private readonly List<(AudioListener listener, bool wasEnabled)> scene1Audio = new();
+    [System.Serializable]
+    public class AudioListenerState
+    {
+        public AudioListener listener;
+        public bool wasEnabled;
+    }
 
-    // NEW: track canvases & raycasters we turn off
-    private readonly List<(Canvas canvas, bool wasEnabled)> scene1Canvases = new();
-    private readonly List<(GraphicRaycaster ray, bool wasEnabled)> scene1Raycasters = new();
+    [System.Serializable]
+    public class AudioSourceState
+    {
+        public AudioSource source;
+        public bool wasPlaying;
+    }
+
+    [System.Serializable]
+    public class CanvasState
+    {
+        public Canvas canvas;
+        public bool wasEnabled;
+    }
+
+    [System.Serializable]
+    public class RaycasterState
+    {
+        public GraphicRaycaster ray;
+        public bool wasEnabled;
+    }
+
+    [SerializeField] private List<Behaviour> disabledBehaviours = new();
+    [SerializeField] private List<AudioListenerState> scene1Audio = new();
+    [SerializeField] private List<CanvasState> scene1Canvases = new();
+    [SerializeField] private List<RaycasterState> scene1Raycasters = new();
+    [SerializeField] private List<AudioSourceState> scene1Sources = new();
 
     void Awake()
     {
@@ -33,7 +60,7 @@ public class MinigameSceneGuard : MonoBehaviour
     private void DisableExtraSceneObjects()
     {
 
-        void disableAndCacheExtraEventSystems()
+        void DisableAndCacheExtraEventSystems()
         {
             var allEventSystems = Resources.FindObjectsOfTypeAll<EventSystem>();
             EventSystem myEventSystem = null;
@@ -101,7 +128,10 @@ public class MinigameSceneGuard : MonoBehaviour
                 }
                 else
                 {
-                    scene1Audio.Add((al, al.enabled));
+                    scene1Audio.Add(new AudioListenerState {
+                        listener = al, 
+                        wasEnabled = al.enabled
+                    });
                     if (al.enabled) al.enabled = false;
                 }
             }
@@ -134,15 +164,27 @@ public class MinigameSceneGuard : MonoBehaviour
 
                 if (cv.gameObject.scene != gameObject.scene)
                 {
-                    scene1Canvases.Add((cv, cv.enabled));
-                    if (cv.enabled) cv.enabled = false;
+                    scene1Canvases.Add(new CanvasState {
+                        canvas = cv, 
+                        wasEnabled = cv.enabled
+                    });
+                    if (cv.enabled) {
+                        cv.enabled = false;
+                        Debug.Log($"Disabled canvas [{cv.name}]");
+                    }
 
                     // Also disable input on those UIs
                     var ray = cv.GetComponent<GraphicRaycaster>();
                     if (ray)
                     {
-                        scene1Raycasters.Add((ray, ray.enabled));
-                        if (ray.enabled) ray.enabled = false;
+                        scene1Raycasters.Add(new RaycasterState {
+                            ray = ray, 
+                            wasEnabled = ray.enabled
+                        });
+                        if (ray.enabled) {
+                            ray.enabled = false;
+                            Debug.Log($"Disabled raycaster [{cv.name}, {ray.name}]");
+                        }
                     }
                 }
                 else
@@ -155,10 +197,51 @@ public class MinigameSceneGuard : MonoBehaviour
             }
         }
 
-        disableAndCacheExtraEventSystems();
+        PauseExtraAudioSources();
+        DisableAndCacheExtraEventSystems();
         DisableAndCacheExtraCameras();
         DisableAndCacheExtraAudioListeners();
         DisableAndCacheExtraCanvases();
+    }
+
+    void PauseExtraAudioSources()
+    {
+        var allSources = Resources.FindObjectsOfTypeAll<AudioSource>();
+        foreach (var source in allSources)
+        {
+            // Don't touch objects in the minigame scene
+            if (!source || !source.gameObject.scene.IsValid() || source.gameObject.scene == gameObject.scene) 
+                continue;
+
+            if (source.isPlaying)
+            {
+                scene1Sources.Add(new AudioSourceState { source = source, wasPlaying = true });
+                source.Pause(); // Use Pause() so it resumes exactly where it left off
+            }
+        }
+    }
+
+    void ResumeExtraAudioSources()
+    {
+        foreach (var state in scene1Sources)
+        {
+            if (state.source && state.wasPlaying)
+            {
+                state.source.UnPause();
+            }
+        }
+        scene1Sources.Clear();
+    }
+
+    void KillCurrentSceneAudio()
+    {
+        foreach (var source in Object.FindObjectsOfType<AudioSource>())
+        {
+            if (source.gameObject.scene == gameObject.scene)
+            {
+                Destroy(source.gameObject); 
+            }
+        }
     }
 
     /// <summary>
@@ -173,19 +256,28 @@ public class MinigameSceneGuard : MonoBehaviour
         disabledBehaviours.Clear();
 
         // Restore AudioListeners
-        foreach (var (listener, wasEnabled) in scene1Audio)
-            if (listener) listener.enabled = wasEnabled;
+        foreach (AudioListenerState ls in scene1Audio)
+            if (ls.listener)
+                ls.listener.enabled = ls.wasEnabled;
         scene1Audio.Clear();
 
         // Restore Canvases
-        foreach (var (canvas, wasEnabled) in scene1Canvases)
-            if (canvas) canvas.enabled = wasEnabled;
+        foreach (CanvasState cs in scene1Canvases)
+            if (cs.canvas) {
+                cs.canvas.enabled = cs.wasEnabled;
+                Debug.Log($"Return canvas: [{cs.canvas.name}, {cs.wasEnabled}]");
+            }
         scene1Canvases.Clear();
 
         // Restore Raycasters
-        foreach (var (ray, wasEnabled) in scene1Raycasters)
-            if (ray) ray.enabled = wasEnabled;
+        foreach (RaycasterState rs in scene1Raycasters)
+            if (rs.ray) {
+                rs.ray.enabled = rs.wasEnabled;
+                Debug.Log($"Return raycaster: [{rs.ray.name}, {rs.wasEnabled}]");
+            }
         scene1Raycasters.Clear();
-    }
 
+        KillCurrentSceneAudio();
+        ResumeExtraAudioSources();
+    }
 }

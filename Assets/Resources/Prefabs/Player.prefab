@@ -67,7 +67,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: d25d1b78c7aaf4ea0a30a0c01376cbac, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f697820d1c5c144e592f3995eea92f69, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -203,7 +203,7 @@ MonoBehaviour:
   rotateSpeed: 7
   playerHeight: 0.7
   playerRadius: 0.7
-  heightOffset: 1.2
+  groundOffset: 0.5
   ySmoothTime: 0.05
   groundMask:
     serializedVersion: 2
@@ -211,6 +211,7 @@ MonoBehaviour:
   groundRayLength: 200
   trackingTarget: {fileID: 0}
   ownerCamPriority: 100
+  avatarTypeId: 0
 --- !u!114 &1281654009352977733
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -365,6 +366,7 @@ MonoBehaviour:
   canvas: {fileID: 7295806088508609018}
   descTmp: {fileID: 7197394129777437608}
   interactBtn: {fileID: 6468705168822870301}
+  replySprite: {fileID: 21300000, guid: b25c74682f5984fb2b769c05e05dd1e0, type: 3}
   worldCam: {fileID: 0}
   triggerRadius: 5
   fadeSmoothTime: 0.75
@@ -431,7 +433,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InteractGroupCamController
   ShowTopMostFoldoutHeaderGroup: 1
-  interactCamName: InteractGroupCam
   activePriority: 200
   inactivePriority: 0
   clearGroupDelay: 2
@@ -500,7 +501,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Interact to form a memory
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
   m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
@@ -527,8 +528,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 0.25
-  m_fontSizeBase: 0.25
+  m_fontSize: 0.2
+  m_fontSizeBase: 0.2
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1011,7 +1012,7 @@ GameObject:
   - component: {fileID: 1459180960745627297}
   - component: {fileID: 6207050874696706845}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: PromptCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1036,7 +1037,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 5}
+  m_AnchoredPosition: {x: 0, y: 6}
   m_SizeDelta: {x: 4, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &7295806088508609018
