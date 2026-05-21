@@ -424,7 +424,7 @@ public class Part2GameManager : MonoBehaviour
             case DialoguePhase.SequenceReview:
                 if (dialogueNextButton != null)
                 {
-                    dialogueNextButton.enabled = true;
+                    dialogueNextButton.gameObject.SetActive(true);
                     dialogueNextButton.onClick.AddListener(HandleFinalDismiss);
                 }
                 break;
@@ -438,7 +438,7 @@ public class Part2GameManager : MonoBehaviour
     private void HandleFinalDismiss()
     {
         dialogueNextButton.onClick.RemoveListener(HandleFinalDismiss);
-        dialogueNextButton.enabled = false;
+        dialogueNextButton.gameObject.SetActive(false);
         if (currentAvatar != null)
             Destroy(currentAvatar);
         PlayerMetadataRegistry.Instance.ExitInteractionServerRpc();
@@ -472,9 +472,13 @@ public class Part2GameManager : MonoBehaviour
         Vector3 spawnPos = avatarSpawnPoint.position;
         AvatarProfileData profile = AvatarRegistry.Instance.GetProfileById(targetCustoms.avatarType);
         if (profile != null)
-            spawnPos.y += profile.part2GameSpawnYOffset;
+            spawnPos.y += profile.canvasYOffset;
 
         currentAvatar = AvatarLoader.Load(targetCustoms, spawnPos, avatarSpawnPoint.rotation, avatarSpawnPoint);
+        if (currentAvatar != null)
+        {
+            currentAvatar.transform.localScale *= 0.8f;
+        }
     }
 
     /// <summary>
@@ -709,6 +713,7 @@ public class Part2GameManager : MonoBehaviour
         if (narrator != null && dialogueController != null)
         {
             RecordPlayerMemory();
+            infoButton.gameObject.SetActive(false);
             dialogueController.StartSequence("narrator-memory-final");
         }
     }

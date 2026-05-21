@@ -18,6 +18,13 @@ public class MinigameSceneGuard : MonoBehaviour
     }
 
     [System.Serializable]
+    public class AudioSourceState
+    {
+        public AudioSource source;
+        public bool wasPlaying;
+    }
+
+    [System.Serializable]
     public class CanvasState
     {
         public Canvas canvas;
@@ -35,6 +42,7 @@ public class MinigameSceneGuard : MonoBehaviour
     [SerializeField] private List<AudioListenerState> scene1Audio = new();
     [SerializeField] private List<CanvasState> scene1Canvases = new();
     [SerializeField] private List<RaycasterState> scene1Raycasters = new();
+    [SerializeField] private List<AudioSourceState> scene1Sources = new();
 
     void Awake()
     {
@@ -189,10 +197,51 @@ public class MinigameSceneGuard : MonoBehaviour
             }
         }
 
+        PauseExtraAudioSources();
         DisableAndCacheExtraEventSystems();
         DisableAndCacheExtraCameras();
         DisableAndCacheExtraAudioListeners();
         DisableAndCacheExtraCanvases();
+    }
+
+    void PauseExtraAudioSources()
+    {
+        var allSources = Resources.FindObjectsOfTypeAll<AudioSource>();
+        foreach (var source in allSources)
+        {
+            // Don't touch objects in the minigame scene
+            if (!source || !source.gameObject.scene.IsValid() || source.gameObject.scene == gameObject.scene) 
+                continue;
+
+            if (source.isPlaying)
+            {
+                scene1Sources.Add(new AudioSourceState { source = source, wasPlaying = true });
+                source.Pause(); // Use Pause() so it resumes exactly where it left off
+            }
+        }
+    }
+
+    void ResumeExtraAudioSources()
+    {
+        foreach (var state in scene1Sources)
+        {
+            if (state.source && state.wasPlaying)
+            {
+                state.source.UnPause();
+            }
+        }
+        scene1Sources.Clear();
+    }
+
+    void KillCurrentSceneAudio()
+    {
+        foreach (var source in Object.FindObjectsOfType<AudioSource>())
+        {
+            if (source.gameObject.scene == gameObject.scene)
+            {
+                Destroy(source.gameObject); 
+            }
+        }
     }
 
     /// <summary>
@@ -227,6 +276,8 @@ public class MinigameSceneGuard : MonoBehaviour
                 Debug.Log($"Return raycaster: [{rs.ray.name}, {rs.wasEnabled}]");
             }
         scene1Raycasters.Clear();
-    }
 
+        KillCurrentSceneAudio();
+        ResumeExtraAudioSources();
+    }
 }

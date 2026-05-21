@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -97,7 +98,6 @@ public class DialogueController : MonoBehaviour
         dialogues = DialogueDatabase.Instance.GetLines(sequence);
         isSequenceInProgress = true;
         currStage = 0;
-        nextButton.gameObject.SetActive(true);
 
         ProgressDialogue();
     }
@@ -187,12 +187,21 @@ public class DialogueController : MonoBehaviour
             if (currIdx > currDialogue.text.Length)
             {
                 isTyping = false;
+                StartCoroutine(delayedButtonSetActive(nextButton, true));
             }
         }
     }
 
+    IEnumerator delayedButtonSetActive(Button button, bool isActive)
+    {
+        yield return new WaitForSeconds(1.5f);
+
+        button.gameObject.SetActive(isActive);
+    }
+
     private void StartTyping()
     {
+        nextButton.gameObject.SetActive(false);
         currDialogue = dialogues[currStage];
         currIdx = 0;
         dialogueText.text = "";

@@ -8,12 +8,13 @@ public class Player : NetworkBehaviour
     [SerializeField] private float rotateSpeed = 7.0f;
     [SerializeField] private float playerHeight = 0.7f;
     [SerializeField] private float playerRadius = 0.7f;
-    [SerializeField] private float heightOffset = 1.2f;
+    [SerializeField] private float groundOffset = 0.5f;
     [SerializeField] private float ySmoothTime = 0.05f;
     [SerializeField] private LayerMask groundMask = ~0;
     [SerializeField] private float groundRayLength = 200f;
     [SerializeField] private Transform trackingTarget;
     [SerializeField] private int ownerCamPriority = 100;
+    [SerializeField] private int avatarTypeId;
 
     private CinemachineCamera cineCam;
     private bool isMoving;
@@ -69,7 +70,7 @@ public class Player : NetworkBehaviour
         float groundY = GetGroundHeight(targetXZ, out bool hasGround);
 
         // If we found ground, keep a smooth clearance; otherwise preserve current Y
-        float targetY = hasGround ? groundY + heightOffset : transform.position.y;
+        float targetY = hasGround ? groundY + groundOffset : transform.position.y;
         float newY    = Mathf.SmoothDamp(transform.position.y, targetY, ref _yVel, ySmoothTime);
 
         // Commit position

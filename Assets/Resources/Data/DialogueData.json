@@ -125,7 +125,7 @@
             {
                 "speaker" : "Gregor",
                 "emotion": "shock",
-                "text"    : "We need your help to fix this! Figure out the bug's genetic code to find a cure and bring Genetics Town back to health. Let's go!"
+                "text"    : "We need your help to fix this! Figure out the bug's genetic code to find a cure and bring Genetics Town back to health."
             },
             {
                 "speaker" : "Gregor",
@@ -134,8 +134,13 @@
             },
             {
                 "speaker" : "Gregor",
+                "emotion": "neutral",
+                "text"    : "You'll see that some friends share lots of the same code if they have many similar features. But, other friends share very little code if they have different features. The bug is the only commonality in everyone's code, so these 6 letters will be shared by each avatar, no matter the similarities or differences of their other features."
+            },
+            {
+                "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "Genetics Town is counting on you!"
+                "text"    : "Genetics Town is counting on you! Click “Save Genetics Town” to begin."
             }
         ]
     },
@@ -146,12 +151,12 @@
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "Now that you’ve found the genetic sequence of the bug, you can create a cure!"
+                "text"    : "Now that you've found the genetic sequence of the bug, you can create a cure!"
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "To cure the bug, we must stop it from creating harm. If we cover up, or silence, the bug’s code, then it can’t function."
+                "text"    : "To cure the bug, we must stop it from creating harm. If we cover up, or silence, the bug's code, then it can't function."
             },
             {
                 "speaker" : "Gregor",
@@ -161,12 +166,12 @@
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "To create an ASO, we must hide the letters in the bug’s genetic sequence with certain other letters. Specifically, we must hide an A with a T and a T with an A, or a C with a G and a G with a C."
+                "text"    : "To create an ASO, we must hide the letters in the bug's genetic sequence with certain other letters. Specifically, we must hide an A with a T and a T with an A, or a C with a G and a G with a C."
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "smile",
-                "text"    : "Here, you will see the 6 letters in the bug sequence you’ve already found. Now it's time to create the ASO. We believe in you!"
+                "text"    : "Here, you will see the 6 letters in the bug sequence you've already found. Now it's time to create the ASO. We believe in you!"
             }
         ]
     },
@@ -235,12 +240,7 @@
             {
                 "speaker": "Gregor",
                 "emotion": "happy",
-                "text": "Nice work! You've completed the full genetic sequence for your new friend. This information will be stored in your inventory."
-            },
-            {
-                "speaker": "Gregor",
-                "emotion": "smile",
-                "text": "Now, click back into Genetics Town to make more friends and discover more sequences."
+                "text": "You saved Genetics Town! Now your avatar can continue exploring. Please play again to meet new friends by creating more avatars with their own genetic sequences. I hope you had fun visiting Genetics Town!"
             }
         ]
     }

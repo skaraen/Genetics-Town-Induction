@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class CameraRig : MonoBehaviour
 {
+    [SerializeField] private 
     bool focusing;
     Vector3 targetCamPos = Vector3.zero;
     Vector3 targetCamFocus = Vector3.zero;
@@ -20,8 +23,8 @@ public class CameraRig : MonoBehaviour
         targetCamPos = transform.position;
 
         this.refTransform = refTransform;
-        straightFocus = new Vector3(0, 0, -zOffset);
-        leftFocus = new Vector3(-xOffset, 0, -zOffset);
+        straightFocus = new Vector3(0, yOffset, -zOffset);
+        leftFocus = new Vector3(-xOffset, yOffset, -zOffset);
     }
 
     public void MoveToLeft()
@@ -56,20 +59,25 @@ public class CameraRig : MonoBehaviour
         yOffset = (float) (camDistance * Math.Sin(theta) * Math.Sin(alpha));
     }
 
-    private Vector3 GetOffset(float camDistance)
+    private Vector3 GetOffset(float camDistance, bool isFromLeft)
     {
         double theta = Math.Atan(Math.Abs(leftFocus.x / leftFocus.z));
         Vector3 offset;
 
-        // OffsetFocusFromLeft(camDistance, theta, out float xOffset, out float yOffset);
-        // offset = (yOffset * refTransform.forward) - (xOffset * refTransform.right);
-        OffsetFocusFromRight(camDistance, theta, out float xOffset, out float yOffset);
-        offset = - (yOffset * refTransform.forward) - (xOffset * refTransform.right);
+        if (isFromLeft)
+        {
+            OffsetFocusFromLeft(camDistance, theta, out float xOffset, out float yOffset);
+            offset = (yOffset * refTransform.forward) - (xOffset * refTransform.right);
+        } else
+        {
+            OffsetFocusFromRight(camDistance, theta, out float xOffset, out float yOffset);
+            offset = - (yOffset * refTransform.forward) - (xOffset * refTransform.right);
+        }
 
         return offset;
     }
 
-    public void FocusOnComponent(Transform obj)
+    public void FocusOnComponent(Transform obj, int avatarId)
     {
         Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
         Bounds bounds = renderers[0].bounds;
@@ -77,17 +85,34 @@ public class CameraRig : MonoBehaviour
         foreach (Renderer r in renderers)
             bounds.Encapsulate(r.bounds);
 
-        FocusOnBounds(bounds);
+        FocusOnBounds(bounds, avatarId);
     }
 
-    public void FocusOnRenderer(Renderer renderer)
+    public void FocusOnComponents(Transform[] objList, int avatarId)
+    {
+        List<Renderer> renderers = new List<Renderer>();
+
+        foreach (Transform obj in objList)
+        {
+            renderers.AddRange(obj.GetComponentsInChildren<Renderer>());
+        }
+
+        Bounds bounds = renderers[0].bounds;
+
+        foreach (Renderer r in renderers)
+            bounds.Encapsulate(r.bounds);
+
+        FocusOnBounds(bounds, avatarId);
+    }
+
+    public void FocusOnRenderer(Renderer renderer, int avatarId)
     {
         Bounds bounds = renderer.bounds;
 
-        FocusOnBounds(bounds);
+        FocusOnBounds(bounds, avatarId);
     }
 
-    void FocusOnBounds(Bounds bounds)
+    void FocusOnBounds(Bounds bounds, int avatarId)
     {
         Vector3 center = bounds.center;
         Debug.Log($"Bounds: {center}");
@@ -95,10 +120,14 @@ public class CameraRig : MonoBehaviour
         float camDistance = bounds.size.magnitude * 1.5f;
         float camCoords = (float)(camDistance / Math.Sqrt(2));
 
-        // targetCamPos = center - refTransform.forward * camCoords - refTransform.right * camCoords;
-        targetCamPos = center - refTransform.forward * camCoords + refTransform.right * camCoords;
+        bool isFromLeft = avatarId != 3;
 
-        targetCamFocus = center + GetOffset(camDistance);
+        if (isFromLeft)
+            targetCamPos = center - refTransform.forward * camCoords - refTransform.right * camCoords;
+        else
+            targetCamPos = center - refTransform.forward * camCoords + refTransform.right * camCoords;
+
+        targetCamFocus = center + GetOffset(camDistance, isFromLeft);
         focusing = true;
     }
 

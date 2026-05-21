@@ -43,7 +43,9 @@ public class PlayerVisual : NetworkBehaviour
     /// </summary>
     private void LoadAvatar(PlayerCustoms customs)
     {
-        currentAvatar = AvatarLoader.Load(customs, transform.position, parent: transform);
+        AvatarProfileData profileData = AvatarRegistry.Instance.GetProfileById(customs.avatarType);
+        Vector3 adjustedPosition = new Vector3(transform.position.x, transform.position.y + profileData.realWorldYOffset, transform.position.z);
+        currentAvatar = AvatarLoader.Load(customs, adjustedPosition, parent: transform);
 
         renderers = currentAvatar.GetComponentsInChildren<Renderer>(true);
 

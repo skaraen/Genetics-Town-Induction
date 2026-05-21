@@ -1,19 +1,19 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;  // <-- Add this if missing
+using UnityEngine.SceneManagement;
+using NUnit.Framework;  // <-- Add this if missing
 
 public class GameManager : MonoBehaviour
 {
     [SerializeField] GameObject spawnerObj;
     [SerializeField] GameObject narrator;
     [SerializeField] Canvas dialogueCanvas;
-    [SerializeField] GameObject dialogueBox;
+    [SerializeField] DialogueController dialogueController;
     [SerializeField] float planeDistance = 5f;
     [SerializeField] Button ASOButton;
 
     private PlayerSpawner spawner;
-    DialogueController dialogueController;
     Animator narratorAnimator;
     /// <summary>
     /// Prevents welcome dialogue from triggering multiple times in multiplayer.
@@ -21,18 +21,17 @@ public class GameManager : MonoBehaviour
     /// would restart repeatedly, confusing the animator state machine.
     /// </summary>
     private bool hasTriggeredWelcome = false;
+    private bool isPanicInProgress = false;
 
     void OnEnable()
     {
-        if (dialogueBox != null)
-        {
-            dialogueController = dialogueBox.GetComponent<DialogueController>();
-        }
+        dialogueController.OnDialogueEnded += HandleDialogueEnd;
 
         spawner = spawnerObj.GetComponent<PlayerSpawner>();
 
         spawner.OnSpawnComplete += TriggerWelcome;
         spawner.OnInfected += TriggerPanic;
+        spawner.OnCured += AcknowledgeCure;
 
         if (narratorAnimator == null)
             narratorAnimator = narrator.GetComponent<Animator>();
@@ -46,8 +45,10 @@ public class GameManager : MonoBehaviour
 
     void OnDisable()
     {
+        dialogueController.OnDialogueEnded -= HandleDialogueEnd;
         spawner.OnSpawnComplete -= TriggerWelcome;
         spawner.OnInfected -= TriggerPanic;
+        spawner.OnCured -= AcknowledgeCure;
 
     }
 
@@ -71,6 +72,20 @@ public class GameManager : MonoBehaviour
         narratorAnimator.SetTrigger("EntryTrigger");
         dialogueController.StartSequence("narrator-glitch-panic");
 
-        ASOButton.gameObject.SetActive(true);
+        isPanicInProgress = true;
+    }
+
+    void HandleDialogueEnd()
+    {
+        if (isPanicInProgress)
+        {
+            ASOButton.gameObject.SetActive(true);
+            isPanicInProgress = false;
+        }
+    }
+
+    void AcknowledgeCure()
+    {
+        ASOButton.gameObject.SetActive(false);
     }
 }

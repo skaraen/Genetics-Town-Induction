@@ -173,7 +173,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3685828565
+  GlobalObjectIdHash: 1102881533
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -203,7 +203,7 @@ MonoBehaviour:
   rotateSpeed: 7
   playerHeight: 0.7
   playerRadius: 0.7
-  heightOffset: 1.2
+  groundOffset: 0.5
   ySmoothTime: 0.05
   groundMask:
     serializedVersion: 2
@@ -211,6 +211,7 @@ MonoBehaviour:
   groundRayLength: 200
   trackingTarget: {fileID: 0}
   ownerCamPriority: 100
+  avatarTypeId: 0
 --- !u!114 &1281654009352977733
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -527,8 +528,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 0.25
-  m_fontSizeBase: 0.25
+  m_fontSize: 0.2
+  m_fontSizeBase: 0.2
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1036,7 +1037,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 5}
+  m_AnchoredPosition: {x: 0, y: 6}
   m_SizeDelta: {x: 4, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &7295806088508609018

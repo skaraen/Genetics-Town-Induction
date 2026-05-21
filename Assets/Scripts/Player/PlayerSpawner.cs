@@ -18,6 +18,7 @@ public class PlayerSpawner : NetworkBehaviour
 
     public event Action OnSpawnComplete;
     public event Action OnInfected;
+    public event Action OnCured;
 
     private bool isInfected = false;
     private string bug;
@@ -180,6 +181,22 @@ public class PlayerSpawner : NetworkBehaviour
         if (playerObj.TryGetComponent<PlayerVisual>(out var visual))
         {
             visual.IsInfected.Value = false;
+
+            ClientRpcParams clientRpcParams = new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams
+                {
+                    TargetClientIds = new ulong[] { senderId }
+                }
+            };
+
+            NotifyCuredClientRpc(clientRpcParams);
         }
+    }
+
+    [ClientRpc]
+    private void NotifyCuredClientRpc(ClientRpcParams clientRpcParams = default)
+    {
+        OnCured?.Invoke();
     }
 }

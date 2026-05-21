@@ -436,8 +436,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.1, y: 1.1, z: 1.1}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1240060215005267485}
   - {fileID: 2787888021116458514}
@@ -481,7 +481,6 @@ MonoBehaviour:
   - {r: 0.65098, g: 0.07843, b: 0.46667, a: 1}
   colorTargetMaterialIndices: 00000000000000000000000000000000
   colorPropertyName: _BaseColor
-  colorSliderUsesValue: 0101
   sequenceBodyParts:
   - bodyParts:
     - {fileID: 8007189008481390473}
@@ -490,9 +489,11 @@ MonoBehaviour:
     - {fileID: 8808933633745258761}
   - bodyParts:
     - {fileID: 4974869228857767246}
-  info: 'REPAIR! its injuries in a special way: when the avatar gets hurt, this sequence
-    tells the avatar to regrow whatever was injured.'
-  spawnYOffset: -2
+  info: "This sequence supports this avatar\u2019s ability to REPAIR its injuries
+    in a special way: when the avatar gets hurt, this sequence tells the avatar to
+    regrow whatever was injured."
+  canvasYOffset: -0.25
+  realWorldYOffset: 0
   part2GameSpawnYOffset: -0.5
 --- !u!1 &4414012847671046490
 GameObject:

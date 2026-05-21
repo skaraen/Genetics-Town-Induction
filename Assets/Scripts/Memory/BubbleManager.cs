@@ -52,12 +52,6 @@ public class BubbleManager : MonoBehaviour
         currIdx = -1;
     }
 
-    GameObject GenerateAvatarPrefab(PlayerCustoms customs)
-    {
-        GameObject prefab = AvatarRegistry.Instance.GetPrefabById(customs.avatarType);
-        return prefab;
-    }
-
     void SetRowParams(string refSeq)
     {
         numRows = refSeq.Length / 3;
@@ -98,11 +92,10 @@ public class BubbleManager : MonoBehaviour
         Bubble bubble = go.GetComponent<Bubble>();
         bubble.SetTitle(customs.name.ToString());
         bubble.SetColor(customs.color0);
+        bubble.SetAvatarCustoms(customs);
         sequenceLookup.Add(customs.name.ToString(), sequence);
 
-        GameObject avatarPrefab = GenerateAvatarPrefab(playerCustoms[idx]);
-        bubble.InitializePreview(previewCamera, defaultTexture, avatarPrefab);
-
+        bubble.InitializePreview(previewCamera, defaultTexture);
         bubble.button.onClick.AddListener(() => OnBubbleClicked(idx, bubble));
     }
 
@@ -118,13 +111,24 @@ public class BubbleManager : MonoBehaviour
             currModel = null; 
         }
 
-        if (bubble.prefabToShow && previewStage)
+        if (previewStage)
         {
-            currModel = Instantiate(bubble.prefabToShow, previewStage);
-            currModel.transform.localPosition = Vector3.zero;
-            currModel.transform.localRotation = Quaternion.identity;
-            SetLayerRecursively(currModel, LayerMask.NameToLayer("BubblePreview"));
-            previewCamera.transform.LookAt(previewStage.position);
+            currModel = AvatarLoader.Load(
+                bubble.customsToShow, 
+                previewStage.position, 
+                Quaternion.identity, 
+                previewStage
+            );
+
+            if (currModel != null)
+            {
+                currModel.transform.localPosition = new Vector3(0f, bubble.GetAvatarYOffset(), 0f);
+                currModel.transform.localScale = Vector3.one * 0.75f;
+                currModel.transform.localRotation = Quaternion.identity;
+
+                SetLayerRecursively(currModel, LayerMask.NameToLayer("BubblePreview"));
+                previewCamera.transform.LookAt(previewStage.position);
+            }
         }
 
         bubble.SetTexture(renderTexture);
