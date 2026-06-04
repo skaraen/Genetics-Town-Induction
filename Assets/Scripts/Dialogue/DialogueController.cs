@@ -135,8 +135,11 @@ public class DialogueController : MonoBehaviour
     }
     void NextButtonClick()
     {
-        if (isSequenceInProgress && (isNarrationMode || !isNarratorAnimating) && !isTyping) 
+        if (isSequenceInProgress && (isNarrationMode || !isNarratorAnimating) && !isTyping)
+        {
             ProgressDialogue();
+            UIAudioManager.Instance.PlayButtonClick();
+        }
     }
 
     void Update()

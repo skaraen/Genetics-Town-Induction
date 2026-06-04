@@ -17,6 +17,12 @@ public class ASOGameManager : MonoBehaviour
     [SerializeField] DialogueController dialogueUI;
     [SerializeField] GameObject funFactUI;
     [SerializeField] string[] facts;
+    [SerializeField] PopupUI popupUI;
+    [SerializeField] [TextArea(3, 6)] string popupNote;
+
+    [Header("Scene Audio")]
+    [SerializeField] private AudioClip bugMusic;
+    [SerializeField] private AudioClip asoMusic;
 
     string bug;
     int currStageId;
@@ -48,6 +54,7 @@ public class ASOGameManager : MonoBehaviour
                 canvas[++currStageId].SetActive(true);
 
                 dialogueUI.StartSequence("narrator-aso-intro");
+                MusicManager.Instance.PlayMusic(asoMusic, 1f);
             }
         });
         resultSequenceText.enabled = false;
@@ -67,6 +74,9 @@ public class ASOGameManager : MonoBehaviour
                 funFactUIComp.FadeIn();
             });
         }
+        
+        popupUI.Activate(popupNote);
+        MusicManager.Instance.PlayMusic(bugMusic, 1f);
     }
 
     /// <summary>
@@ -116,6 +126,7 @@ public class ASOGameManager : MonoBehaviour
 
             isGameComplete = true;
             dialogueUI.StartSequence("narrator-aso-final");
+            UIAudioManager.Instance.PlayEndGame();
             return;   
         }
 

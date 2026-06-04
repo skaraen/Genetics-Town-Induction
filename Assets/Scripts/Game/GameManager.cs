@@ -13,6 +13,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] float planeDistance = 5f;
     [SerializeField] Button ASOButton;
 
+    [Header("Scene Audio")]
+    [SerializeField] private AudioClip worldMusic;
+    [SerializeField] private AudioClip glitchMusic;
+
     private PlayerSpawner spawner;
     Animator narratorAnimator;
     /// <summary>
@@ -41,6 +45,8 @@ public class GameManager : MonoBehaviour
         {
             SceneManager.LoadScene("ASOGame", LoadSceneMode.Additive);
         });
+
+        SceneManager.sceneUnloaded += HandleSceneUnloaded;
     }
 
     void OnDisable()
@@ -50,6 +56,7 @@ public class GameManager : MonoBehaviour
         spawner.OnInfected -= TriggerPanic;
         spawner.OnCured -= AcknowledgeCure;
 
+        SceneManager.sceneUnloaded -= HandleSceneUnloaded;
     }
 
     void TriggerWelcome()
@@ -60,7 +67,9 @@ public class GameManager : MonoBehaviour
         if (hasTriggeredWelcome)
             return;
         hasTriggeredWelcome = true;
+        Debug.Log("Triggered welcom");
 
+        MusicManager.Instance.PlayMusic(worldMusic, 1f);
         narrator.GetComponent<ReactionChooser>().SetReaction("happy");
         narratorAnimator.SetTrigger("EntryTrigger");
         dialogueController.StartSequence("narrator-first-welcome");
@@ -68,6 +77,7 @@ public class GameManager : MonoBehaviour
 
     void TriggerPanic()
     {
+        MusicManager.Instance.PlayMusic(glitchMusic, 1f);
         narrator.GetComponent<ReactionChooser>().SetReaction("shock");
         narratorAnimator.SetTrigger("EntryTrigger");
         dialogueController.StartSequence("narrator-glitch-panic");
@@ -87,5 +97,12 @@ public class GameManager : MonoBehaviour
     void AcknowledgeCure()
     {
         ASOButton.gameObject.SetActive(false);
+        MusicManager.Instance.PlayMusic(worldMusic, 1f);
+    }
+
+    void HandleSceneUnloaded(Scene scene)
+    {
+        if (scene.name == "ASOGame" || scene.name == "Part2Scene")
+            MusicManager.Instance.PlayMusic(worldMusic, 1f);
     }
 }

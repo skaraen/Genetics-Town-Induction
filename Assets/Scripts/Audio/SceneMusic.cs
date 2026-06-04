@@ -1,72 +1,103 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class SceneMusic : MonoBehaviour
+[RequireComponent(typeof(AudioSource))]
+public class MusicManager : MonoBehaviour
 {
-    private static SceneMusic instance;
+    public static MusicManager Instance { get; private set; }
+
+    [SerializeField] private float defaultFadeDuration = 1.5f;
+
     private AudioSource audioSource;
-    private bool isManualDestroy = false;
+    private Coroutine fadeRoutine;
 
-    void Awake()
+    private void Awake()
     {
-        // // Singleton Pattern
-        // if (instance != null && instance != this)
-        // {
-        //     Destroy(gameObject);
-        //     return;
-        // }
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
 
-        instance = this;
+        Instance = this;
         DontDestroyOnLoad(gameObject);
 
         audioSource = GetComponent<AudioSource>();
         audioSource.loop = true;
+        audioSource.playOnAwake = false;
     }
 
-    void Start()
+    public void PlayMusic(AudioClip clip)
     {
-        StartCoroutine(FadeIn(2f));
+        PlayMusic(clip, defaultFadeDuration);
     }
 
-    /// <summary>
-    /// Call this from your Scene Transition script 
-    /// instead of calling Destroy(musicObject) directly.
-    /// </summary>
-    public void StartFadeOutAndDestroy(float duration)
+    public void PlayMusic(AudioClip clip, float fadeDuration)
     {
-        if (isManualDestroy) return;
-        isManualDestroy = true;
-        StartCoroutine(FadeOutRoutine(duration));
+        if (clip == null)
+            return;
+
+        if (audioSource.clip == clip && audioSource.isPlaying)
+            return;
+
+        if (fadeRoutine != null)
+            StopCoroutine(fadeRoutine);
+
+        fadeRoutine = StartCoroutine(SwitchMusicRoutine(clip, fadeDuration / 2f));
     }
 
-    private IEnumerator FadeIn(float duration)
+    public void FadeOutAndStop()
     {
-        float t = 0;
-        audioSource.volume = 0;
-        audioSource.Play();
+        FadeOutAndStop(defaultFadeDuration);
+    }
 
-        while (t < duration)
+    public void FadeOutAndStop(float fadeDuration)
+    {
+        if (fadeRoutine != null)
+            StopCoroutine(fadeRoutine);
+
+        fadeRoutine = StartCoroutine(FadeOutRoutine(fadeDuration));
+    }
+
+    private IEnumerator SwitchMusicRoutine(AudioClip newClip, float duration)
+    {
+        float startVolume = audioSource.volume;
+
+        while (audioSource.isPlaying && audioSource.volume > 0f)
         {
-            t += Time.deltaTime;
-            audioSource.volume = Mathf.Lerp(0, 1, t / duration);
+            audioSource.volume -= Time.deltaTime / duration;
             yield return null;
         }
+
+        audioSource.Stop();
+        audioSource.clip = newClip;
+        audioSource.volume = 0f;
+        audioSource.Play();
+
+        while (audioSource.volume < 1f)
+        {
+            audioSource.volume += Time.deltaTime / duration;
+            yield return null;
+        }
+
+        audioSource.volume = 1f;
+        fadeRoutine = null;
     }
 
     private IEnumerator FadeOutRoutine(float duration)
     {
         float startVolume = audioSource.volume;
-        float t = 0;
+        float t = 0f;
 
         while (t < duration)
         {
             t += Time.deltaTime;
-            audioSource.volume = Mathf.Lerp(startVolume, 0, t / duration);
+            audioSource.volume = Mathf.Lerp(startVolume, 0f, t / duration);
             yield return null;
         }
 
+        audioSource.volume = 0f;
         audioSource.Stop();
-        Destroy(gameObject);
+        fadeRoutine = null;
     }
 }

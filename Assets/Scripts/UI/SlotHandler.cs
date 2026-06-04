@@ -32,6 +32,8 @@ public class SlotHandler : MonoBehaviour, IDropHandler
             GameObject dropped = eventData.pointerDrag;
             DraggableItem dItem = dropped.GetComponent<DraggableItem>();
             dItem.slotAfterDrag = this;
+
+            UIAudioManager.Instance.PlayDraggableDropClip();
         }
     }
 

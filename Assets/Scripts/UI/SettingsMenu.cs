@@ -3,8 +3,10 @@ using TMPro;
 using UnityEngine.UI;
 using System.Collections;
 
-public class SettingsUI : MonoBehaviour
+public class SettingsMenu : MonoBehaviour
 {
+    [SerializeField] private GameObject settingsUI;
+    [SerializeField] private Button settingsButton;
     [SerializeField] private Button closeBtn;
     [SerializeField] private float fadeDuration = 0.4f;
     [SerializeField] private Sprite musicOffSprite;
@@ -25,32 +27,54 @@ public class SettingsUI : MonoBehaviour
 
     void Awake()
     {
-        canvasGroup = GetComponent<CanvasGroup>();
+        canvasGroup = settingsUI.GetComponent<CanvasGroup>();
         closeBtn.onClick.AddListener(FadeOut);
+        settingsButton.onClick.AddListener(Activate);
+        musicToggle.onClick.AddListener(ToggleMusic);
 
         canvasGroup.alpha = 0f;
-        gameObject.SetActive(false);
+        settingsUI.SetActive(false);
 
         envParams = new EnvParams();
         musicSource = FindAnyObjectByType<AudioSource>();
     }
 
-    public void Activate(string animationName, string fact)
+    public void Activate()
     {
-        gameObject.SetActive(true);
+        settingsUI.SetActive(true);
         Init();
         FadeIn();
     }
 
     private void Init()
     {
-       envParams.isMusicOn = musicSource != null && musicSource.isPlaying;
-       SetIcons();
+        envParams.isMusicOn = musicSource != null && musicSource.isPlaying;
+        SetIcons();
     }
 
     private void SetIcons()
     {
-        musicToggle.GetComponent<Image>().sprite = envParams.isMusicOn ? musicOnSprite : musicOffSprite;
+        Image toggleImage = musicToggle.GetComponent<Image>();
+        toggleImage.sprite = envParams.isMusicOn ? musicOnSprite : musicOffSprite;
+    }
+
+    private void ToggleMusic()
+    {
+        if (musicSource == null)
+            return;
+
+        if (musicSource.isPlaying)
+        {
+            musicSource.Pause();
+            envParams.isMusicOn = false;
+        }
+        else
+        {
+            musicSource.Play();
+            envParams.isMusicOn = true;
+        }
+
+        SetIcons();
     }
 
     public void FadeIn()
@@ -82,7 +106,7 @@ public class SettingsUI : MonoBehaviour
         canvasGroup.alpha = end;
 
         if (end == 0f)
-            gameObject.SetActive(false);
+            settingsUI.SetActive(false);
         else
         {
             canvasGroup.interactable = true;

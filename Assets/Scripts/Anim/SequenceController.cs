@@ -16,6 +16,7 @@ public class SequenceController : MonoBehaviour
     [SerializeField] Image geneImage;
     [SerializeField] Image dnaLensImage;
     [SerializeField] private float fadeSpeed = 0.5f;
+    [SerializeField] private AudioClip introMusic;
 
     private NarratorController narratorController;
     private DialogueController dialogueController;
@@ -73,6 +74,7 @@ public class SequenceController : MonoBehaviour
         });
 
         narratorController.TriggerEntry();
+        MusicManager.Instance.PlayMusic(introMusic, 1.5f);
 
         dnaImages = dnaObj.GetComponentsInChildren<Image>(true);
         variantImages = variantObj.GetComponentsInChildren<Image>(true);

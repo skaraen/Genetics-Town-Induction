@@ -37,11 +37,13 @@ public class AvatarGenerator : NetworkBehaviour
     [SerializeField] TextMeshProUGUI subtitleTmp;
     [SerializeField] string[] subtitles;
     [SerializeField] Button zoomOutButton;
-    [SerializeField] Button funFactButton;
+    [SerializeField] Button[] funFactButtons;
     [SerializeField] GameObject funFactUI;
 
     [SerializeField] TMP_InputField playerNameInput;
     [SerializeField] TextMeshProUGUI waitMessage;
+    [TextArea(6,3)]
+    [SerializeField] private string customizationFact;
 
 
     const string set = "ATGC";
@@ -145,7 +147,10 @@ public class AvatarGenerator : NetworkBehaviour
 
     void SetupButtons()
     {
-        nextButton.onClick.AddListener(() => StartCoroutine(AdvanceStage()));
+        nextButton.onClick.AddListener(() => {
+            StartCoroutine(AdvanceStage());
+            UIAudioManager.Instance.PlayButtonClick();
+        });
         nextButton.interactable = false;
 
         int buttonCount = Mathf.Min(baseSequenceCodons.Length, sequenceButtons.Length);
@@ -165,21 +170,37 @@ public class AvatarGenerator : NetworkBehaviour
                     nextButton.interactable = true;
 
                 currBaseSequence = str;
+                UIAudioManager.Instance.PlayButtonClick();
             });
         }
-        funFactButton.onClick.AddListener(() =>
-        {
-            FunFactUI funFactUIComp = funFactUI.GetComponent<FunFactUI>();
-            string factInfo = currProfileData.info;
-            funFactUIComp.Activate(currProfileData.avatarName, factInfo);
-            funFactUIComp.FadeIn();
-        });
 
+        for (int i = 0; i < funFactButtons.Length; i++)
+        {
+            int index = i;
+            funFactButtons[index].onClick.AddListener(() =>
+            {
+                FunFactUI funFactUIComp = funFactUI.GetComponent<FunFactUI>();
+
+                if (index == 0)
+                {
+                    string factInfo = currProfileData.info;
+                    funFactUIComp.Activate(currProfileData.avatarName, factInfo);
+                } else
+                {
+                    funFactUIComp.Activate("ASO", customizationFact);
+                }
+                funFactUIComp.FadeIn();
+                UIAudioManager.Instance.PlayButtonClick();
+            });
+        }
+
+        funFactButtons[1].gameObject.SetActive(false);
         zoomOutButton.gameObject.SetActive(false);
         zoomOutButton.onClick.AddListener(() =>
         {
             cameraRig.MoveToLeft();
             zoomOutButton.gameObject.SetActive(false);
+            UIAudioManager.Instance.PlayButtonClick();
         });
     }
 
@@ -332,11 +353,13 @@ public class AvatarGenerator : NetworkBehaviour
             case 1:
                 cameraRig.MoveToLeft();
                 yield return new WaitForSeconds(1f);
+                funFactButtons[1].gameObject.SetActive(true);
                 break;
             case 2:
                 RevealTraits();
                 yield return new WaitForSeconds(6f);
                 zoomOutButton.gameObject.SetActive(false);
+                funFactButtons[1].gameObject.SetActive(false);
                 cameraRig.MoveStraight();
                 break;
             case 3:
@@ -562,9 +585,7 @@ public class AvatarGenerator : NetworkBehaviour
             return;
         }
 
-        SceneMusic music = FindObjectOfType<SceneMusic>();
-        if (music != null)
-            music.StartFadeOutAndDestroy(1.5f);
+        MusicManager.Instance.FadeOutAndStop(1.5f);
 
         // Local Cache
         PlayerLogbook.Instance.AddPlayerCustom(NetworkManager.Singleton.LocalClientId, customs);

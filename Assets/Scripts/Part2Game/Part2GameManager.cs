@@ -43,6 +43,7 @@ public class Part2GameManager : MonoBehaviour
     [SerializeField] private Transform avatarSpawnPoint;
     [Tooltip("CanvasGroup for the game UI, fades in after dialogue ends")]
     [SerializeField] private CanvasGroup gameUI;
+    [SerializeField] private CanvasGroup legendUI;
 
     [Header("Grey-Out Effect")]
     [Tooltip("Material applied to avatar body parts that have not yet been unlocked by completing their sequence")]
@@ -69,6 +70,13 @@ public class Part2GameManager : MonoBehaviour
     [SerializeField] private GameObject nucleotideCPrefab;
     [Tooltip("Text prefab spawned to the left of each sequence row showing the trait name during review")]
     [SerializeField] private GameObject sequenceNameLabelPrefab;
+
+    [Header("Pop-up Elements")]
+    [SerializeField] PopupUI popupUI;
+    [SerializeField] string popupNote;
+
+    [Header("Scene Audio")]
+    [SerializeField] private AudioClip memoryAudio;
 
     private DialogueController dialogueController;
     private Button dialogueNextButton;
@@ -374,6 +382,11 @@ public class Part2GameManager : MonoBehaviour
             funFactUIComp.Activate("Sequencing", fact);
             funFactUIComp.FadeIn();
         });
+
+        legendUI.alpha = 0;
+
+        popupUI.Activate(popupNote);
+        MusicManager.Instance.PlayMusic(memoryAudio, 1f);
     }
 
     void OnDisable()
@@ -518,6 +531,8 @@ public class Part2GameManager : MonoBehaviour
             // ShowGameobjOnToggleInteractChange (show checkmark since interactable is false)
             // It also triggers ClearSequence via the onValueChanged listener
             completedToggle.isOn = false;
+
+            UIAudioManager.Instance.PlayCelebration();
 
             bool allComplete = CheckAllSequencesCompleted();
             StartCoroutine(MoveNucleotidesToStrip(allComplete, completedTraitIndex));
@@ -678,6 +693,11 @@ public class Part2GameManager : MonoBehaviour
         {
             yield return gameUI.DOFade(0f, 1f).WaitForCompletion();
             gameUI.gameObject.SetActive(false);
+        }
+
+        if (legendUI != null)
+        {
+            legendUI.alpha = 1f;
         }
 
         // Reorder rows by biological order (trait 0, 1, 2)
