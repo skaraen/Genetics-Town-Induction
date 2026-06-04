@@ -11,6 +11,7 @@ public class ScrollItem : MonoBehaviour
     private Coroutine shiftCoroutine;
     private float rowShift = 0f;
     bool isLoaded = false;
+    private bool isShifting;
 
     void LoadPrefabs()
     {
@@ -41,23 +42,29 @@ public class ScrollItem : MonoBehaviour
         foreach (char c in sequence)
             Instantiate(prefabMap[c + "_L"], transform);
         UpdateGridHeight();
+        isShifting = false;
     }
 
-    public void StartShift(int direction)
+    public bool StartShift(int direction)
     {
-        if (rowShift == 0) {
+        if (isShifting)
+            return false;
+
+        if (rowShift == 0)
             rowShift = GetRowShiftAmount();
-            Debug.Log($"Row shift amount {rowShift}");
-        }
 
         if (shiftCoroutine != null)
             StopCoroutine(shiftCoroutine);
 
         shiftCoroutine = StartCoroutine(SmoothShift(direction * rowShift));
+
+        return true;
     }
 
     private IEnumerator SmoothShift(float deltaY)
     {
+        isShifting = true;
+
         Vector3 startPos = transform.localPosition;
         Vector3 targetPos = startPos + new Vector3(0, deltaY, 0);
         float elapsed = 0f;
@@ -72,6 +79,8 @@ public class ScrollItem : MonoBehaviour
         }
 
         transform.localPosition = targetPos;
+
+        isShifting = false;
     }
 
     private float GetRowShiftAmount()

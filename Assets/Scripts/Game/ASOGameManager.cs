@@ -29,12 +29,13 @@ public class ASOGameManager : MonoBehaviour
     PlayerSpawner spawner;
     bool isGameComplete = false;
 
-    void OnEnable()
+    void Start()
     {
         currStageId = 0;
         canvas[currStageId].SetActive(true);
 
         dialogueUI.OnDialogueEnded += HandleDialogueEnd;
+        popupUI.Activate(popupNote);
 
         spawner = FindFirstObjectByType<PlayerSpawner>();
         if (spawner != null)
@@ -74,8 +75,7 @@ public class ASOGameManager : MonoBehaviour
                 funFactUIComp.FadeIn();
             });
         }
-        
-        popupUI.Activate(popupNote);
+
         MusicManager.Instance.PlayMusic(bugMusic, 1f);
     }
 

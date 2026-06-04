@@ -187,7 +187,7 @@ public class AvatarGenerator : NetworkBehaviour
                     funFactUIComp.Activate(currProfileData.avatarName, factInfo);
                 } else
                 {
-                    funFactUIComp.Activate("ASO", customizationFact);
+                    funFactUIComp.Activate("OnOff", customizationFact);
                 }
                 funFactUIComp.FadeIn();
                 UIAudioManager.Instance.PlayButtonClick();
