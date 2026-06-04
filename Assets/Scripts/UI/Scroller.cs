@@ -87,9 +87,11 @@ public class Scroller : MonoBehaviour
         if (currRow >= numRows - TARGET_WIDTH)
             return;
 
-        currRow++;
-        SetTargetCodons();
-        scrollItem.StartShift(1);
+        if (scrollItem.StartShift(1))
+        {
+            currRow++;
+            SetTargetCodons();
+        }
     }
 
     public void ShiftDown()
@@ -97,9 +99,11 @@ public class Scroller : MonoBehaviour
         if (currRow <= 0)
             return;
         
-        currRow--;
-        SetTargetCodons();
-        scrollItem.StartShift(-1);
+        if (scrollItem.StartShift(-1))
+        {
+            currRow--;
+            SetTargetCodons();
+        }
     }
 
     public void SetScrollTitle(string name)
