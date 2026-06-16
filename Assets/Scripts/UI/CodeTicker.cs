@@ -33,7 +33,8 @@ public class CodeTicker : MonoBehaviour
         int prefabWidth = 30;
         int numItems = (int) width / prefabWidth;
 
-        Debug.Log($"Number of items {numItems}");
+        Debug.Log($"Width={width}");
+        Debug.Log($"NumItems={numItems}");
 
         for (int i = 0; i < numItems; i++)
         {
