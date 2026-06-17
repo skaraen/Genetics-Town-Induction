@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class CreditsManager : MonoBehaviour
@@ -15,6 +16,9 @@ public class CreditsManager : MonoBehaviour
     [SerializeField] private float creditFadeDuration = 1f;
     [SerializeField] private float creditDisplayDuration = 3f;
 
+    [Header("Scene Audio")]
+    [SerializeField] private AudioClip creditsMusic;
+
     private bool binarySpawned;
     private bool backgroundReady;
 
@@ -27,6 +31,7 @@ public class CreditsManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
 
+        MusicManager.Instance.PlayMusic(creditsMusic, 1f);
         yield return StartCoroutine(FadeInBinaryBackground());
 
         // StartCoroutine(BinaryFlickerRoutine());
@@ -82,6 +87,8 @@ public class CreditsManager : MonoBehaviour
 
             credit.SetActive(false);
         }
+
+        SceneManager.LoadScene("TitleScene");
     }
 
     private IEnumerator FadeCanvasGroup(

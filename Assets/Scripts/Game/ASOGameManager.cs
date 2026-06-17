@@ -42,6 +42,9 @@ public class ASOGameManager : MonoBehaviour
         {
             bug = spawner.GetBugSequence();
             Debug.Log($"[ASOGame] The bug sequence is: {bug}");
+        } else
+        {
+            bug = "TESTER";
         }
 
         verifySequenceButton.onClick.AddListener(() =>
@@ -125,12 +128,22 @@ public class ASOGameManager : MonoBehaviour
             resultASOText.color = Color.green;
 
             isGameComplete = true;
-            dialogueUI.StartSequence("narrator-aso-final");
-            UIAudioManager.Instance.PlayEndGame();
+
+            StartCuring();
             return;   
         }
 
         ShowError(resultASOText, message);
+    }
+
+    void StartCuring()
+    {
+        canvas[currStageId].SetActive(false);
+        canvas[++currStageId].SetActive(true);
+
+        UIAudioManager.Instance.PlayEndGame();
+
+        // dialogueUI.StartSequence("narrator-aso-final");
     }
 
     void ShowError(TextMeshProUGUI tmp, string error) {

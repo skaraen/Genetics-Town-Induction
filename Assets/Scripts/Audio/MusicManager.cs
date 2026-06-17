@@ -25,6 +25,25 @@ public class MusicManager : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         audioSource.loop = true;
         audioSource.playOnAwake = false;
+        audioSource.mute = !AudioSettingsState.MusicOn;
+    }
+
+    private void OnEnable()
+    {
+        AudioSettingsState.OnSettingsChanged += ApplySettings;
+    }
+
+    private void OnDisable()
+    {
+        AudioSettingsState.OnSettingsChanged -= ApplySettings;
+    }
+
+    private void ApplySettings()
+    {
+        if (audioSource == null)
+            return;
+
+        audioSource.mute = !AudioSettingsState.MusicOn;
     }
 
     public void PlayMusic(AudioClip clip)
@@ -61,8 +80,6 @@ public class MusicManager : MonoBehaviour
 
     private IEnumerator SwitchMusicRoutine(AudioClip newClip, float duration)
     {
-        float startVolume = audioSource.volume;
-
         while (audioSource.isPlaying && audioSource.volume > 0f)
         {
             audioSource.volume -= Time.deltaTime / duration;
@@ -72,6 +89,7 @@ public class MusicManager : MonoBehaviour
         audioSource.Stop();
         audioSource.clip = newClip;
         audioSource.volume = 0f;
+        audioSource.mute = !AudioSettingsState.MusicOn;
         audioSource.Play();
 
         while (audioSource.volume < 1f)

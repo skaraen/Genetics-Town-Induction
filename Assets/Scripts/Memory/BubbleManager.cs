@@ -101,6 +101,8 @@ public class BubbleManager : MonoBehaviour
 
     void OnBubbleClicked(int idx, Bubble bubble)
     {
+        UIAudioManager.Instance?.PlayBubbleClick();
+
         if (currBubble != null)
             ResetBubble(currBubble, currIdx);
         currBubble = bubble;

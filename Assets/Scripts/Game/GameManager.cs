@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] DialogueController dialogueController;
     [SerializeField] float planeDistance = 5f;
     [SerializeField] Button ASOButton;
+    [SerializeField] Button CreditsButton;
 
     [Header("Scene Audio")]
     [SerializeField] private AudioClip worldMusic;
@@ -44,6 +45,12 @@ public class GameManager : MonoBehaviour
         ASOButton.onClick.AddListener(() =>
         {
             SceneManager.LoadScene("ASOGame", LoadSceneMode.Additive);
+        });
+
+        CreditsButton.gameObject.SetActive(false);
+        CreditsButton.onClick.AddListener(() =>
+        {
+            SceneManager.LoadScene("CreditsScene");
         });
 
         SceneManager.sceneUnloaded += HandleSceneUnloaded;
@@ -97,6 +104,7 @@ public class GameManager : MonoBehaviour
     void AcknowledgeCure()
     {
         ASOButton.gameObject.SetActive(false);
+        CreditsButton.gameObject.SetActive(true);
         MusicManager.Instance.PlayMusic(worldMusic, 1f);
     }
 

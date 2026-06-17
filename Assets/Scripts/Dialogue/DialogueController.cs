@@ -93,7 +93,11 @@ public class DialogueController : MonoBehaviour
             Debug.LogError("DialogueDatabase is missing!");
 
         if (isNarrationMode)
-            narratorAnimator.SetTrigger("EntryTrigger");        
+        {
+            UIAudioManager.Instance?.PlayNarratorEntry();
+
+            narratorAnimator.SetTrigger("EntryTrigger"); 
+        }       
         
         dialogues = DialogueDatabase.Instance.GetLines(sequence);
         isSequenceInProgress = true;
@@ -204,6 +208,8 @@ public class DialogueController : MonoBehaviour
 
     private void StartTyping()
     {
+        UIAudioManager.Instance?.PlayNarratorSpeaking();
+        
         nextButton.gameObject.SetActive(false);
         currDialogue = dialogues[currStage];
         currIdx = 0;
@@ -222,7 +228,10 @@ public class DialogueController : MonoBehaviour
         nextButton.gameObject.SetActive(false);
 
         if (isNarrationMode)
+        {
+            UIAudioManager.Instance?.PlayNarratorEntry();
             narratorAnimator.SetTrigger("ExitTrigger");
+        }
 
         OnDialogueEnded?.Invoke();
     }

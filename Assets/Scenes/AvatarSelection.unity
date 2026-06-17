@@ -2814,9 +2814,7 @@ MonoBehaviour:
     is a type of cell for every part of your body! Almost every cell contains identical
     genetic sequences. So, if all cells have the same genetic code, how is it possible
     that they come in all different types? The answer lies in whether sequences are
-    turned on fully, partially, or not at all. Think of a cake \u2013 two cakes may
-    have the exact same ingredients, but if these items are present in different
-    amounts, then each cake will have an entirely different flavor!"
+    turned on fully, partially, or not at all."
 --- !u!114 &445566541
 MonoBehaviour:
   m_ObjectHideFlags: 0

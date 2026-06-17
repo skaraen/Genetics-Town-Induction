@@ -11,6 +11,11 @@ public class UIAudioManager : MonoBehaviour
     [SerializeField] private AudioClip endGameClip;
     [SerializeField] private AudioClip draggableDropClip;
 
+    [Header("Narrator Sound Effects")]
+    [SerializeField] private AudioClip narratorEntryClip;
+    [SerializeField] private AudioClip narratorSpeakingClip;
+    [SerializeField] private AudioClip bubbleClickClip;
+
     [Header("Settings")]
     [SerializeField] private float volume = 1f;
 
@@ -30,6 +35,25 @@ public class UIAudioManager : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         audioSource.loop = false;
         audioSource.playOnAwake = false;
+        audioSource.mute = !AudioSettingsState.SfxOn;
+    }
+
+    private void OnEnable()
+    {
+        AudioSettingsState.OnSettingsChanged += ApplySettings;
+    }
+
+    private void OnDisable()
+    {
+        AudioSettingsState.OnSettingsChanged -= ApplySettings;
+    }
+
+    private void ApplySettings()
+    {
+        if (audioSource == null)
+            return;
+
+        audioSource.mute = !AudioSettingsState.SfxOn;
     }
 
     public void PlayButtonClick()
@@ -52,9 +76,27 @@ public class UIAudioManager : MonoBehaviour
         PlaySound(draggableDropClip);
     }
 
+    public void PlayNarratorEntry()
+    {
+        PlaySound(narratorEntryClip);
+    }
+
+    public void PlayNarratorSpeaking()
+    {
+        PlaySound(narratorSpeakingClip);
+    }
+
+    public void PlayBubbleClick()
+    {
+        PlaySound(bubbleClickClip);
+    }
+
     public void PlaySound(AudioClip clip)
     {
         if (clip == null)
+            return;
+
+        if (!AudioSettingsState.SfxOn)
             return;
 
         audioSource.PlayOneShot(clip, volume);

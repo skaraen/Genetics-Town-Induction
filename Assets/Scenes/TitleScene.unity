@@ -1143,6 +1143,60 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 920637799}
   m_CullTransparentMesh: 1
+--- !u!1 &1020251580
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1020251581}
+  - component: {fileID: 1020251582}
+  m_Layer: 0
+  m_Name: EnvSFXManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1020251581
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1020251580}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1020251582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1020251580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f360466bcc8a843cdbd3c5e84811474a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  walkingClips:
+  - {fileID: 8300000, guid: 595e7e2e35e4f47bf993d086c636aacc, type: 3}
+  - {fileID: 8300000, guid: 0571e0660fa204579aed9ee7c34e26a9, type: 3}
+  - {fileID: 8300000, guid: 6498e4d22dfce4192bd37e36467812e6, type: 3}
+  - {fileID: 8300000, guid: a3761e1246b794f2293e312b324ea2ab, type: 3}
+  windClip: {fileID: 8300000, guid: e62bf59aca54a4047aadb593001ac14d, type: 3}
+  waterClip: {fileID: 8300000, guid: ad145325b5a97475a85d5dd6bc38ee48, type: 3}
+  walkingVolume: 1
+  windVolume: 1
+  waterVolume: 1
 --- !u!1 &1050376343
 GameObject:
   m_ObjectHideFlags: 0
@@ -1842,6 +1896,10 @@ MonoBehaviour:
   buttonClickClip: {fileID: 8300000, guid: 36739b58d56404970ba2de4e51d8f8fc, type: 3}
   celebrationClip: {fileID: 8300000, guid: 82a7d1d10efaf4bbab9d33a696461887, type: 3}
   endGameClip: {fileID: 8300000, guid: aa3046a2673f141c0aec129c18480da5, type: 3}
+  draggableDropClip: {fileID: 8300000, guid: aba73d258e5a94002aa6751808fabadd, type: 3}
+  narratorEntryClip: {fileID: 8300000, guid: be0bacc8eedae487fa120776415e4fd7, type: 3}
+  narratorSpeakingClip: {fileID: 8300000, guid: b8fc264625e3e4b7c97b80a7126c7e42, type: 3}
+  bubbleClickClip: {fileID: 8300000, guid: f7497815675464c69a2e36d0e9d5698b, type: 3}
   volume: 1
 --- !u!82 &1275424229
 AudioSource:
@@ -1855,7 +1913,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -2776,10 +2834,10 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -3103,3 +3161,4 @@ SceneRoots:
   - {fileID: 1360127393}
   - {fileID: 1962711813}
   - {fileID: 1275424230}
+  - {fileID: 1020251581}
