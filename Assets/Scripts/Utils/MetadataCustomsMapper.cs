@@ -1,4 +1,4 @@
-using Unity.Collections;
+using Fusion;
 
 /// <summary>
 /// Maps between PlayerMetadata (local, full avatar data) and PlayerCustoms (network-serializable, minimal).
@@ -11,10 +11,13 @@ public static class MetaDataCustomsMapper
     /// </summary>
     public static PlayerCustoms ToNet(PlayerMetadata m)
     {
+        NetworkString<_64> networkName = default;
+        networkName.Set(m.name ?? string.Empty);
+
         return new PlayerCustoms
         {
             avatarType = m.avatarType,
-            name = (FixedString64Bytes)m.name,
+            name = networkName,
             subSeq0Enabled = m.sequenceEnabled[0],
             subSeq1Enabled = m.sequenceEnabled[1],
             color0 = m.colors[0],
@@ -36,7 +39,7 @@ public static class MetaDataCustomsMapper
         }
         var m = new PlayerMetadata(profile);
         m.id = id;
-        m.name = n.name.ToString();
+        m.name = n.name.Value;
         m.avatarType = n.avatarType;
         m.sequenceEnabled[0] = n.subSeq0Enabled;
         m.sequenceEnabled[1] = n.subSeq1Enabled;
