@@ -1,6 +1,6 @@
 using System.Collections;
 using Unity.Cinemachine;
-using Unity.Netcode;
+using Fusion;
 using UnityEngine;
 
 /// <summary>
@@ -24,9 +24,9 @@ public class InteractGroupCamController : NetworkBehaviour
     private CinemachineTargetGroup targetGroup;
     private Coroutine clearGroupCoroutine;
 
-    public override void OnNetworkSpawn()
+    public override void Spawned()
     {
-        if (!IsOwner) return;
+        if (!Object.HasInputAuthority) return;
 
         interactCam = CameraManager.Instance.InteractGroupCam;
         targetGroup = interactCam.Target.TrackingTarget.GetComponent<CinemachineTargetGroup>();
@@ -35,9 +35,9 @@ public class InteractGroupCamController : NetworkBehaviour
         PlayerUI.OnInteractPopupHidden += OnPopupHidden;
     }
 
-    public override void OnNetworkDespawn()
+    public override void Despawned(NetworkRunner runner, bool hasState)
     {
-        if (!IsOwner) return;
+        if (Object != null && !Object.HasInputAuthority) return;
 
         PlayerUI.OnInteractPopupShown  -= OnPopupShown;
         PlayerUI.OnInteractPopupHidden -= OnPopupHidden;

@@ -1,17 +1,22 @@
-using Unity.Netcode;
+using Fusion;
 using UnityEngine;
 
 [DefaultExecutionOrder(-1000)]
 public class NetworkManagerLifetime : MonoBehaviour
 {
-    void Awake()
+    private void Awake()
     {
-        var nm = GetComponent<NetworkManager>();
-        if (NetworkManager.Singleton != null && NetworkManager.Singleton != nm)
+        NetworkRunner runner = GetComponent<NetworkRunner>();
+        if (runner == null)
+            return;
+
+        NetworkRunner existingRunner = FindFirstObjectByType<NetworkRunner>();
+        if (existingRunner != null && existingRunner != runner)
         {
-            Destroy(gameObject);            // kill duplicates if scene accidentally has another
+            Destroy(gameObject);
             return;
         }
-        DontDestroyOnLoad(gameObject);      // persist across Avatar/Game scenes
+
+        DontDestroyOnLoad(gameObject);
     }
 }

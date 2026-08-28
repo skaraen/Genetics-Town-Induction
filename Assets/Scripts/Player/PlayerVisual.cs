@@ -1,86 +1,108 @@
 using System.Collections.Generic;
+using Fusion;
 using TMPro;
-using Unity.Cinemachine;
-using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class PlayerVisual : NetworkBehaviour
 {
-    public NetworkVariable<PlayerCustoms> AvatarCustoms = new(
-        new PlayerCustoms(),
-        NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Server
-    );
+    [Networked, OnChangedRender(nameof(OnAvatarCustomsChanged))]
+    public PlayerCustoms AvatarCustoms { get; set; }
 
-    [SerializeField] TextMeshProUGUI playerTag;
+    [Networked, OnChangedRender(nameof(OnInfectionChanged))]
+    public NetworkBool IsInfected { get; set; }
+
+    [SerializeField] private TextMeshProUGUI playerTag;
     [SerializeField] private Material holoMat;
-    Dictionary<string, Material> defaultMaterial = new Dictionary<string, Material>();
-    Renderer[] renderers;
-    public NetworkVariable<bool> IsInfected = new NetworkVariable<bool>(false, readPerm: NetworkVariableReadPermission.Everyone, writePerm: NetworkVariableWritePermission.Server);
 
-    GameObject currentAvatar;
+    private readonly Dictionary<string, Material> defaultMaterial = new();
+    private Renderer[] renderers;
+    private GameObject currentAvatar;
 
-    public override void OnNetworkSpawn()
+    public override void Spawned()
     {
-        AvatarCustoms.OnValueChanged += OnAvatarTypeChanged;
-        IsInfected.OnValueChanged += OnInfectionToggle;
+        LoadAvatar(AvatarCustoms);
+        ToggleEffect(IsInfected);
     }
 
-    public override void OnNetworkDespawn()
+    public override void Despawned(NetworkRunner runner, bool hasState)
     {
-        AvatarCustoms.OnValueChanged -= OnAvatarTypeChanged;
-        IsInfected.OnValueChanged -= OnInfectionToggle;
-        if (currentAvatar) Destroy(currentAvatar);
+        if (currentAvatar != null)
+            Destroy(currentAvatar);
     }
 
-    private void OnAvatarTypeChanged(PlayerCustoms prev, PlayerCustoms next) => LoadAvatar(next);
+    public void SetAvatarCustoms(PlayerCustoms customs)
+    {
+        if (Object != null && Object.HasStateAuthority)
+            AvatarCustoms = customs;
 
-    /// <summary>
-    /// Loads and customizes the avatar using the shared AvatarLoader utility,
-    /// then performs PlayerVisual-specific setup (renderer caching for infection effect, name tag).
-    /// </summary>
+        LoadAvatar(customs);
+    }
+
+    public void SetInfected(bool infected)
+    {
+        if (Object != null && Object.HasStateAuthority)
+            IsInfected = infected;
+
+        ToggleEffect(infected);
+    }
+
+    private void OnAvatarCustomsChanged()
+    {
+        LoadAvatar(AvatarCustoms);
+    }
+
+    private void OnInfectionChanged()
+    {
+        ToggleEffect(IsInfected);
+    }
+
     private void LoadAvatar(PlayerCustoms customs)
     {
+        if (customs.avatarType == 0 || AvatarRegistry.Instance == null)
+            return;
+
+        if (currentAvatar != null)
+            Destroy(currentAvatar);
+
+        defaultMaterial.Clear();
+
         AvatarProfileData profileData = AvatarRegistry.Instance.GetProfileById(customs.avatarType);
         Vector3 adjustedPosition = new Vector3(transform.position.x, transform.position.y + profileData.realWorldYOffset, transform.position.z);
         currentAvatar = AvatarLoader.Load(customs, adjustedPosition, parent: transform);
 
         renderers = currentAvatar.GetComponentsInChildren<Renderer>(true);
 
-        if (!IsOwner)
-            playerTag.text = customs.name.ToString();
-        else
-            playerTag.text = "";
+        if (playerTag != null)
+            playerTag.text = Object != null && Object.HasInputAuthority ? string.Empty : customs.name.Value;
 
         InitDefaults();
+        ToggleEffect(IsInfected);
     }
 
-    private void OnInfectionToggle(bool prev, bool next) => ToggleEffect(next);
+    private void InitDefaults()
+    {
+        if (renderers == null)
+            return;
 
-    void InitDefaults() {
+        foreach (Renderer r in renderers)
+            defaultMaterial[r.name] = r.material;
+    }
+
+    private void ToggleEffect(bool infected)
+    {
+        if (renderers == null)
+            return;
+
         foreach (Renderer r in renderers)
         {
-            defaultMaterial.Add(r.name, r.material);
-        }
-    }
-
-    void ToggleEffect(bool isInfected)
-    {   
-        if (isInfected)
-        {
-            foreach (Renderer r in renderers)
-                r.material = holoMat;
-        }
-        else
-        {
-            foreach (Renderer r in renderers)
+            if (infected)
             {
-                Material defaultMat;
-                defaultMaterial.TryGetValue(r.name, out defaultMat);
-                r.material = defaultMat;
+                r.material = holoMat;
+                continue;
             }
+
+            if (defaultMaterial.TryGetValue(r.name, out Material defaultMat))
+                r.material = defaultMat;
         }
     }
 }

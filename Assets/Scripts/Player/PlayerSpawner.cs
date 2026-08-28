@@ -1,10 +1,11 @@
-// PlayerSpawner.cs
 using System;
 using System.Collections.Generic;
-using Unity.Netcode;
+using Fusion;
+using Fusion.Sockets;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class PlayerSpawner : NetworkBehaviour
+public class PlayerSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 {
     [Header("Root player prefab")]
     [SerializeField] private GameObject rootPrefab;
@@ -20,121 +21,161 @@ public class PlayerSpawner : NetworkBehaviour
     public event Action OnInfected;
     public event Action OnCured;
 
-    private bool isInfected = false;
+    private readonly Dictionary<PlayerRef, NetworkObject> spawnedPlayers = new();
+    private readonly Dictionary<PlayerRef, int> spawnIndices = new();
+    private bool isInfected;
     private string bug;
-    private float timer = 0f;
+    private float timer;
+    private NetworkRunner registeredRunner;
 
-    public override void OnNetworkSpawn()
+    private void Start()
     {
-        if (!IsServer) { enabled = false; return; }
-
-        NetworkManager.SceneManager.OnSceneEvent += OnSceneEvent;
+        RegisterCallbacks();
 
         if (PlayerMetadataRegistry.Instance != null)
             PlayerMetadataRegistry.Instance.OnSubmitted += OnMetadataSubmitted;
+
+        TrySpawnExistingPlayers();
     }
 
     private void OnDestroy()
     {
-        if (NetworkManager != null)
-            NetworkManager.SceneManager.OnSceneEvent -= OnSceneEvent;
-
         if (PlayerMetadataRegistry.Instance != null)
             PlayerMetadataRegistry.Instance.OnSubmitted -= OnMetadataSubmitted;
+
+        if (registeredRunner != null)
+        {
+            registeredRunner.RemoveGlobal(this);
+            registeredRunner.RemoveCallbacks(this);
+        }
     }
 
     private void Update()
     {
-        if (!IsServer || isInfected) return;
+        if (registeredRunner == null)
+            RegisterCallbacks();
+
+        NetworkRunner runner = GetRunner();
+        if (runner == null || !runner.IsServer || isInfected)
+            return;
 
         timer += Time.deltaTime;
+        if (timer < interval)
+            return;
 
-        if (timer >= interval)
-        {
-            Debug.Log("[PlayerSpawner] Checking for infection");
-            timer = 0f;
-            PlayerMetadataRegistry.Instance.InfectionReadinessServerRpc();
-        }
+        timer = 0f;
+        PlayerMetadataRegistry.Instance?.InfectionReadinessServerRpc();
     }
 
-    private void OnSceneEvent(SceneEvent evt)
+    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        if (!IsServer || evt.SceneName != gameSceneName) return;
-
-        if (evt.SceneEventType == SceneEventType.LoadEventCompleted)
-        {
-            foreach (var clientId in NetworkManager.ConnectedClientsIds)
-                TrySpawnFor(clientId);
-        }
-        else if (evt.SceneEventType == SceneEventType.LoadComplete)
-        {
-            TrySpawnFor(evt.ClientId);
-        }
+        TrySpawnFor(player);
     }
 
-    private void OnMetadataSubmitted(ulong clientId, PlayerCustoms _)
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
-        if (!IsServer) return;
-        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != gameSceneName) return;
-        if (NetworkManager.SpawnManager.GetPlayerNetworkObject(clientId) != null) return;
+        if (runner == null || !runner.IsServer)
+            return;
 
-        TrySpawnFor(clientId);
+        PlayerMetadataRegistry.Instance?.Remove(player);
+
+        if (spawnedPlayers.TryGetValue(player, out NetworkObject playerObject) && playerObject != null)
+            runner.Despawn(playerObject);
+
+        spawnedPlayers.Remove(player);
+        spawnIndices.Remove(player);
     }
 
-    private void TrySpawnFor(ulong clientId)
+    private void TrySpawnExistingPlayers()
     {
-        if (NetworkManager.SpawnManager.GetPlayerNetworkObject(clientId) != null) return;
+        NetworkRunner runner = GetRunner();
+        if (runner == null || !runner.IsServer)
+            return;
+
+        foreach (PlayerRef player in runner.ActivePlayers)
+            TrySpawnFor(player);
+    }
+
+    private void OnMetadataSubmitted(PlayerRef player, PlayerCustoms _)
+    {
+        if (SceneManager.GetActiveScene().name == gameSceneName)
+            TrySpawnFor(player);
+    }
+
+    private void TrySpawnFor(PlayerRef player)
+    {
+        NetworkRunner runner = GetRunner();
+        if (runner == null || !runner.IsServer)
+            return;
+
+        if (SceneManager.GetActiveScene().name != gameSceneName || spawnedPlayers.ContainsKey(player))
+            return;
 
         if (PlayerMetadataRegistry.Instance == null ||
-            !PlayerMetadataRegistry.Instance.TryGetCustoms(clientId, out var customs))
+            !PlayerMetadataRegistry.Instance.TryGetCustoms(player, out PlayerCustoms customs))
         {
-            Debug.Log($"[Spawner] Waiting for metadata for client {clientId}...");
+            Debug.Log($"[Spawner] Waiting for metadata for player {player}...");
             return;
         }
 
-        var (pos, rot) = GetSpawnFor(clientId);
-        var rootObject = Instantiate(rootPrefab, pos, rot);
-        rootObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, destroyWithScene: true);
+        NetworkObject networkPrefab = rootPrefab != null ? rootPrefab.GetComponent<NetworkObject>() : null;
+        if (networkPrefab == null)
+        {
+            Debug.LogError("[Spawner] Root prefab must have a Photon Fusion NetworkObject component.");
+            return;
+        }
 
-        rootObject.GetComponent<PlayerVisual>().AvatarCustoms.Value = customs;
+        var (position, rotation) = GetSpawnFor(player);
+        NetworkObject playerObject = runner.Spawn(networkPrefab, position, rotation, player);
+        spawnedPlayers[player] = playerObject;
+        runner.SetPlayerObject(player, playerObject);
 
-        Debug.Log($"[Spawner] Spawned player for {clientId} (avatarType={customs.avatarType}).");
+        if (playerObject.TryGetComponent(out PlayerVisual visual))
+            visual.SetAvatarCustoms(customs);
+
+        Debug.Log($"[Spawner] Spawned player for {player} (avatarType={customs.avatarType}).");
         OnSpawnComplete?.Invoke();
-        NotifySpawnCompleteClientRpc();
+        RPC_NotifySpawnComplete(runner);
     }
 
-    private (Vector3, Quaternion) GetSpawnFor(ulong clientId)
+    private (Vector3, Quaternion) GetSpawnFor(PlayerRef player)
     {
-        if (clientId < 4)
-            return (spawnPoints[clientId].position, spawnPoints[clientId].rotation);
+        int index = GetSpawnIndex(player);
+        if (spawnPoints != null && index < spawnPoints.Length && spawnPoints[index] != null)
+            return (spawnPoints[index].position, spawnPoints[index].rotation);
+
         return (Vector3.zero, Quaternion.identity);
     }
 
     public void StartInfection(string seq)
     {
-        if (!IsServer) return;
+        StartInfection(seq, PlayerRef.None);
+    }
+
+    public void StartInfection(string seq, PlayerRef targetPlayer)
+    {
+        NetworkRunner runner = GetRunner();
+        if (runner == null || !runner.IsServer)
+            return;
 
         isInfected = true;
-        Debug.Log("[PlayerSpawner] Start infection");
+        bug = seq;
 
-        foreach (var clientId in NetworkManager.ConnectedClientsIds)
+        if (targetPlayer != PlayerRef.None && spawnedPlayers.TryGetValue(targetPlayer, out NetworkObject targetObject))
         {
-            if (!NetworkManager.ConnectedClients.TryGetValue(clientId, out var client))
-                continue;
-
-            var playerObj = client.PlayerObject;
-            if (playerObj == null)
-                continue;
-
-            if (playerObj.TryGetComponent<PlayerVisual>(out var visual))
+            if (targetObject.TryGetComponent(out PlayerVisual visual))
+                visual.SetInfected(true);
+        }
+        else
+        {
+            foreach (NetworkObject playerObject in spawnedPlayers.Values)
             {
-                visual.IsInfected.Value = true;
+                if (playerObject != null && playerObject.TryGetComponent(out PlayerVisual visual))
+                    visual.SetInfected(true);
             }
         }
-        
-        bug = seq;
-        OnInfected?.Invoke();
-        NotifyInfectedClientRpc(seq);
+
+        RPC_NotifyInfected(runner, seq);
     }
 
     public string GetBugSequence()
@@ -142,61 +183,115 @@ public class PlayerSpawner : NetworkBehaviour
         return bug;
     }
 
-    /// <summary>
-    /// Broadcasts spawn complete notification to all clients.
-    /// Called by server after a player is spawned.
-    /// </summary>
-    [ClientRpc]
-    private void NotifySpawnCompleteClientRpc()
+    public void CureInfectionServerRpc()
     {
-        if (IsHost) return;
-        OnSpawnComplete?.Invoke();
+        NetworkRunner runner = GetRunner();
+        if (runner != null)
+            RPC_RequestCure(runner);
     }
 
-    /// <summary>
-    /// Broadcasts infection notification to all clients.
-    /// Called by server after infection starts.
-    /// </summary>
-    [ClientRpc]
-    private void NotifyInfectedClientRpc(string seq)
+    private void CureFor(NetworkRunner runner, PlayerRef player)
     {
-        if (IsHost) return;
+        if (!spawnedPlayers.TryGetValue(player, out NetworkObject playerObject) || playerObject == null)
+            return;
 
-        bug = seq;
-        OnInfected?.Invoke();
+        if (playerObject.TryGetComponent(out PlayerVisual visual))
+            visual.SetInfected(false);
+
+        RPC_NotifyCured(runner, player);
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void CureInfectionServerRpc(ServerRpcParams rpcParams = default)
+    private int GetSpawnIndex(PlayerRef player)
     {
-        ulong senderId = rpcParams.Receive.SenderClientId;
+        if (spawnIndices.TryGetValue(player, out int existingIndex))
+            return existingIndex;
 
-        if (!NetworkManager.ConnectedClients.TryGetValue(senderId, out var client))
+        int nextIndex = spawnIndices.Count;
+        if (spawnPoints != null && spawnPoints.Length > 0)
+            nextIndex %= spawnPoints.Length;
+
+        spawnIndices[player] = nextIndex;
+        return nextIndex;
+    }
+
+    private NetworkRunner GetRunner()
+    {
+        return Runner != null ? Runner : registeredRunner != null ? registeredRunner : FindFirstObjectByType<NetworkRunner>();
+    }
+
+    private void RegisterCallbacks()
+    {
+        NetworkRunner runner = GetRunner();
+
+        if (runner == null || !runner.IsRunning || registeredRunner == runner)
             return;
 
-        var playerObj = client.PlayerObject;
-        if (playerObj == null)
-            return;
-
-        if (playerObj.TryGetComponent<PlayerVisual>(out var visual))
+        if (registeredRunner != null)
         {
-            visual.IsInfected.Value = false;
-
-            ClientRpcParams clientRpcParams = new ClientRpcParams
-            {
-                Send = new ClientRpcSendParams
-                {
-                    TargetClientIds = new ulong[] { senderId }
-                }
-            };
-
-            NotifyCuredClientRpc(clientRpcParams);
+            registeredRunner.RemoveGlobal(this);
+            registeredRunner.RemoveCallbacks(this);
         }
+
+        registeredRunner = runner;
+        registeredRunner.AddGlobal(this);
+        registeredRunner.AddCallbacks(this);
     }
 
-    [ClientRpc]
-    private void NotifyCuredClientRpc(ClientRpcParams clientRpcParams = default)
+    private static PlayerRef ResolveSource(NetworkRunner runner, RpcInfo info)
     {
-        OnCured?.Invoke();
+        return info.Source == PlayerRef.None ? runner.LocalPlayer : info.Source;
     }
+
+    [Rpc]
+    private static void RPC_NotifySpawnComplete(NetworkRunner runner)
+    {
+        FindFirstObjectByType<PlayerSpawner>()?.OnSpawnComplete?.Invoke();
+    }
+
+    [Rpc]
+    private static void RPC_NotifyInfected(NetworkRunner runner, string seq)
+    {
+        PlayerSpawner spawner = FindFirstObjectByType<PlayerSpawner>();
+        if (spawner == null)
+            return;
+
+        spawner.bug = seq;
+        spawner.OnInfected?.Invoke();
+    }
+
+    [Rpc(HostMode = RpcHostMode.SourceIsHostPlayer)]
+    private static void RPC_RequestCure(NetworkRunner runner, RpcInfo info = default)
+    {
+        if (!runner.IsServer)
+            return;
+
+        FindFirstObjectByType<PlayerSpawner>()?.CureFor(runner, ResolveSource(runner, info));
+    }
+
+    [Rpc]
+    private static void RPC_NotifyCured(NetworkRunner runner, [RpcTarget] PlayerRef target)
+    {
+        FindFirstObjectByType<PlayerSpawner>()?.OnCured?.Invoke();
+    }
+
+    public void OnConnectedToServer(NetworkRunner runner) { }
+    public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
+    public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
+    public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
+    public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
+    public void OnInput(NetworkRunner runner, NetworkInput input) { }
+    public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
+    public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
+    public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
+    public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
+    public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ReadOnlySpan<byte> data) { }
+    public void OnSceneLoadDone(NetworkRunner runner)
+    {
+        TrySpawnExistingPlayers();
+    }
+    public void OnSceneLoadStart(NetworkRunner runner) { }
+    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
+    public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
+    public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
 }

@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using TMPro;
 using System.Collections;
 using System.Linq;
-using Unity.Netcode;
+using Fusion;
 using System;
 
-public class AvatarGenerator : NetworkBehaviour
+public class AvatarGenerator : MonoBehaviour
 {
     const int NUM_SUBSEQUENCES = 2;
     const int NUM_CHOICES = 2;
@@ -569,9 +569,12 @@ public class AvatarGenerator : NetworkBehaviour
     {
         nextButton.gameObject.SetActive(false);
 
+        NetworkString<_64> networkName = default;
+        networkName.Set(playerName ?? string.Empty);
+
         PlayerCustoms customs = new PlayerCustoms()
         {
-            name = playerName,
+            name = networkName,
             avatarType = currProfileData.id,
             subSeq0Enabled = subSequenceEnabled[0],
             subSeq1Enabled = subSequenceEnabled[1],
@@ -579,18 +582,16 @@ public class AvatarGenerator : NetworkBehaviour
             color1 = currColor[1]
         };
 
-        if (NetworkManager.Singleton == null)
+        NetworkRunner runner = FindFirstObjectByType<NetworkRunner>();
+        if (runner == null)
         {
-            Debug.LogError("NetworkManager not initialized yet");
+            Debug.LogError("Fusion NetworkRunner not initialized yet");
             return;
         }
 
         MusicManager.Instance.FadeOutAndStop(1.5f);
 
-        // Local Cache
-        PlayerLogbook.Instance.AddPlayerCustom(NetworkManager.Singleton.LocalClientId, customs);
-
         // Submit to server (marks this client 'ready')
-        PlayerMetadataRegistry.Instance.SubmitMetadataServerRpc(customs);
+        PlayerMetadataRegistry.Instance.SubmitMetadata(customs);
     }
 }

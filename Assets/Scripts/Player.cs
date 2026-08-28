@@ -1,9 +1,15 @@
 using UnityEngine;
-using Unity.Netcode;
+using Fusion;
 using Unity.Cinemachine;
 
 public class Player : NetworkBehaviour
 {
+    [Networked, OnChangedRender(nameof(ApplyNetworkTransform))]
+    private Vector3 NetworkedPosition { get; set; }
+
+    [Networked, OnChangedRender(nameof(ApplyNetworkTransform))]
+    private Quaternion NetworkedRotation { get; set; }
+
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 7.0f;
     [SerializeField] private float rotateSpeed = 7.0f;
@@ -34,9 +40,15 @@ public class Player : NetworkBehaviour
     private float currentWaterVolume;
     private float _yVel;
 
-    public override void OnNetworkSpawn()
+    public override void Spawned()
     {
-        if (!IsOwner) return;
+        if (Object.HasStateAuthority)
+        {
+            NetworkedPosition = transform.position;
+            NetworkedRotation = transform.rotation;
+        }
+
+        if (!Object.HasInputAuthority) return;
 
         BindCamera();
 
@@ -45,7 +57,7 @@ public class Player : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsOwner) return;
+        if (Object == null || !Object.HasInputAuthority) return;
 
         HandleMovement();
         HandleMovementAudio();
@@ -64,15 +76,15 @@ public class Player : NetworkBehaviour
         cineCam.Priority = ownerCamPriority;
     }
 
-    public override void OnNetworkDespawn()
+    private void OnDisable()
     {
-        if (IsOwner && cineCam != null)
+        if (Object != null && Object.HasInputAuthority && cineCam != null)
         {
             cineCam.Target.TrackingTarget = null;
             cineCam.Target.LookAtTarget = null;
         }
 
-        if (IsOwner)
+        if (Object != null && Object.HasInputAuthority)
         {
             EnvironmentSFXManager.Instance?.StopWalking();
             EnvironmentSFXManager.Instance?.StopWater();
@@ -101,18 +113,47 @@ public class Player : NetworkBehaviour
         float targetY = hasGround ? groundY + groundOffset : transform.position.y;
         float newY = Mathf.SmoothDamp(transform.position.y, targetY, ref _yVel, ySmoothTime);
 
-        transform.position = new Vector3(targetXZ.x, newY, targetXZ.z);
+        Vector3 nextPosition = new Vector3(targetXZ.x, newY, targetXZ.z);
+        Quaternion nextRotation = transform.rotation;
 
         if (moveVector != Vector3.zero)
         {
-            transform.forward = Vector3.Slerp(
+            nextRotation = Quaternion.LookRotation(Vector3.Slerp(
                 transform.forward,
                 moveVector,
                 Time.deltaTime * rotateSpeed
-            );
+            ));
         }
 
+        transform.SetPositionAndRotation(nextPosition, nextRotation);
+        PublishTransform(nextPosition, nextRotation);
+
         isMoving = moveVector.sqrMagnitude > 0.001f;
+    }
+
+    private void PublishTransform(Vector3 position, Quaternion rotation)
+    {
+        if (Object.HasStateAuthority)
+        {
+            SetNetworkTransform(position, rotation);
+            return;
+        }
+
+        RPC_Move(position, rotation);
+    }
+
+    private void SetNetworkTransform(Vector3 position, Quaternion rotation)
+    {
+        NetworkedPosition = position;
+        NetworkedRotation = rotation;
+    }
+
+    private void ApplyNetworkTransform()
+    {
+        if (Object != null && Object.HasInputAuthority)
+            return;
+
+        transform.SetPositionAndRotation(NetworkedPosition, NetworkedRotation);
     }
 
     private void HandleMovementAudio()
@@ -250,7 +291,7 @@ public class Player : NetworkBehaviour
 
     private void HandleInteractions()
     {
-        if (!IsOwner) return;
+        if (Object == null || !Object.HasInputAuthority) return;
 
         if (Input.GetKeyDown(KeyCode.E))
         {
@@ -259,5 +300,12 @@ public class Player : NetworkBehaviour
             foreach (var c in proximalNpcs)
                 Debug.Log(c.name);
         }
+    }
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority, Channel = RpcChannel.Unreliable)]
+    private void RPC_Move(Vector3 position, Quaternion rotation)
+    {
+        transform.SetPositionAndRotation(position, rotation);
+        SetNetworkTransform(position, rotation);
     }
 }

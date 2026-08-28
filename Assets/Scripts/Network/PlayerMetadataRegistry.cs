@@ -1,167 +1,247 @@
 using System;
 using System.Collections.Generic;
-using Unity.Netcode;
+using Fusion;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class PlayerMetadataRegistry : NetworkBehaviour
+public class PlayerMetadataRegistry : SimulationBehaviour
 {
     public static PlayerMetadataRegistry Instance { get; private set; }
 
     [SerializeField] private int interactionThreshold;
     [SerializeField] private List<string> bugSequences = new();
-    private readonly Dictionary<ulong, PlayerCustoms> store = new();
-    private readonly HashSet<ulong> ready = new();
-    private HashSet<ulong> interacting = new();
-    private int numPlayers = 0;
-    private int numInteractions = 0;
-    
+
+    private readonly Dictionary<PlayerRef, PlayerCustoms> store = new();
+    private readonly HashSet<PlayerRef> ready = new();
+    private readonly HashSet<PlayerRef> interacting = new();
+    private int numInteractions;
     private bool sceneSwitched;
 
-    public event Action<ulong, PlayerCustoms> OnSubmitted;
+    public event Action<PlayerRef, PlayerCustoms> OnSubmitted;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
-    public override void OnNetworkSpawn()
+    public void SubmitMetadata(PlayerCustoms data)
     {
-        if (!IsServer) return;
-        NetworkManager.OnClientDisconnectCallback += OnClientDisconnected;
+        NetworkRunner runner = GetRunner();
+        if (runner == null)
+        {
+            Debug.LogError("[Registry] Cannot submit metadata before Fusion runner exists.");
+            return;
+        }
+
+        RPC_SubmitMetadata(runner, data);
     }
 
-    private void OnDestroy()
+    public bool TryGetCustoms(PlayerRef player, out PlayerCustoms data)
     {
-        if (NetworkManager != null)
-            NetworkManager.OnClientDisconnectCallback -= OnClientDisconnected;
+        return store.TryGetValue(player, out data);
     }
 
-    private void OnClientDisconnected(ulong clientId)
+    public bool TryGetCustoms(ulong playerId, out PlayerCustoms data)
     {
-        store.Remove(clientId);
-        ready.Remove(clientId);
+        foreach (var pair in store)
+        {
+            if ((ulong)pair.Key.PlayerId == playerId)
+            {
+                data = pair.Value;
+                return true;
+            }
+        }
+
+        data = default;
+        return false;
     }
 
-    public bool TryGetCustoms(ulong clientId, out PlayerCustoms data)
+    public void Remove(PlayerRef player)
     {
-        if (!IsServer) { data = default; return false; }
-        return store.TryGetValue(clientId, out data);
+        store.Remove(player);
+        ready.Remove(player);
+        interacting.Remove(player);
     }
 
     public bool AllPlayersReady()
     {
-        var ids = NetworkManager.ConnectedClientsIds;
-        if (ids.Count == 0) return false;
-        foreach (var id in ids) if (!ready.Contains(id)) return false;
-        return true;
-    }
+        NetworkRunner runner = GetRunner();
+        if (runner == null)
+            return false;
 
-    [ServerRpc(RequireOwnership = false)]
-    public void SubmitMetadataServerRpc(PlayerCustoms data, ServerRpcParams rpcParams = default)
-    {
-        var sender = rpcParams.Receive.SenderClientId;
-        store[sender] = data;
-        ready.Add(sender);
-
-        OnSubmitted?.Invoke(sender, data);
-        TryStartGameIfReady();
-    }
-
-    private void TryStartGameIfReady()
-    {
-        if (!IsServer || sceneSwitched) return;
-        if (AllPlayersReady())
+        int playerCount = 0;
+        foreach (PlayerRef player in runner.ActivePlayers)
         {
-            numPlayers = NetworkManager.ConnectedClients.Count;
-            interactionThreshold = (numPlayers * (numPlayers - 1) + 3) / 4;
-            sceneSwitched = true;
-            NetworkManager.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+            playerCount++;
+            if (!ready.Contains(player))
+                return false;
         }
+
+        return playerCount > 0;
     }
 
-    // -------- Optional: allow clients to request others' metadata later
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestMetadataServerRpc(ulong targetClientId, ServerRpcParams rpcParams = default)
+    public void RequestMetadata(PlayerRef targetPlayer)
     {
-        var senderClientId = rpcParams.Receive.SenderClientId;
+        NetworkRunner runner = GetRunner();
+        if (runner != null)
+            RPC_RequestMetadata(runner, targetPlayer);
+    }
 
-        if (store.TryGetValue(targetClientId, out var data))
-        {
-            SendMetadataClientRpc(targetClientId, data, new ClientRpcParams {
-                Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } }
-            });
-        }
+    public void RegisterInteractionServerRpc(PlayerRef targetPlayer)
+    {
+        NetworkRunner runner = GetRunner();
+        if (runner != null)
+            RPC_RegisterInteraction(runner, targetPlayer);
+    }
+
+    public void ExitInteractionServerRpc()
+    {
+        NetworkRunner runner = GetRunner();
+        if (runner != null)
+            RPC_ExitInteraction(runner);
+    }
+
+    public void InfectionReadinessServerRpc()
+    {
+        NetworkRunner runner = GetRunner();
+        if (runner == null)
+            return;
+
+        if (runner.IsServer)
+            TryStartInfectionFor(runner.LocalPlayer);
         else
-        {
-            SendNotFoundClientRpc((int)targetClientId, new ClientRpcParams {
-                Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } }
-            });
-        }
+            RPC_CheckInfectionReadiness(runner);
     }
 
-    [ClientRpc]
-    private void SendMetadataClientRpc(ulong id, PlayerCustoms data, ClientRpcParams clientRpcParams = default)
+    private void StoreSubmitted(NetworkRunner runner, PlayerRef player, PlayerCustoms data)
     {
-        PlayerLogbook.Instance.AddPlayerCustom(id, data);
+        store[player] = data;
+        ready.Add(player);
+        OnSubmitted?.Invoke(player, data);
+        TryStartGameIfReady(runner);
     }
 
-    [ClientRpc]
-    private void SendNotFoundClientRpc(int targetId, ClientRpcParams clientRpcParams = default)
+    private void TryStartGameIfReady(NetworkRunner runner)
+    {
+        if (!runner.IsServer || sceneSwitched || !AllPlayersReady())
+            return;
+
+        int playerCount = 0;
+        foreach (PlayerRef _ in runner.ActivePlayers)
+            playerCount++;
+
+        interactionThreshold = (playerCount * (playerCount - 1) + 3) / 4;
+        sceneSwitched = true;
+        if (runner.IsSceneAuthority)
+            runner.LoadScene("GameScene", LoadSceneMode.Single);
+    }
+
+    private void TryStartInfectionFor(PlayerRef targetPlayer)
+    {
+        if (numInteractions < interactionThreshold || interacting.Count != 0)
+        {
+            Debug.Log($"[Registry] Not ready for infection: {interacting.Count}");
+            return;
+        }
+
+        if (bugSequences.Count == 0)
+        {
+            Debug.LogWarning("[Registry] No bug sequences configured.");
+            return;
+        }
+
+        string bugSeq = bugSequences[UnityEngine.Random.Range(0, bugSequences.Count)];
+        PlayerSpawner spawner = FindFirstObjectByType<PlayerSpawner>();
+        spawner?.StartInfection(bugSeq, targetPlayer);
+    }
+
+    private static PlayerRef ResolveSource(NetworkRunner runner, RpcInfo info)
+    {
+        return info.Source == PlayerRef.None ? runner.LocalPlayer : info.Source;
+    }
+
+    private static NetworkRunner GetRunner()
+    {
+        return FindFirstObjectByType<NetworkRunner>();
+    }
+
+    [Rpc(HostMode = RpcHostMode.SourceIsHostPlayer)]
+    private static void RPC_SubmitMetadata(NetworkRunner runner, PlayerCustoms data, RpcInfo info = default)
+    {
+        if (!runner.IsServer)
+            return;
+
+        PlayerRef sender = ResolveSource(runner, info);
+        Instance?.StoreSubmitted(runner, sender, data);
+        RPC_CacheMetadata(runner, sender, data);
+    }
+
+    [Rpc]
+    private static void RPC_CacheMetadata(NetworkRunner runner, PlayerRef player, PlayerCustoms data)
+    {
+        if (Instance == null)
+            return;
+
+        Instance.store[player] = data;
+        PlayerLogbook.Instance?.AddPlayerCustom((ulong)player.PlayerId, data);
+    }
+
+    [Rpc(HostMode = RpcHostMode.SourceIsHostPlayer)]
+    private static void RPC_RequestMetadata(NetworkRunner runner, PlayerRef targetPlayer, RpcInfo info = default)
+    {
+        PlayerRef sender = ResolveSource(runner, info);
+        if (Instance != null && Instance.store.TryGetValue(targetPlayer, out PlayerCustoms data))
+            RPC_SendMetadata(runner, sender, targetPlayer, data);
+        else
+            RPC_SendNotFound(runner, sender, targetPlayer.PlayerId);
+    }
+
+    [Rpc]
+    private static void RPC_SendMetadata(NetworkRunner runner, [RpcTarget] PlayerRef target, PlayerRef player, PlayerCustoms data)
+    {
+        PlayerLogbook.Instance?.AddPlayerCustom((ulong)player.PlayerId, data);
+    }
+
+    [Rpc]
+    private static void RPC_SendNotFound(NetworkRunner runner, [RpcTarget] PlayerRef target, int targetId)
     {
         Debug.LogWarning($"[Registry] No metadata for id {targetId} yet.");
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void RegisterInteractionServerRpc(ulong targetClientId, ServerRpcParams rpcParams = default)
+    [Rpc(HostMode = RpcHostMode.SourceIsHostPlayer)]
+    private static void RPC_RegisterInteraction(NetworkRunner runner, PlayerRef targetPlayer, RpcInfo info = default)
     {
-        numInteractions += 1;
-        ulong senderClientId = rpcParams.Receive.SenderClientId;
+        if (Instance == null || !runner.IsServer)
+            return;
 
-        interacting.Add(targetClientId);
-        interacting.Add(senderClientId);
+        PlayerRef sender = ResolveSource(runner, info);
+        Instance.numInteractions += 1;
+        Instance.interacting.Add(targetPlayer);
+        Instance.interacting.Add(sender);
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void ExitInteractionServerRpc(ServerRpcParams rpcParams = default)
+    [Rpc(HostMode = RpcHostMode.SourceIsHostPlayer)]
+    private static void RPC_ExitInteraction(NetworkRunner runner, RpcInfo info = default)
     {
-        ulong senderClientId = rpcParams.Receive.SenderClientId;
-        
-        if (interacting.Contains(senderClientId))
-            interacting.Remove(senderClientId);
+        if (Instance == null || !runner.IsServer)
+            return;
+
+        Instance.interacting.Remove(ResolveSource(runner, info));
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void InfectionReadinessServerRpc(ServerRpcParams rpcParams = default)
+    [Rpc(HostMode = RpcHostMode.SourceIsHostPlayer)]
+    private static void RPC_CheckInfectionReadiness(NetworkRunner runner, RpcInfo info = default)
     {
-        if (numInteractions >= interactionThreshold && interacting.Count == 0)
-        {
-            Debug.Log("[InfectionServerRpc] Initiate infection");
-            var rand = new System.Random();
-            int index = rand.Next(bugSequences.Count);
-            string bugSeq = bugSequences[index];
+        if (!runner.IsServer || Instance == null)
+            return;
 
-            ulong senderClientId = rpcParams.Receive.SenderClientId;
-            ClientRpcParams sendParams = new ClientRpcParams
-            {
-                Send = new ClientRpcSendParams
-                {
-                    TargetClientIds = new ulong[] { senderClientId }
-                }
-            };
-            StartInfectionClientRpc(bugSeq, sendParams);
-        } else
-            Debug.Log($"[InfectionServerRpc] Not ready for infection: {interacting.Count}");
-    }
-
-    [ClientRpc] 
-    public void StartInfectionClientRpc(string bugSeq, ClientRpcParams rpcParams = default)
-    {
-        Debug.Log("[InfectionClientRpc] Use spawner to infect");
-
-        PlayerSpawner spawner = FindFirstObjectByType<PlayerSpawner>();
-        spawner.StartInfection(bugSeq);
+        Instance.TryStartInfectionFor(ResolveSource(runner, info));
     }
 }
