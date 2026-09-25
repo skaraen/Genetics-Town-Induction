@@ -28,7 +28,7 @@ public class BubbleManager : MonoBehaviour
     int numRows;
     int maxStartRow;
     
-    private Dictionary<string, string> sequenceLookup = new();
+    private Dictionary<int, string> sequenceLookup = new();
 
     void OnEnable()
     {
@@ -90,10 +90,10 @@ public class BubbleManager : MonoBehaviour
 
         GameObject go = Instantiate(buttonPrefab, spawnContainer.transform);
         Bubble bubble = go.GetComponent<Bubble>();
-        bubble.SetTitle(customs.name.ToString());
+        bubble.SetTitle(customs.name.Value);
         bubble.SetColor(customs.color0);
         bubble.SetAvatarCustoms(customs);
-        sequenceLookup.Add(customs.name.ToString(), sequence);
+        sequenceLookup[idx] = sequence;
 
         bubble.InitializePreview(previewCamera, defaultTexture);
         bubble.button.onClick.AddListener(() => OnBubbleClicked(idx, bubble));
@@ -135,14 +135,14 @@ public class BubbleManager : MonoBehaviour
 
         bubble.SetTexture(renderTexture);
         bubble.SetTitle("");
-        oppScroller.SetScrollTitle(playerCustoms[idx].name.ToString());
-        string sequence = sequenceLookup[playerCustoms[idx].name.ToString()];
+        oppScroller.SetScrollTitle(playerCustoms[idx].name.Value);
+        sequenceLookup.TryGetValue(idx, out string sequence);
         if (!String.IsNullOrEmpty(sequence))
             oppScroller.SetGeneSequence(sequence);
     }
 
     void ResetBubble(Bubble bubble, int idx) {
-        bubble.SetTitle(playerCustoms[idx].name.ToString());
+        bubble.SetTitle(playerCustoms[idx].name.Value);
         bubble.SetColor(playerCustoms[idx].color0);
         bubble.SetTexture(defaultTexture);
     }

@@ -8,6 +8,7 @@ public class PlayerLogbook : MonoBehaviour
 
     private List<PlayerCustoms> playerData = new();
     private Dictionary<ulong, PlayerCustoms> idLookup = new();
+    private List<ulong> playerOrder = new();
     private Dictionary<int, AvatarProfileData> profileLookup = new();
 
     private void Awake()
@@ -39,7 +40,23 @@ public class PlayerLogbook : MonoBehaviour
 
     public void AddPlayerCustom(ulong id, PlayerCustoms customs)
     {
+        if (!idLookup.ContainsKey(id))
+        {
+            playerOrder.Add(id);
+            playerData.Add(customs);
+        }
+        else
+        {
+            int index = playerOrder.IndexOf(id);
+            if (index >= 0 && index < playerData.Count)
+                playerData[index] = customs;
+            else
+            {
+                playerOrder.Add(id);
+                playerData.Add(customs);
+            }
+        }
+
         idLookup[id] = customs;
-        playerData.Add(customs);
     }
 }

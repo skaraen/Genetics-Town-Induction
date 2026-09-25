@@ -1,3 +1,4 @@
+using Fusion;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -91,6 +92,14 @@ public class SequenceController : MonoBehaviour
 
     void HandleSceneEnd()
     {
+        NetworkRunner runner = FindFirstObjectByType<NetworkRunner>();
+        if (runner != null)
+        {
+            if (runner.IsSceneAuthority)
+                runner.LoadScene("AvatarSelection", LoadSceneMode.Single);
+            return;
+        }
+
         SceneManager.LoadScene("AvatarSelection");
     }
 

@@ -33,6 +33,11 @@ public class GameManager : MonoBehaviour
         dialogueController.OnDialogueEnded += HandleDialogueEnd;
 
         spawner = spawnerObj.GetComponent<PlayerSpawner>();
+        if (spawner == null)
+        {
+            Debug.LogError("[GameManager] No PlayerSpawner found.");
+            return;
+        }
 
         spawner.OnSpawnComplete += TriggerWelcome;
         spawner.OnInfected += TriggerPanic;
@@ -59,9 +64,12 @@ public class GameManager : MonoBehaviour
     void OnDisable()
     {
         dialogueController.OnDialogueEnded -= HandleDialogueEnd;
-        spawner.OnSpawnComplete -= TriggerWelcome;
-        spawner.OnInfected -= TriggerPanic;
-        spawner.OnCured -= AcknowledgeCure;
+        if (spawner != null)
+        {
+            spawner.OnSpawnComplete -= TriggerWelcome;
+            spawner.OnInfected -= TriggerPanic;
+            spawner.OnCured -= AcknowledgeCure;
+        }
 
         SceneManager.sceneUnloaded -= HandleSceneUnloaded;
     }

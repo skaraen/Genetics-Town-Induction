@@ -1,8 +1,8 @@
 using System;
 using DG.Tweening;
+using Fusion;
 using TMPro;
 using Unity.Cinemachine;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -11,45 +11,34 @@ public class PlayerUI : NetworkBehaviour
 {
     private enum FacingTarget { Camera, Player, Hybrid }
 
-    /// <summary>
-    /// Fired on the local machine when this player's interact popup becomes visible to the local owner.
-    /// Passes the canvas Transform so the camera controller can frame it alongside the local player.
-    /// Static so InteractGroupCamController on the local player can subscribe without a reference to this instance.
-    /// </summary>
-    public static event System.Action<Transform> OnInteractPopupShown;
-
-    /// <summary>
-    /// Fired on the local machine when this player's interact popup begins hiding.
-    /// Fires at the start of HideUI() (not after fade) so the camera blend back begins immediately.
-    /// </summary>
-    public static event System.Action OnInteractPopupHidden;
+    public static event Action<Transform> OnInteractPopupShown;
+    public static event Action OnInteractPopupHidden;
 
     [Header("References")]
     [SerializeField] private Canvas canvas;
     [SerializeField] private TextMeshProUGUI descTmp;
     [SerializeField] private Button interactBtn;
-    [SerializeField] Sprite replySprite;
+    [SerializeField] private Sprite replySprite;
 
     [Header("Trackers")]
     [SerializeField] private Camera worldCam;
     [SerializeField] private float triggerRadius = 5f;
 
     [Header("UI Fade")]
-    [SerializeField] float fadeSmoothTime = 0.2f;
-    CanvasGroup canvasGroup;
+    [SerializeField] private float fadeSmoothTime = 0.2f;
 
-    SphereCollider trigger;
-    Action targetAction;
-    CinemachineInputAxisController inputAxisController;
-    FacingTarget facingTarget = FacingTarget.Camera;
+    private CanvasGroup canvasGroup;
+    private Action targetAction;
+    private CinemachineInputAxisController inputAxisController;
+    private FacingTarget facingTarget = FacingTarget.Camera;
+    private bool requestReceived;
+    private PlayerCustoms pendingTargetCustoms;
+    private ClientRegistry registry;
 
-    bool requestReceived = false;
-    PlayerCustoms pendingTargetCustoms; // customs of the other player
-    ClientRegistry registry;
-
-    void Start()
+    private void Start()
     {
-        if (gameObject.GetComponent<NetworkObject>().IsOwner) return;
+        if (Object != null && Object.HasInputAuthority)
+            return;
 
         if (!worldCam)
         {
@@ -57,39 +46,35 @@ public class PlayerUI : NetworkBehaviour
             inputAxisController = CameraManager.Instance.InputAxisController;
         }
 
-        trigger = gameObject.AddComponent<SphereCollider>();
+        SphereCollider trigger = gameObject.AddComponent<SphereCollider>();
         trigger.isTrigger = true;
         trigger.radius = triggerRadius;
 
         UpdateTargetAction();
     }
 
-    bool IsOwnPlayer(Collider other)
+    private bool IsOwnPlayer(Collider other)
     {
-        if (!other.CompareTag("Player") || !other.gameObject.GetComponentInParent<NetworkObject>().IsOwner)
+        if (!other.CompareTag("Player"))
             return false;
 
-        return true;
+        NetworkObject networkObject = other.gameObject.GetComponentInParent<NetworkObject>();
+        return networkObject != null && networkObject.HasInputAuthority;
     }
 
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
-        if (!IsOwnPlayer(other)) return;
-
-        ShowUI();
+        if (IsOwnPlayer(other))
+            ShowUI();
     }
 
-    void OnTriggerExit(Collider other)
+    private void OnTriggerExit(Collider other)
     {
-        if (!IsOwnPlayer(other)) return;
-
-        HideUI();
+        if (IsOwnPlayer(other))
+            HideUI();
     }
 
-    /// <summary>
-    /// Activates the canvas and fades it in via DOTween. Stops any in-progress fade first.
-    /// </summary>
-    void ShowUI()
+    private void ShowUI()
     {
         if (inputAxisController) inputAxisController.enabled = false;
         canvasGroup.DOKill();
@@ -101,11 +86,7 @@ public class PlayerUI : NetworkBehaviour
         OnInteractPopupShown?.Invoke(canvas.transform);
     }
 
-    /// <summary>
-    /// Fades the canvas out via DOTween, then deactivates it. Stops any in-progress fade first.
-    /// Fires OnInteractPopupHidden immediately so camera blends back without waiting for the fade.
-    /// </summary>
-    void HideUI()
+    private void HideUI()
     {
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
@@ -117,7 +98,7 @@ public class PlayerUI : NetworkBehaviour
         OnInteractPopupHidden?.Invoke();
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         if (!canvas)
         {
@@ -127,47 +108,42 @@ public class PlayerUI : NetworkBehaviour
 
         canvas.renderMode = RenderMode.WorldSpace;
         canvas.worldCamera = worldCam;
-        if (!canvas.TryGetComponent<CanvasGroup>(out canvasGroup))
+        if (!canvas.TryGetComponent(out canvasGroup))
             canvasGroup = canvas.gameObject.AddComponent<CanvasGroup>();
 
-        if (canvasGroup)
-        {
-            canvasGroup.alpha = 0f;
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
-        }
+        canvasGroup.alpha = 0f;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
 
-        interactBtn.onClick.AddListener(() =>
-        {
-            // if you interact on another player
-            if (!requestReceived)
-            {
-                descTmp.text = "Waiting for response...";
-                interactBtn.enabled = false;
-                NotifyOwnerServerRpc(); // notify the other player
-            }
-            // If another player interacts on you
-            else
-            {
-                requestReceived = false;
-                Part2DataHolder.OwnerClientId = GetComponent<NetworkObject>().OwnerClientId;
-                Part2DataHolder.TargetCustoms = pendingTargetCustoms;
-                AckOwnerServerRpc();
-                // PROBLEM: the scene is not additively loaded correctly, 
-                // you can see grass from the game in the background
-                SceneManager.LoadScene("Part2Scene", LoadSceneMode.Additive);
-            }
-        });
+        interactBtn.onClick.AddListener(OnInteractClicked);
 
         if (!registry) registry = FindFirstObjectByType<ClientRegistry>();
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
-
+        if (interactBtn != null)
+            interactBtn.onClick.RemoveListener(OnInteractClicked);
     }
 
-    void UpdateTargetAction()
+    private void OnInteractClicked()
+    {
+        if (!requestReceived)
+        {
+            descTmp.text = "Waiting for response...";
+            interactBtn.enabled = false;
+            RPC_NotifyOwner();
+            return;
+        }
+
+        requestReceived = false;
+        Part2DataHolder.OwnerClientId = (ulong)Object.InputAuthority.PlayerId;
+        Part2DataHolder.TargetCustoms = pendingTargetCustoms;
+        RPC_AckOwner();
+        SceneManager.LoadScene("Part2Scene", LoadSceneMode.Additive);
+    }
+
+    private void UpdateTargetAction()
     {
         targetAction = facingTarget switch
         {
@@ -177,14 +153,14 @@ public class PlayerUI : NetworkBehaviour
         };
     }
 
-    void FaceCamera()
+    private void FaceCamera()
     {
         if (!canvas || !worldCam) return;
         var toCam = canvas.transform.position - worldCam.transform.position;
         canvas.transform.rotation = Quaternion.LookRotation(toCam, Vector3.up);
     }
 
-    void FaceHybrid()
+    private void FaceHybrid()
     {
         if (!canvas || !worldCam) return;
         var camFwdFlat = Vector3.ProjectOnPlane(worldCam.transform.forward, Vector3.up);
@@ -193,75 +169,61 @@ public class PlayerUI : NetworkBehaviour
         canvas.transform.rotation = Quaternion.LookRotation(camFwdFlat, Vector3.up);
     }
 
-    void LateUpdate()
+    private void LateUpdate()
     {
         targetAction?.Invoke();
     }
 
-
-    /// <summary>
-    /// Marks this UI as having a pending interaction request and stores the requester's full
-    /// customization data so it can be forwarded to Part2DataHolder when accepted.
-    /// </summary>
-    /// <param name="targetCustoms">The full visual customization of the player who sent the request</param>
     public void RequestInteraction(PlayerCustoms targetCustoms)
     {
         requestReceived = true;
         pendingTargetCustoms = targetCustoms;
         descTmp.text = "says hello!\nPress reply to say hello back.";
         interactBtn.GetComponent<Image>().sprite = replySprite;
+        interactBtn.enabled = true;
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    private void NotifyOwnerServerRpc(ServerRpcParams rpcParams = default)
+    private static PlayerRef ResolveSource(NetworkRunner runner, RpcInfo info)
     {
-        ulong senderId = rpcParams.Receive.SenderClientId;
+        return info.Source == PlayerRef.None ? runner.LocalPlayer : info.Source;
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority, HostMode = RpcHostMode.SourceIsHostPlayer)]
+    private void RPC_NotifyOwner(RpcInfo info = default)
+    {
+        PlayerRef sender = ResolveSource(Runner, info);
 
         PlayerCustoms senderCustoms = default;
-        PlayerMetadataRegistry.Instance.TryGetCustoms(senderId, out senderCustoms);
+        PlayerMetadataRegistry.Instance.TryGetCustoms(sender, out senderCustoms);
 
-        NotifyOwnerClientRpc(senderId, senderCustoms, new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = new ulong[] { OwnerClientId }
-            }
-        });
+        RPC_ReceiveInteractionRequest(Object.InputAuthority, sender, senderCustoms);
     }
 
-    [ClientRpc]
-    private void NotifyOwnerClientRpc(ulong senderId, PlayerCustoms senderCustoms, ClientRpcParams clientRpcParams = default)
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_ReceiveInteractionRequest([RpcTarget] PlayerRef target, PlayerRef sender, PlayerCustoms senderCustoms)
     {
-        Debug.Log($"Owner {OwnerClientId} received notification from Client {senderId}");
-        GameObject targetPlayer = registry.FindPlayerByClientId(senderId);
+        if (!registry) registry = FindFirstObjectByType<ClientRegistry>();
 
-        targetPlayer.GetComponent<PlayerUI>().RequestInteraction(senderCustoms);
+        GameObject targetPlayer = registry != null ? registry.FindPlayerByPlayerRef(sender) : null;
+        targetPlayer?.GetComponent<PlayerUI>()?.RequestInteraction(senderCustoms);
     }
-    
-    [ServerRpc(RequireOwnership = false)]
-    private void AckOwnerServerRpc(ServerRpcParams rpcParams = default)
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority, HostMode = RpcHostMode.SourceIsHostPlayer)]
+    private void RPC_AckOwner(RpcInfo info = default)
     {
-        ulong senderId = rpcParams.Receive.SenderClientId;
+        PlayerRef sender = ResolveSource(Runner, info);
 
         PlayerCustoms senderCustoms = default;
-        PlayerMetadataRegistry.Instance.TryGetCustoms(senderId, out senderCustoms);
+        PlayerMetadataRegistry.Instance.TryGetCustoms(sender, out senderCustoms);
 
-        AckOwnerClientRpc(senderId, senderCustoms, new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = new ulong[] { OwnerClientId }
-            }
-        });
+        RPC_ReceiveInteractionAck(Object.InputAuthority, sender, senderCustoms);
     }
 
-    [ClientRpc]
-    private void AckOwnerClientRpc(ulong senderId, PlayerCustoms senderCustoms, ClientRpcParams clientRpcParams = default)
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_ReceiveInteractionAck([RpcTarget] PlayerRef target, PlayerRef sender, PlayerCustoms senderCustoms)
     {
-        Debug.Log($"Owner {OwnerClientId} received acknowledgement from Client {senderId}");
         Part2DataHolder.TargetCustoms = senderCustoms;
-
-        PlayerMetadataRegistry.Instance.RegisterInteractionServerRpc(senderId);
+        PlayerMetadataRegistry.Instance.RegisterInteractionServerRpc(sender);
         SceneManager.LoadScene("Part2Scene", LoadSceneMode.Additive);
     }
 }
