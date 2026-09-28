@@ -14,18 +14,20 @@ public class DialogueController : MonoBehaviour
     private DialogueLine[] dialogues;
     private TextMeshProUGUI dialogueText;
 
-    private Vector3 headerStartPos;
-    private Vector3 bodyStartPos;
-    private Vector3 headerTargetPos;
-    private Vector3 bodyTargetPos;
+    private RectTransform headerRect;
+    private RectTransform bodyRect;
 
-    private Vector3 headerActivePos;
-    private Vector3 bodyActivePos;
-    private Vector3 headerInactivePos;
-    private Vector3 bodyInactivePos;
+    private Vector2 headerActivePos;
+    private Vector2 bodyActivePos;
 
-    private Vector3 headerVelocity = Vector3.zero;
-    private Vector3 bodyVelocity = Vector3.zero;
+    private Vector2 headerInactivePos;
+    private Vector2 bodyInactivePos;
+
+    private Vector2 headerTargetPos;
+    private Vector2 bodyTargetPos;
+
+    private Vector2 headerVelocity = Vector2.zero;
+    private Vector2 bodyVelocity = Vector2.zero;
 
     private bool isAnimating = false;
     private bool isTyping = false;
@@ -52,27 +54,32 @@ public class DialogueController : MonoBehaviour
     string beginTag = "<color=#00000000>";
     string endTag = "</color>";
 
-    void OnEnable()
+    void Awake()
     {
         dialogueText = body.GetComponentInChildren<TextMeshProUGUI>();
+
+        headerRect = header.GetComponent<RectTransform>();
+        bodyRect = body.GetComponent<RectTransform>();
+
+        bodyActivePos = bodyRect.anchoredPosition;
+        headerActivePos = headerRect.anchoredPosition;
+
+        bodyInactivePos = bodyActivePos + new Vector2(0, -600);
+        headerInactivePos = headerActivePos + new Vector2(-600, 0);
+    }
+
+    void OnEnable()
+    {
         dialogueText.text = "";
-
-        bodyActivePos = body.transform.position;
-        headerActivePos = header.transform.position;
-
-        bodyInactivePos = bodyActivePos + new Vector3(0, -600, 0);
-        headerInactivePos = headerActivePos + new Vector3(-600, 0, 0);
 
         bodyTargetPos = bodyActivePos;
         headerTargetPos = headerActivePos;
 
-        bodyStartPos = bodyInactivePos;
-        headerStartPos = headerInactivePos;
-
-        body.transform.position = bodyStartPos;
-        header.transform.position = headerStartPos;
+        bodyRect.anchoredPosition = bodyInactivePos;
+        headerRect.anchoredPosition = headerInactivePos;
 
         isNarrationMode = true;
+
         if (narrator != null)
         {
             narratorAnimator = narrator.GetComponent<Animator>();
@@ -80,7 +87,12 @@ public class DialogueController : MonoBehaviour
         }
 
         nextButton.gameObject.SetActive(false);
-        nextButton.onClick.AddListener(() => NextButtonClick());
+        nextButton.onClick.AddListener(NextButtonClick);
+    }
+
+    void OnDisable()
+    {
+        nextButton.onClick.RemoveListener(NextButtonClick);
     }
 
     public void SetNarrationMode(bool mode) {
@@ -139,6 +151,7 @@ public class DialogueController : MonoBehaviour
     }
     void NextButtonClick()
     {
+        Debug.Log("Hello Dialougue Next Click");
         if (isSequenceInProgress && (isNarrationMode || !isNarratorAnimating) && !isTyping)
         {
             ProgressDialogue();
@@ -150,16 +163,22 @@ public class DialogueController : MonoBehaviour
     {
         if (isAnimating)
         {
-            body.transform.position = Vector3.SmoothDamp(
-                body.transform.position, bodyTargetPos, ref bodyVelocity, smoothTime
+            bodyRect.anchoredPosition = Vector2.SmoothDamp(
+                bodyRect.anchoredPosition,
+                bodyTargetPos,
+                ref bodyVelocity,
+                smoothTime
             );
 
-            header.transform.position = Vector3.SmoothDamp(
-                header.transform.position, headerTargetPos, ref headerVelocity, smoothTime
+            headerRect.anchoredPosition = Vector2.SmoothDamp(
+                headerRect.anchoredPosition,
+                headerTargetPos,
+                ref headerVelocity,
+                smoothTime
             );
 
-            if (Vector3.Distance(body.transform.position, bodyTargetPos) < 0.01f &&
-                Vector3.Distance(header.transform.position, headerTargetPos) < 0.01f)
+            if (Vector2.Distance(bodyRect.anchoredPosition, bodyTargetPos) < 0.01f && 
+                    Vector2.Distance(headerRect.anchoredPosition, headerTargetPos) < 0.01f)
             {
                 isAnimating = false;
 
