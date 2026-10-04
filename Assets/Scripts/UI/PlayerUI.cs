@@ -33,7 +33,6 @@ public class PlayerUI : NetworkBehaviour
     private FacingTarget facingTarget = FacingTarget.Camera;
     private bool requestReceived;
     private PlayerCustoms pendingTargetCustoms;
-    private ClientRegistry registry;
 
     private void Start()
     {
@@ -116,8 +115,6 @@ public class PlayerUI : NetworkBehaviour
         canvasGroup.blocksRaycasts = false;
 
         interactBtn.onClick.AddListener(OnInteractClicked);
-
-        if (!registry) registry = FindFirstObjectByType<ClientRegistry>();
     }
 
     private void OnDisable()
@@ -128,19 +125,6 @@ public class PlayerUI : NetworkBehaviour
 
     private void OnInteractClicked()
     {
-        if (!requestReceived)
-        {
-            descTmp.text = "Waiting for response...";
-            interactBtn.enabled = false;
-            RPC_NotifyOwner();
-            return;
-        }
-
-        requestReceived = false;
-        Part2DataHolder.OwnerClientId = (ulong)Object.InputAuthority.PlayerId;
-        Part2DataHolder.TargetCustoms = pendingTargetCustoms;
-        RPC_AckOwner();
-        SceneManager.LoadScene("Part2Scene", LoadSceneMode.Additive);
     }
 
     private void UpdateTargetAction()
@@ -188,42 +172,42 @@ public class PlayerUI : NetworkBehaviour
         return info.Source == PlayerRef.None ? runner.LocalPlayer : info.Source;
     }
 
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority, HostMode = RpcHostMode.SourceIsHostPlayer)]
-    private void RPC_NotifyOwner(RpcInfo info = default)
-    {
-        PlayerRef sender = ResolveSource(Runner, info);
+    // [Rpc(RpcSources.All, RpcTargets.StateAuthority, HostMode = RpcHostMode.SourceIsHostPlayer)]
+    // private void RPC_NotifyOwner(RpcInfo info = default)
+    // {
+    //     PlayerRef sender = ResolveSource(Runner, info);
 
-        PlayerCustoms senderCustoms = default;
-        PlayerMetadataRegistry.Instance.TryGetCustoms(sender, out senderCustoms);
+    //     PlayerCustoms senderCustoms = default;
+    //     // PlayerMetadataRegistry.Instance.TryGetCustoms(sender, out senderCustoms);
 
-        RPC_ReceiveInteractionRequest(Object.InputAuthority, sender, senderCustoms);
-    }
+    //     RPC_ReceiveInteractionRequest(Object.InputAuthority, sender, senderCustoms);
+    // }
 
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    private void RPC_ReceiveInteractionRequest([RpcTarget] PlayerRef target, PlayerRef sender, PlayerCustoms senderCustoms)
-    {
-        if (!registry) registry = FindFirstObjectByType<ClientRegistry>();
+    // [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    // private void RPC_ReceiveInteractionRequest([RpcTarget] PlayerRef target, PlayerRef sender, PlayerCustoms senderCustoms)
+    // {
+    //     if (!registry) registry = FindFirstObjectByType<ClientRegistry>();
 
-        GameObject targetPlayer = registry != null ? registry.FindPlayerByPlayerRef(sender) : null;
-        targetPlayer?.GetComponent<PlayerUI>()?.RequestInteraction(senderCustoms);
-    }
+    //     GameObject targetPlayer = registry != null ? registry.FindPlayerByPlayerRef(sender) : null;
+    //     targetPlayer?.GetComponent<PlayerUI>()?.RequestInteraction(senderCustoms);
+    // }
 
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority, HostMode = RpcHostMode.SourceIsHostPlayer)]
-    private void RPC_AckOwner(RpcInfo info = default)
-    {
-        PlayerRef sender = ResolveSource(Runner, info);
+    // [Rpc(RpcSources.All, RpcTargets.StateAuthority, HostMode = RpcHostMode.SourceIsHostPlayer)]
+    // private void RPC_AckOwner(RpcInfo info = default)
+    // {
+    //     PlayerRef sender = ResolveSource(Runner, info);
 
-        PlayerCustoms senderCustoms = default;
-        PlayerMetadataRegistry.Instance.TryGetCustoms(sender, out senderCustoms);
+    //     PlayerCustoms senderCustoms = default;
+    //     PlayerMetadataRegistry.Instance.TryGetCustoms(sender, out senderCustoms);
 
-        RPC_ReceiveInteractionAck(Object.InputAuthority, sender, senderCustoms);
-    }
+    //     RPC_ReceiveInteractionAck(Object.InputAuthority, sender, senderCustoms);
+    // }
 
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    private void RPC_ReceiveInteractionAck([RpcTarget] PlayerRef target, PlayerRef sender, PlayerCustoms senderCustoms)
-    {
-        Part2DataHolder.TargetCustoms = senderCustoms;
-        PlayerMetadataRegistry.Instance.RegisterInteractionServerRpc(sender);
-        SceneManager.LoadScene("Part2Scene", LoadSceneMode.Additive);
-    }
+    // [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    // private void RPC_ReceiveInteractionAck([RpcTarget] PlayerRef target, PlayerRef sender, PlayerCustoms senderCustoms)
+    // {
+    //     Part2DataHolder.TargetCustoms = senderCustoms;
+    //     PlayerMetadataRegistry.Instance.RegisterInteractionServerRpc(sender);
+    //     SceneManager.LoadScene("Part2Scene", LoadSceneMode.Additive);
+    // }
 }

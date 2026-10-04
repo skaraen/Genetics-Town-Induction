@@ -374,9 +374,8 @@ MonoBehaviour:
   - bodyParts:
     - {fileID: 6099875284491081719}
     - {fileID: 71940573155300650}
-  info: The sequence you chose contributes to SPEED! This sequence allows this avatar
-    to break down sugar faster, increasing its energy to make it a more powerful
-    flier.
+  info: This sequence quickly converts food into ENERGY, making the avatar a more
+    powerful flier.
   canvasYOffset: 1.5
   realWorldYOffset: 2.5
   part2GameSpawnYOffset: 0

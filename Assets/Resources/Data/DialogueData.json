@@ -115,32 +115,27 @@
             {
                 "speaker" : "Gregor",
                 "emotion": "shock",
-                "text"    : "Attention everyone, no need to p-p-p-PANIC!!!"
+                "text"    : "Whoa!... Alright everyone, uh, no need to p-p-p–PANIC!!!"
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "shock",
-                "text"    : "It looks like there's a bug! This bug has a genetic code of its own that's snuck into every avatar's genetic code."
+                "text"    : "It looks like there's a bug! This bug has a genetic sequence of its own that's snuck into every avatar."
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "shock",
-                "text"    : "We need your help to fix this! Figure out the bug's genetic code to find a cure and bring Genetics Town back to health."
+                "text"    : "We need your help to fix this! Figure out the bug’s genetic sequence to find a cure and bring Genetics Town back to health."
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "neutral",
-                "text"    : "To cure your avatar, first figure out the genetic sequence of the bug. To find the genetic sequence of the bug, look through the sequences of all the avatar friends you've made and find the 6 letters that are ordered the same in everyone's code."
+                "text"    : "To find the genetic sequence of the bug, look through the sequences of all the avatar friends you’ve made. Since all the avatars have the same bug, find the 6 letters that are alike, in exactly the same order, for everyone."
             },
             {
                 "speaker" : "Gregor",
                 "emotion": "neutral",
-                "text"    : "You'll see that some friends share lots of the same code if they have many similar features. But, other friends share very little code if they have different features. The bug is the only commonality in everyone's code, so these 6 letters will be shared by each avatar, no matter the similarities or differences of their other features."
-            },
-            {
-                "speaker" : "Gregor",
-                "emotion": "smile",
-                "text"    : "Genetics Town is counting on you! Click “Save Genetics Town” to begin."
+                "text"    : "Genetics Town is counting on you! Save your avatar to save Genetics Town. Click \"Save Genetics Town\" to begin."
             }
         ]
     },

@@ -96,9 +96,8 @@ MonoBehaviour:
   - bodyParts:
     - {fileID: 6835127885028735663}
     - {fileID: 1891638868463072173}
-  info: This sequence contributes to its GLOW! This sequence allows this avatar to
-    emit colorful light, creating the glow. As a result, this avatar could distract
-    or attract others with bright light flashes.
+  info: This sequence allows the avatar to give off a colorful GLOW, which can distract
+    or attract others with bright flashes of light.
   canvasYOffset: -1.5
   realWorldYOffset: -1
   part2GameSpawnYOffset: -0.5

@@ -489,9 +489,8 @@ MonoBehaviour:
     - {fileID: 8808933633745258761}
   - bodyParts:
     - {fileID: 4974869228857767246}
-  info: "This sequence supports this avatar\u2019s ability to REPAIR its injuries
-    in a special way: when the avatar gets hurt, this sequence tells the avatar to
-    regrow whatever was injured."
+  info: This sequence helps REPAIR injuries in a special way by enabling the avatar
+    to regrow whatever is damaged.
   canvasYOffset: -0.25
   realWorldYOffset: 0
   part2GameSpawnYOffset: -0.5

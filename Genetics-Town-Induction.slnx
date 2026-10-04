@@ -1,0 +1,12 @@
+﻿<Solution>
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Fusion.Unity.Editor.csproj" />
+  <Project Path="Fusion.Unity.csproj" />
+  <Project Path="Photon.Realtime.csproj" />
+  <Project Path="URPWizard.csproj" />
+  <Project Path="Assembly-CSharp-firstpass.csproj" />
+  <Project Path="Unity.StarterAssets.Editor.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="Unity.StarterAssets.csproj" />
+  <Project Path="Unity.Fusion.CodeGen.csproj" />
+</Solution>

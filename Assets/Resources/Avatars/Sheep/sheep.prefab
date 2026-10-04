@@ -1672,8 +1672,8 @@ MonoBehaviour:
   - bodyParts:
     - {fileID: 7901446040301581459}
     - {fileID: 978063476116181302}
-  info: "This sequence contributes to SIGHT! This sequence allows this avatar\u2019s
-    eyes to adjust, letting them see more of their surroundings."
+  info: "This sequence helps with SIGHT, allowing the avatar\u2019s eyes to adjust
+    and see more of their surroundings."
   canvasYOffset: -0.25
   realWorldYOffset: 0
   part2GameSpawnYOffset: 0.25

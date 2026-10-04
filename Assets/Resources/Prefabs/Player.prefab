@@ -138,6 +138,7 @@ GameObject:
   - component: {fileID: 7977793399430811681}
   - component: {fileID: 5349061468962465566}
   - component: {fileID: 8940682863906703278}
+  - component: {fileID: 7270959286369617343}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -198,7 +199,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 363ae094672de411387ab0933f6526d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
   moveSpeed: 7
   rotateSpeed: 7
   playerHeight: 0.7
@@ -212,6 +212,9 @@ MonoBehaviour:
   trackingTarget: {fileID: 0}
   ownerCamPriority: 100
   avatarTypeId: 0
+  waterFadeDistance: 8
+  maxWaterVolume: 1
+  waterVolumeSmoothSpeed: 5
 --- !u!114 &1281654009352977733
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,86 +273,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c3c63490dce14f6f84ce673f38c7e1c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  AvatarCustoms:
-    m_InternalValue:
-      avatarType: 0
-      name:
-        utf8LengthInBytes: 0
-        bytes:
-          offset0000:
-            byte0000: 0
-            byte0001: 0
-            byte0002: 0
-            byte0003: 0
-            byte0004: 0
-            byte0005: 0
-            byte0006: 0
-            byte0007: 0
-            byte0008: 0
-            byte0009: 0
-            byte0010: 0
-            byte0011: 0
-            byte0012: 0
-            byte0013: 0
-            byte0014: 0
-            byte0015: 0
-          offset0016:
-            byte0000: 0
-            byte0001: 0
-            byte0002: 0
-            byte0003: 0
-            byte0004: 0
-            byte0005: 0
-            byte0006: 0
-            byte0007: 0
-            byte0008: 0
-            byte0009: 0
-            byte0010: 0
-            byte0011: 0
-            byte0012: 0
-            byte0013: 0
-            byte0014: 0
-            byte0015: 0
-          offset0032:
-            byte0000: 0
-            byte0001: 0
-            byte0002: 0
-            byte0003: 0
-            byte0004: 0
-            byte0005: 0
-            byte0006: 0
-            byte0007: 0
-            byte0008: 0
-            byte0009: 0
-            byte0010: 0
-            byte0011: 0
-            byte0012: 0
-            byte0013: 0
-            byte0014: 0
-            byte0015: 0
-          byte0048: 0
-          byte0049: 0
-          byte0050: 0
-          byte0051: 0
-          byte0052: 0
-          byte0053: 0
-          byte0054: 0
-          byte0055: 0
-          byte0056: 0
-          byte0057: 0
-          byte0058: 0
-          byte0059: 0
-          byte0060: 0
-          byte0061: 0
-      subSeq0Enabled: 0
-      subSeq1Enabled: 0
-      color0: {r: 0, g: 0, b: 0, a: 0}
-      color1: {r: 0, g: 0, b: 0, a: 0}
+  _AvatarCustoms:
+    avatarType: 0
+    name:
+      _length: 0
+      _data:
+        Data: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+    subSeq0Enabled:
+      RawValue: 0
+    subSeq1Enabled:
+      RawValue: 0
+    color0: {r: 0, g: 0, b: 0, a: 0}
+    color1: {r: 0, g: 0, b: 0, a: 0}
+  _IsInfected:
+    RawValue: 0
   playerTag: {fileID: 5664898480588184713}
   holoMat: {fileID: 2100000, guid: 93d051c141501498cabc2772859ab151, type: 2}
-  IsInfected:
-    m_InternalValue: 0
 --- !u!114 &3809831677086898486
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -362,7 +301,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45d23c27a9d904a339290e5acf4a4184, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
   canvas: {fileID: 7295806088508609018}
   descTmp: {fileID: 7197394129777437608}
   interactBtn: {fileID: 6468705168822870301}
@@ -432,10 +370,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bada5ff7f674e45b685414c594df9728, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InteractGroupCamController
-  ShowTopMostFoldoutHeaderGroup: 1
   activePriority: 200
   inactivePriority: 0
   clearGroupDelay: 2
+--- !u!114 &7270959286369617343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1636854815523831658}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkObject
+  SortKey: 2377336731
+  SendPriority: 1
+  EnableInterpolation: 1
+  Flags: 262146
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 103663872872526549}
+  - {fileID: 1709710939618315438}
+  - {fileID: 3809831677086898486}
+  - {fileID: 8940682863906703278}
+  ForceRemoteRenderTimeframe: 0
 --- !u!1 &3186822504345725598
 GameObject:
   m_ObjectHideFlags: 0
@@ -1058,6 +1018,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
